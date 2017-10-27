@@ -1,3 +1,3 @@
 # datamaps
 
-Еще один ОРМ-фреймворкь 
+This is MRM framework  
