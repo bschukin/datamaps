@@ -15,6 +15,7 @@ class DataMappingReadTests {
        {
             "name" : "AAA",
             "table" :   AAA_,
+            "id-column": "name";
             "fields":[
                 {
                     "field": "caption",
@@ -30,7 +31,19 @@ class DataMappingReadTests {
                 {
                     field: "bbb",
                     m-1:{to:"BBB", join-column:"bbbId"},
-                    1-m:{to:"CCCC", their-join-column:"aaaID"}
+                    1-m:{to:"CCCC", their-join-column:"aaaID"},
+                    m-m:{to:"ZZZZ", join-table:"AAA_ZZZ", our-join-column:"AAA_ID", their-join-column:"aaaID"}
+                }
+            ],
+            groups:
+            [   {
+                    name:"specific",
+                    fields:
+                    [
+                        {
+                        field: "ccc"
+                        }
+                    ]
                 }
             ]
         }
@@ -48,6 +61,7 @@ class DataMappingReadTests {
                 println(df.sqlcolumn)
                 println(df.manyToOne?.joinColumn)
                 println(df.oneToMany?.theirJoinColumn)
+                println(df.manyToMany?.joinTable)
             }
         }
     }

@@ -72,6 +72,11 @@
 			<artifactId>gson</artifactId>
 			<version>2.8.1</version>
 		</dependency>
+		<dependency>
+			<groupId>io.methvin</groupId>
+			<artifactId>directory-watcher</artifactId>
+			<version>0.2.2</version>
+		</dependency>
 
 	</dependencies>
 
@@ -80,7 +85,7 @@
 		<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
 		<testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
 		<plugins>
-			<!--<plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<executions>
@@ -91,7 +96,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			--><plugin>
+			<plugin>
 				<artifactId>kotlin-maven-plugin</artifactId>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<version>${kotlin.version}</version>
