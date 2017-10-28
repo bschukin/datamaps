@@ -5,7 +5,28 @@ import org.testng.annotations.Test
  */
 class KotlinTests {
 
-    @Test fun partially() {
-        println("hello world")
+    @Test
+    fun workWithMaps() {
+
+        val map = mutableMapOf<String, String>()
+        map["xxx"] = "zzz";
+
+        println(map["xxx"])
+
+        var myJson = """
+                  user(id: 1) {
+                    name
+                    age
+                    friends {
+                      name
+                    }
+                  }
+                }
+        """.trimIndent()
+
+        println(myJson)
+
     }
 }
+
+
