@@ -38,4 +38,42 @@ class GsonTests {
         var result = Gson().fromJson(json, Map::class.java)
         println(result)
     }
+
+    @Test
+    fun workWithGson2() {
+
+        var json = """
+        {
+            name : "name1",
+             map: {
+                "key1":{
+                    "name":"xxx"
+                },
+                "key2":{
+                    "name":"xxx"
+                }
+
+            }
+        }
+    """.trimIndent()
+
+        var result = Gson().fromJson(json, Foo::class.java);
+        println(result.name)
+        println(result.map)
+    }
+
+
+    class Foo {
+        var name: String = "";
+        val map: Map<String, Bar> = mutableMapOf();
+    }
+
+    class Bar {
+        var name: String = "";
+        override fun toString(): String {
+            return "Bar(name='$name')"
+        }
+
+
+    }
 }

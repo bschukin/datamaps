@@ -12,6 +12,10 @@ import com.google.gson.annotations.SerializedName
 class DataMapping(var name: String) {
 
     var table: String? = null
+
+    @SerializedName("scan-fields-in-db")
+    var scanFieldsInDb = false;
+
     @SerializedName("id-column")
     var idColumn: String? = ID;
     var fields: List<DataField> = mutableListOf()
