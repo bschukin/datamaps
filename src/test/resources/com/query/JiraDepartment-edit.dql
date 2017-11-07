@@ -1,11 +1,3 @@
 JiraDepartment {
-    groups:"default, full",                  //default можно и не указывать
-    parent:{                                 //для парента давайте вытащим только title
-        fields: "title",
-    },
-    workers:
-    {
-        groups: "ref"         // при загрузке рабочих  - используй группу полей "ref" (описана в маппинге JiraWorker)
-    }
-                              //про коллекцию проектов ничего не будем  писать - пусть приедет то что приедет
+    groups:"full",                          //default можно и не указывать
  }

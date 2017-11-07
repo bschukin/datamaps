@@ -1,18 +1,4 @@
-  AAA {
-    alias: "aaa",                       //алиасы, чтобы можно было писать куски кода sql
-    groups:"specific",                  //помимо дефолтной группы полей будет загружена группа полей specific
-    bbb:{
-        alias:"bbb1",
-        join: " aaa.id = bbb.aaa_id ", //переопределяет стандартный джойн, который был бы сгенерен по маппингам
-        fields: "name, okato",         //поля которые следует загрузить в поле bbb,
-        name: ":param1",
-        okato: {
-            fields: "name, oktmo"
-        }
-    },
-    ccc:
-    {
-        use: "ссс-view"               // при загрузке на поле ссс использовать view "ссс-view"
-    }
-    filter: " bbb1.someField =  :param2 ";
- }
+AAA {
+    view: "PersonView",
+    alias-for:"specific",
+}

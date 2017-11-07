@@ -1,9 +1,8 @@
-package com.datamaps.service
+package com.datamaps.services
 
 import com.datamaps.maps.DataMap
 import org.testng.Assert
-
-import java.util.Collections
+import java.util.*
 
 /**
  * Created by Щукин on 31.10.2017.

@@ -1,4 +1,4 @@
-package com.datamaps
+package com.datamaps.mappings
 
 import com.google.gson.Gson
 import org.testng.annotations.Test
@@ -33,6 +33,7 @@ class GsonTests {
     },
     "result" : "4be26bc400d3c"
 }
+
     """.trimIndent()
 
         var result = Gson().fromJson(json, Map::class.java)
