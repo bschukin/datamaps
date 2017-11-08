@@ -14,13 +14,13 @@ class DataMappingsService {
 
     var mappings = mutableMapOf<String, DataMapping>()
 
-    fun getDataMapping(name: String): DataMapping? {
+    fun getDataMapping(name: String): DataMapping {
         var dm = mappings[name]
         if (dm == null) {
             dm = buildMapping(name)
             mappings[name] = dm
         }
-        return dm;
+        return dm
     }
 
 

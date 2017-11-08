@@ -1,6 +1,7 @@
 package com.datamaps.mappings
 
-import com.datamaps.general.NSY
+import com.datamaps.general.NIY
+import com.datamaps.general.SNF
 import com.google.gson.annotations.SerializedName
 import java.math.BigDecimal
 import java.sql.JDBCType
@@ -19,7 +20,7 @@ class DataMapping(var name: String, var table: String) {
 
     @SerializedName("id-column")
     var idColumn: String? = ID;
-    var fields = mutableListOf<DataField>()
+    var fields = linkedMapOf<String, DataField>()
 
     var groups: MutableMap<String, DataGroup> = linkedMapOf<String, DataGroup>()
 
@@ -31,7 +32,12 @@ class DataMapping(var name: String, var table: String) {
         get() = groups[DEFAULT]!!
 
 
-    fun add(field: DataField) = fields.add(field)
+    fun add(field: DataField) = fields.put(field.name.toLowerCase(), field)
+
+    operator fun get(field: String): DataField {
+        return fields.computeIfAbsent(field.toLowerCase(),
+                { t -> throw SNF("field '${field}' of '${name}' entity not found") })
+    }
 
 }
 
@@ -39,11 +45,11 @@ const val ID: String = "ID";
 const val DEFAULT: String = "DEFAULT";
 
 
-class DataField(var field: String) {
+class DataField(var name: String) {
 
     var type: FieldType? = null
     var javaType: Class<Any>? = null
-    var sqlcolumn: String? = null
+    lateinit var sqlcolumn: String
 
     @SerializedName("m-1")
     var manyToOne: ManyToOne? = null;
@@ -53,6 +59,9 @@ class DataField(var field: String) {
 
     @SerializedName("m-m")
     var manyToMany: ManyToMany? = null;
+
+    val isSimple: Boolean
+        get() = manyToOne==null && oneToMany==null && manyToMany==null
 }
 
 
@@ -108,13 +117,13 @@ fun <T:Any> getJavaTypeByJDBCType(jdbcType: JDBCType):Class<T>
         JDBCType.REAL -> Float::class.java
         JDBCType.FLOAT -> Double::class.java
         JDBCType.DOUBLE -> Double::class.java
-        JDBCType.BINARY, JDBCType.VARBINARY, JDBCType.LONGVARBINARY -> throw NSY()
+        JDBCType.BINARY, JDBCType.VARBINARY, JDBCType.LONGVARBINARY -> throw NIY()
         JDBCType.DATE    -> java.sql.Date::javaClass
         JDBCType.TIME  -> java.sql.Time::javaClass
         JDBCType.TIMESTAMP  -> java.sql.Timestamp::javaClass
-        JDBCType.CLOB, JDBCType.BLOB  -> throw NSY()
-        JDBCType.ARRAY, JDBCType.DISTINCT, JDBCType.DATALINK,JDBCType.STRUCT, JDBCType.REF  -> throw NSY()
-        else-> throw NSY()
+        JDBCType.CLOB, JDBCType.BLOB  -> throw NIY()
+        JDBCType.ARRAY, JDBCType.DISTINCT, JDBCType.DATALINK,JDBCType.STRUCT, JDBCType.REF  -> throw NIY()
+        else-> throw NIY()
     } as Class<T>
 
 }

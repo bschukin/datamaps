@@ -1,6 +1,6 @@
 package com.datamaps.services
 
-import com.datamaps.general.NSY
+import com.datamaps.general.NIY
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.util.Assert
@@ -132,7 +132,7 @@ class GenericDbMetadataService : DbMetadataService {
         var pkField:String? = null
         while (pk.next()) {
             if(pkField!=null)
-                throw NSY("primary key with multiple columns is not supported")
+                throw NIY("primary key with multiple columns is not supported")
             pkField = pk.getString("COLUMN_NAME")
         }
 

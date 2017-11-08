@@ -39,7 +39,7 @@ class DefaultMappingBuilder {
 
             //включаем в дефолтную группу - если поле не участвует в ссылке и не является каким нето клобом
             if(defaultGroupCandidate(col))
-                dm.defaultGroup.add(df.field)
+                dm.defaultGroup.add(df.name)
         }
 
 

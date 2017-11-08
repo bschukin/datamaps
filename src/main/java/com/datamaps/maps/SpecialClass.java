@@ -14,16 +14,8 @@ public class SpecialClass {
 
     }
 
-    public class NSY extends RuntimeException {
-        public NSY() {
-        }
 
-        public NSY(String message) {
-            super(message);
-        }
 
-        public NSY(Throwable cause) {
-            super(cause);
-        }
-    }
+
+
 }

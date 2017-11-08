@@ -1,6 +1,6 @@
 package com.datamaps.services
 
-import com.datamaps.mappings.DataMapping
+import com.datamaps.mappings.DataProjection
 import com.datamaps.maps.DataMap
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
@@ -14,7 +14,7 @@ interface DataService {
 
 }
 
-class SqlQuery(val sql: String, val dataMapping: DataMapping, val params: Map<String, Any>) {
+class SqlQuery(val sql: String, val dataProjection: DataProjection, val params: Map<String, Any>) {
 }
 
 

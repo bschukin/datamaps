@@ -5,14 +5,22 @@ package com.datamaps.general
  */
 
 //Not Implemented Yet Exception
-class NIY : RuntimeException() {
-}
-
-//Not Supported Yet Exception
-class NSY : RuntimeException {
+class NIY : RuntimeException {
     constructor() {}
 
     constructor(message: String) : super(message) {}
 
     constructor(cause: Throwable) : super(cause) {}
+
+}
+
+
+//Something not found
+class SNF : RuntimeException {
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+
 }

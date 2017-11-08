@@ -18,18 +18,18 @@ class DataMappingReadTests {
             "id-column": "name";
             "fields":[
                 {
-                    "field": "caption",
+                    "name": "caption",
                     group: "default",
                     type:"string"
                 },
                 {
-                    "field": "description",
+                    "name": "description",
                     sqlcolumn: "desc_",
                     type:"string"
                 }
                 ,
                 {
-                    field: "bbb",
+                    name: "bbb",
                     m-1:{to:"BBB", join-column:"bbbId"},
                     1-m:{to:"CCCC", their-join-column:"aaaID"},
                     m-m:{to:"ZZZZ", join-table:"AAA_ZZZ", our-join-column:"AAA_ID", their-join-column:"aaaID"}
@@ -41,7 +41,7 @@ class DataMappingReadTests {
                     fields:
                     [
                         {
-                        field: "ccc"
+                        name: "ccc"
                         }
                     ]
                 }
@@ -54,14 +54,14 @@ class DataMappingReadTests {
         println(result.table)
         result.fields.forEach { df ->
             run {
-                println("===")
+               /* println("===")
                 println(df.field)
                 //println(df.group)
                 println(df.type)
                 println(df.sqlcolumn)
                 println(df.manyToOne?.joinColumn)
                 println(df.oneToMany?.theirJoinColumn)
-                println(df.manyToMany?.joinTable)
+                println(df.manyToMany?.joinTable)*/
             }
         }
     }

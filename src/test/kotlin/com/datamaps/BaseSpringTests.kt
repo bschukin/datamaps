@@ -3,6 +3,7 @@ package com.datamaps
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
+import org.testng.Assert
 
 
 /**
@@ -21,4 +22,12 @@ class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
 
 
 
+
+}
+
+fun eraseAllWs(string:String):String =  string.replace("\\s+","")
+
+
+fun assertBodyEquals(string1:String, string2:String) {
+    Assert.assertEquals(eraseAllWs(string1), eraseAllWs(string2))
 }

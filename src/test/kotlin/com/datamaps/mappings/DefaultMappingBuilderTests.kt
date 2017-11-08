@@ -21,10 +21,10 @@ class DefaultMappingBuilderTests : BaseSpringTests() {
         var dt = defaultMappingBuilder.buildDefault("JiraGender")
         assertNotNull(dt)
 
-        Assert.assertEquals(dt.fields.size, 2)
-        Assert.assertEquals(dt.fields.stream().map { f -> f.field }.toList(), listOf("ID", "GENDER"))
+        Assert.assertEquals(dt.fields.size, 3)
+        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "GENDER", "ISCLASSIC"))
 
-        Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "GENDER"))
+        Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "GENDER", "ISCLASSIC"))
     }
 
     @Test
@@ -34,7 +34,7 @@ class DefaultMappingBuilderTests : BaseSpringTests() {
         assertNotNull(dt)
 
         Assert.assertEquals(dt.fields.size, 3)
-        Assert.assertEquals(dt.fields.stream().map { f -> f.field }.toList(), listOf("ID", "NAME", "EMAIL"))
+        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "NAME", "EMAIL"))
 
         Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "NAME", "EMAIL"))
     }
