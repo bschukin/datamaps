@@ -8,7 +8,7 @@ import org.testng.annotations.Test
  */
 
 class DataMappingReadTests {
-    @Test
+    @Test(invocationCount = 0)
     fun readMappingsFromString() {
 
         var mapping = """
@@ -56,7 +56,7 @@ class DataMappingReadTests {
             run {
                 println("===")
                 println(df.field)
-                println(df.group)
+                //println(df.group)
                 println(df.type)
                 println(df.sqlcolumn)
                 println(df.manyToOne?.joinColumn)

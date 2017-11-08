@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 class QueryExecutor {
 
-    public fun executeSingle(q:Query): DataMap
+    public fun executeSingle(q:SqlQuery): DataMap
     {
         throw NIY();
     }

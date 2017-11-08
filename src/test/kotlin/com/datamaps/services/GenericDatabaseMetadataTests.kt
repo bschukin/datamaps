@@ -2,9 +2,9 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import org.testng.Assert
+import org.testng.Assert.assertNotNull
 import org.testng.annotations.Test
 import java.sql.JDBCType
-import java.sql.SQLException
 import javax.annotation.Resource
 
 
@@ -14,7 +14,7 @@ import javax.annotation.Resource
 class GenericDatabaseMetadataTests : BaseSpringTests() {
 
     @Resource
-    lateinit var genericDbMetadataService:GenericDbMetadataService;
+    lateinit var genericDbMetadataService:DbMetadataService;
 
     @Test
     public fun testGetTableInfo()
@@ -40,40 +40,42 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
     public fun testGetImportedKeys()
     {
         var table = genericDbMetadataService.getTableInfo("JiraWorker")
-        println(table)
-        Assert.assertEquals(table.name, "JiraWorker".toUpperCase())
-        Assert.assertEquals(table.columns.size, 4)
-        //todo ассерты на форины и каскады
-    }
 
-    @Test(invocationCount = 1)
-    @Throws(SQLException::class)
-    fun testCoonection() {
+        //JiraWorker имеет одну ссылку M-1: на гендер
+        var genderID  = table["jiraGenderId"]
+        Assert.assertNotNull(genderID)
+        Assert.assertNotNull(genderID.importedKey)
+        Assert.assertEquals(genderID.importedKey!!.pkTable, "JiraGender".toUpperCase())
+        Assert.assertEquals(genderID.importedKey!!.pkColumn, "id".toUpperCase())
 
-        var start = System.currentTimeMillis()
+        Assert.assertNotNull( genericDbMetadataService.getTableInfo(genderID.importedKey!!
+                .pkTable)[genderID.importedKey!!.pkColumn] )
 
-        val c = jdbcTemplate.dataSource.connection
-        val md = c.metaData
-        var start1 = System.currentTimeMillis()
-        var start2 = System.currentTimeMillis()
 
-        var crs = md.getImportedKeys(null, "PUBLIC", "JiraWorker".toUpperCase())
-        while (crs.next()) {
-            print("-==")
-            print(crs.getString("PKTABLE_NAME") + " ")
-            print(crs.getString("PKCOLUMN_NAME") + " ")
-            print(crs.getString("FKTABLE_NAME")+ " ")
-            print(crs.getString("FKCOLUMN_NAME").toString() + " ")
-            print(crs.getString("FK_NAME").toString() + " ")
-            print(crs.getString("PK_NAME") + " ")
-            print(crs.getString("UPDATE_RULE") + " ")
-            println(crs.getString("DELETE_RULE") + " ")
-        }
+        //JiraDepartment имеет одну ссылку M-1: на JiraDepartment (это же дерево)
+        table = genericDbMetadataService.getTableInfo("JiraDepartment")
 
-        println("============================ " + (start1 - start))
-        println("============================ " + (start2 - start1))
-        println("============================ " + (start2 - start))
+        var parentId  = table["parentId"]
+        Assert.assertNotNull(parentId)
+        Assert.assertNotNull(parentId.importedKey)
+        Assert.assertEquals(parentId.importedKey!!.pkTable, "JiraDepartment".toUpperCase())
+        Assert.assertEquals(parentId.importedKey!!.pkColumn, "id".toUpperCase())
 
+        Assert.assertNotNull( genericDbMetadataService.getTableInfo(parentId.importedKey!!
+                .pkTable)[parentId.importedKey!!.pkColumn] )
+
+
+        //JiraWorker_JiraDepartment имеет 2 ссылки M-1: на JiraWorker и JiraDepartment
+        var keys = genericDbMetadataService.getImportedKeys("JiraWorker_JiraDepartment")
+        Assert.assertEquals(keys.size, 2)
+        Assert.assertTrue(keys.stream().filter({ fk -> fk.pkTable.equals("JiraWorker", true)})
+                .findFirst().isPresent)
+
+        Assert.assertTrue(keys.stream().filter({ fk -> fk.pkTable.equals("JiraWorker", true)})
+                .findFirst().get().pkColumn.equals("id", true))
+        assertNotNull(keys.stream().filter({ fk -> fk.pkTable.equals("JiraDepartment", true)}).findFirst())
+        Assert.assertTrue(keys.stream().filter({ fk -> fk.pkTable.equals("JiraDepartment", true)})
+                .findFirst().get().pkColumn.equals("id".toUpperCase()))
     }
 
 }

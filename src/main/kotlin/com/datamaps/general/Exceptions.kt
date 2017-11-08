@@ -7,3 +7,12 @@ package com.datamaps.general
 //Not Implemented Yet Exception
 class NIY : RuntimeException() {
 }
+
+//Not Supported Yet Exception
+class NSY : RuntimeException {
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+}

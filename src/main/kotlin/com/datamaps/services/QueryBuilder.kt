@@ -14,7 +14,7 @@ class QueryBuilder {
     @Resource
     lateinit var dataMappingsService: DataMappingsService;
 
-    public fun createQueryByEntityNameAndId(name: String, id: Long): Query {
+    public fun createQueryByEntityNameAndId(name: String, id: Long): SqlQuery {
         var dm = dataMappingsService.getDataMapping(name)
         //val query = Query()
         throw NIY()

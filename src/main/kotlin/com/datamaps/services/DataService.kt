@@ -14,7 +14,7 @@ interface DataService {
 
 }
 
-public class Query(val sql: String, val dataMapping: DataMapping, val params: Map<String, Any>) {
+class SqlQuery(val sql: String, val dataMapping: DataMapping, val params: Map<String, Any>) {
 }
 
 

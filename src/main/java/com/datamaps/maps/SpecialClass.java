@@ -1,25 +1,29 @@
 package com.datamaps.maps;
 
-import org.springframework.beans.factory.annotation.Value;
-
-import java.io.File;
-import java.nio.file.Path;
-import java.sql.JDBCType;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.datamaps.services.GenericDbMetadataService;
 
 /**
  * Created by Щукин on 03.11.2017.
  */
 public class SpecialClass {
 
-    @Value("${xxxx}")
-    String zxxx;
+    GenericDbMetadataService zxxx;
 
     void test ()
     {
-        //JDBCType.valueOf (crs.getInt("DATA_TYPE"))
-        Path path;
+
     }
 
+    public class NSY extends RuntimeException {
+        public NSY() {
+        }
+
+        public NSY(String message) {
+            super(message);
+        }
+
+        public NSY(Throwable cause) {
+            super(cause);
+        }
+    }
 }
