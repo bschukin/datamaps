@@ -34,5 +34,29 @@ class QueryBuilderTests : BaseSpringTests() {
         })
     }
 
+    @Test(invocationCount = 0)//простейшие тесты на квери: на таблицу c вложенными сущностями M-1
+    fun testBuildQuery02() {
+        var dp = DataProjection("JiraWorker")
+                .group("default")
+                .field("gender")
+                /*  */.inner()
+                /*      */.field("gender")
+                /*  */.end()
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+
+       /* println(q.sql)
+        assertBodyEquals("SELECT \n" +
+                "\tJIRAGENDER1.ID, JIRAGENDER1.GENDER, JIRAGENDER1.ISCLASSIC\n" +
+                "FROM JIRAGENDER as JIRAGENDER1", q.sql)
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        jdbcTemplate.query(q.sql, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID")}==>${resultSet.getString("GENDER")}, " +
+                        resultSet.getString("ISCLASSIC"))
+            }
+        })*/
+    }
 
 }

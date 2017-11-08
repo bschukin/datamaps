@@ -27,14 +27,15 @@ class DefaultMappingBuilderTests : BaseSpringTests() {
         Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "GENDER", "ISCLASSIC"))
     }
 
+
     @Test
     //тест на маппинг таблицы в которой есть простое ссылочное поле
-    fun testDefaultMappingForimpleTable() {
+    fun testDefaultMappingForSimpleTable() {
         var dt = defaultMappingBuilder.buildDefault("JiraWorker")
         assertNotNull(dt)
 
-        Assert.assertEquals(dt.fields.size, 3)
-        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "NAME", "EMAIL"))
+        Assert.assertEquals(dt.fields.size, 4)
+        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "NAME", "EMAIL", "GENDER"))
 
         Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "NAME", "EMAIL"))
     }

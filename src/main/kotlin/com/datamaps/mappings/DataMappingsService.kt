@@ -1,5 +1,6 @@
 package com.datamaps.mappings
 
+import com.datamaps.general.NIY
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
 
@@ -21,6 +22,18 @@ class DataMappingsService {
             mappings[name] = dm
         }
         return dm
+    }
+
+    /**
+     * Получить маппинг по ссылке
+     */
+    fun getRefDataMapping(dm:DataMapping, field: String): DataMapping {
+        var df = dm[field]
+
+        if(!df.isM1)
+            throw NIY()
+
+        return getDataMapping(df.manyToOne!!.to)
     }
 
 

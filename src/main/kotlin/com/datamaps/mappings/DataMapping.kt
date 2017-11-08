@@ -62,6 +62,9 @@ class DataField(var name: String) {
 
     val isSimple: Boolean
         get() = manyToOne==null && oneToMany==null && manyToMany==null
+
+    val isM1: Boolean
+        get() = manyToOne!=null
 }
 
 

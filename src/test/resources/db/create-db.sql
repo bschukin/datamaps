@@ -9,8 +9,8 @@ CREATE TABLE JiraWorker (
   id         INTEGER PRIMARY KEY,
   name VARCHAR(30),
   email  VARCHAR(50),
-  jiraGenderId INTEGER,
-  FOREIGN KEY (jiraGenderId) REFERENCES JiraGender(id) ON DELETE CASCADE
+  genderId INTEGER,
+  FOREIGN KEY (genderId) REFERENCES JiraGender(id) ON DELETE CASCADE
 );
 
 CREATE TABLE JiraDepartment (

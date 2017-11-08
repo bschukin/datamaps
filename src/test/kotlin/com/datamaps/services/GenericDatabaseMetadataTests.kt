@@ -42,7 +42,7 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
         var table = genericDbMetadataService.getTableInfo("JiraWorker")
 
         //JiraWorker имеет одну ссылку M-1: на гендер
-        var genderID  = table["jiraGenderId"]
+        var genderID  = table["genderId"]
         Assert.assertNotNull(genderID)
         Assert.assertNotNull(genderID.importedKey)
         Assert.assertEquals(genderID.importedKey!!.pkTable, "JiraGender".toUpperCase())

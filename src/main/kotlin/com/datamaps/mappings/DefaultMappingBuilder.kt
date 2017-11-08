@@ -42,6 +42,15 @@ class DefaultMappingBuilder {
                 dm.defaultGroup.add(df.name)
         }
 
+        //обратываем M-1 колонки, с ними то посложнее
+        table.m1Columns.forEach { col ->
+            val df = DataField(getDefaultFieldName(col))
+            df.sqlcolumn = col.name
+            df.javaType = getJavaTypeByJDBCType(col.jdbcType)
+            df.manyToOne = ManyToOne(col.importedKey!!.pkTable, col.importedKey!!.pkColumn)
+            dm.add(df)
+        }
+
 
         return dm
     }

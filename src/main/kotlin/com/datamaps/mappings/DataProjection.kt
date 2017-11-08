@@ -1,6 +1,6 @@
 package com.datamaps.mappings
 
-import scala.annotation.meta.field
+import com.datamaps.general.SNF
 
 /**
  * Created by Щукин on 07.11.2017.
@@ -39,6 +39,10 @@ class DataProjection {
         this.entity = entity
     }
 
+    operator fun get(field: String): DataProjection {
+        return fields.computeIfAbsent(field,
+                { t -> throw SNF("field '${field}' of '${entity}' entity not found") })
+    }
 
     fun group(gr:String):DataProjection
     {

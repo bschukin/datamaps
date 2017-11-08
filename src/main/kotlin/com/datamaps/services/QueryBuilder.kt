@@ -7,6 +7,7 @@ import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.mappings.DataProjection
 import org.springframework.stereotype.Service
+import java.util.*
 import java.util.stream.Collectors.joining
 import javax.annotation.Resource
 
@@ -19,21 +20,42 @@ class QueryBuilder {
     @Resource
     lateinit var dataMappingsService: DataMappingsService;
 
+    fun createQueryForEntity(qr: QueryBuildContext, parent: DataProjection, field: String) {
+
+    }
+
     fun createQueryByEntityNameAndId(name: String, id: Long): SqlQuery {
         var dm = dataMappingsService.getDataMapping(name)
         //val query = Query()
         throw NIY()
     }
 
-    class QueryResult {
+    fun createQueryByDataProjection(dp: DataProjection): SqlQuery {
+
+        val qr = QueryBuildContext()
+
+        buildDataProjection(qr, dp, null)
+
+        return builqSqlQuery(qr, dp)
+    }
+
+    class QueryBuildContext {
+
         var aliasCounters = mutableMapOf<String, Int>()
         var selectColumns = mutableSetOf<String>()
         var joins = mutableSetOf<String>()
         lateinit var from: String
 
+        var stack = Stack<QueryLevel>()
+
         fun getSelectString(): String {
             return selectColumns.stream()
                     .collect(joining(", "))
+        }
+
+        fun getJoinString(): String {
+            return joins.stream()
+                    .collect(joining("\r\n\t "))
         }
 
         fun addSelect(alias: String, column: String) {
@@ -47,42 +69,79 @@ class QueryBuilder {
         }
     }
 
-    fun createQueryByDataProjection(dp: DataProjection): SqlQuery {
-        val dm = dataMappingsService.getDataMapping(dp.entity!!)
+    class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String, var field: String?) {
 
-        val qr = QueryResult()
+    }
+
+
+    private fun buildDataProjection(qr: QueryBuildContext, dp: DataProjection, field: String?) {
+
+        val isRoot = field == null
+
+        //если мы на руте - берем рутовый маппинг
+        val dm = if (isRoot)
+            dataMappingsService.getDataMapping(dp.entity!!)
+        else
+            dataMappingsService.getRefDataMapping(qr.stack.peek().dm, field!!)
+
+        //если мы на руте - берем рутовую проекцию, иначе берем проекцию с поля
+        val projection = if (isRoot) dp else dp[field!!]
+
+        //генерим алиас
         val alias = qr.getAlias(dm.table)
 
-        qr.from = dm.table + " as " + alias
+        val ql = QueryLevel(dm, projection, alias, field)
+        //ддля рута - формируем клауз FROM
+        if (isRoot)
+            qr.from = dm.table + " as " + alias
+        //для ссылки - формируем JOIN
+        else
+            buildJoin(qr, qr.stack.pop(), ql)
+
+        //запоминаем в контексте
+        qr.stack.push(ql)
+
+
         //получаем список всех полей которые мы будем селектить
         //все поля =  поля всех указанных групп (groups) U поля указанные в списке fields
-        val allFields = getAllFieldsOnLevel(dp, dm)
+        val allFields = getAllFieldsOnLevel(projection, dm)
 
         //бежим по всем полям и решаем что с кажным из них делать
         allFields.forEach { f ->
             run {
                 val entityField = dm[f]
-                if (!entityField.isSimple)
-                    throw NIY()
                 when {
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
+                    entityField.isM1 -> buildDataProjection(qr, dp, entityField.name)
+                    else -> throw NIY()
                 }
             }
         }
-
-        return builqSqlQuery(qr, dp)
+        qr.stack.pop()
     }
 
-    private fun builqSqlQuery(qr: QueryResult, dp: DataProjection): SqlQuery {
+    private fun buildJoin(qr: QueryBuildContext, parent: QueryLevel?, me: QueryLevel): String {
+        var ref = parent!!.dm[me.field!!]
+
+        return "LEFT JOIN ${me.dm.table} ON " +
+                parent.alias + "." + ref.sqlcolumn + "=" + me.alias + "." +ref.manyToOne!!.joinColumn
+    }
+
+    private fun buildM1Field(qr: QueryBuildContext, dm: DataMapping, alias: String, entityField: DataField) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    private fun builqSqlQuery(qr: QueryBuildContext, dp: DataProjection): SqlQuery {
 
         val sql = "SELECT \n\t" +
                 qr.getSelectString() + "\n" +
-                "FROM " + qr.from
+                "FROM " + qr.from +
+                qr.getJoinString()
 
         return SqlQuery(sql, dp, emptyMap())
     }
 
-    private fun buildSimpleField(qr: QueryResult, dm: DataMapping, alias: String, entityField: DataField) {
+    private fun buildSimpleField(qr: QueryBuildContext, dm: DataMapping, alias: String, entityField: DataField) {
         qr.addSelect(alias, entityField.sqlcolumn)
     }
 
@@ -106,14 +165,11 @@ class QueryBuilder {
                 allFields.addAll(datagroup.fields)
             }
         }
-        //поля указанные в списке fields
+        //
         dp.fields.forEach { f -> allFields.add(f.key) }
 
         return allFields
     }
 
-    fun createQueryForEntity(qr: QueryResult, parent: DataProjection, field: String) {
-
-    }
 
 }

@@ -29,6 +29,9 @@ class DbTable(val name: String, val primaryKeyField:String?, val comment: String
     val simpleColumns: List<DbColumn>
         get() = columns.values.stream().filter { t -> t.isSimple() }.collect(Collectors.toList())
 
+    val m1Columns: List<DbColumn>
+        get() = columns.values.stream().filter { t -> t.isManyToOne() }.collect(Collectors.toList())
+
     operator fun get(column: String): DbColumn {
         if (!columns.containsKey(column.toLowerCase()))
             throw RuntimeException()
