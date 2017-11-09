@@ -37,6 +37,9 @@ class DefaultMappingBuilder {
 
             dm.add(df)
 
+            //включаем в FULL-группу - здесь лежать все поля
+            dm.fullGroup.add(df.name)
+
             //включаем в дефолтную группу - если поле не участвует в ссылке и не является каким нето клобом
             if(defaultGroupCandidate(col))
                 dm.defaultGroup.add(df.name)
@@ -48,9 +51,11 @@ class DefaultMappingBuilder {
             df.sqlcolumn = col.name
             df.javaType = getJavaTypeByJDBCType(col.jdbcType)
             df.manyToOne = ManyToOne(col.importedKey!!.pkTable, col.importedKey!!.pkColumn)
+
+            //включаем в FULL-группу - здесь лежать все поля
+            dm.fullGroup.add(df.name)
             dm.add(df)
         }
-
 
         return dm
     }

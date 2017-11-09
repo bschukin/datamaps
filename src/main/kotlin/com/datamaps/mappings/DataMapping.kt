@@ -2,6 +2,7 @@ package com.datamaps.mappings
 
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
+import com.datamaps.util.linkedCaseInsMapOf
 import com.google.gson.annotations.SerializedName
 import java.math.BigDecimal
 import java.sql.JDBCType
@@ -20,16 +21,20 @@ class DataMapping(var name: String, var table: String) {
 
     @SerializedName("id-column")
     var idColumn: String? = ID;
-    var fields = linkedMapOf<String, DataField>()
+    var fields = linkedCaseInsMapOf<DataField>()
 
-    var groups: MutableMap<String, DataGroup> = linkedMapOf<String, DataGroup>()
+    var groups: MutableMap<String, DataGroup> = linkedCaseInsMapOf<DataGroup>()
 
     init {
         groups[DEFAULT] = DataGroup(DEFAULT)
+        groups[FULL] = DataGroup(FULL)
     }
 
     val defaultGroup: DataGroup
         get() = groups[DEFAULT]!!
+
+    val fullGroup: DataGroup
+        get() = groups[FULL]!!
 
 
     fun add(field: DataField) = fields.put(field.name.toLowerCase(), field)
@@ -41,8 +46,9 @@ class DataMapping(var name: String, var table: String) {
 
 }
 
-const val ID: String = "ID";
-const val DEFAULT: String = "DEFAULT";
+const val ID: String = "ID"
+const val DEFAULT: String = "DEFAULT"
+const val FULL: String = "FULL";
 
 
 class DataField(var name: String) {

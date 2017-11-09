@@ -25,7 +25,7 @@ class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
 
 }
 
-fun eraseAllWs(string:String):String =  string.replace("\\s+","")
+fun eraseAllWs(string:String):String =  string.replace("\\s".toRegex(),"")
 
 
 fun assertBodyEquals(string1:String, string2:String) {

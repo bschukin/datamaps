@@ -55,11 +55,15 @@ class QueryBuilder {
 
         fun getJoinString(): String {
             return joins.stream()
-                    .collect(joining("\r\n\t "))
+                    .collect(joining(" "))
         }
 
         fun addSelect(alias: String, column: String) {
             selectColumns.add(alias + "." + column)
+        }
+
+        fun addJoin(alias: String) {
+            joins.add(alias)
         }
 
         fun getAlias(table: String): String {
@@ -96,7 +100,7 @@ class QueryBuilder {
             qr.from = dm.table + " as " + alias
         //для ссылки - формируем JOIN
         else
-            buildJoin(qr, qr.stack.pop(), ql)
+            qr.addJoin(buildJoin(qr, qr.stack.peek(), ql))
 
         //запоминаем в контексте
         qr.stack.push(ql)
@@ -112,7 +116,10 @@ class QueryBuilder {
                 val entityField = dm[f]
                 when {
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
-                    entityField.isM1 -> buildDataProjection(qr, dp, entityField.name)
+                    entityField.isM1 -> run{
+                        buildSimpleField(qr, dm, alias, entityField)
+                        buildDataProjection(qr, dp, entityField.name)
+                    }
                     else -> throw NIY()
                 }
             }
@@ -123,8 +130,8 @@ class QueryBuilder {
     private fun buildJoin(qr: QueryBuildContext, parent: QueryLevel?, me: QueryLevel): String {
         var ref = parent!!.dm[me.field!!]
 
-        return "LEFT JOIN ${me.dm.table} ON " +
-                parent.alias + "." + ref.sqlcolumn + "=" + me.alias + "." +ref.manyToOne!!.joinColumn
+        return "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
+                "${parent.alias}.${ref.sqlcolumn}=${me.alias}.${ref.manyToOne!!.joinColumn}"
     }
 
     private fun buildM1Field(qr: QueryBuildContext, dm: DataMapping, alias: String, entityField: DataField) {
@@ -155,18 +162,18 @@ class QueryBuilder {
         val allFields = mutableSetOf<String>()
 
         // поля дефлотной группы
-        allFields.addAll(dm.defaultGroup.fields)
+        allFields.addAll(dm.defaultGroup.fields.map { f -> f.toLowerCase() })
 
         //поля всех указанных групп (groups)
         dp.groups.forEach { gr ->
             run {
                 val datagroup = dm.groups.computeIfAbsent(gr,
                         { t -> throw SNF("group ${gr} of ${dp.entity} entity not found") })
-                allFields.addAll(datagroup.fields)
+                allFields.addAll(datagroup.fields.map { f -> f.toLowerCase() })
             }
         }
         //
-        dp.fields.forEach { f -> allFields.add(f.key) }
+        dp.fields.forEach { f -> allFields.add(f.key.toLowerCase()) }
 
         return allFields
     }

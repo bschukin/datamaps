@@ -1,6 +1,7 @@
 package com.datamaps.mappings
 
 import com.datamaps.general.SNF
+import com.datamaps.util.linkedCaseInsMapOf
 
 /**
  * Created by Щукин on 07.11.2017.
@@ -25,7 +26,7 @@ class DataProjection {
     var field: String? = null
     var entity: String? = null
     var groups = mutableListOf<String>()
-    var fields = linkedMapOf<String, DataProjection>() //рекурсивные проекции
+    var fields = linkedCaseInsMapOf<DataProjection>() //рекурсивные проекции
 
     var last: DataProjection? = null
     var prev: DataProjection? = null
