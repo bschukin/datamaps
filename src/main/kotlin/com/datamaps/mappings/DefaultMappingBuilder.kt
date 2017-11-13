@@ -80,8 +80,10 @@ fun getDefaultFieldName(col: DbColumn): String {
         null -> col.name
 
         else -> { // Note the block
+            if (col.name.endsWith("_id", true))
+                return col.name.substring(0, col.name.length - 3) else col.name
             if (col.name.endsWith("id", true))
-                col.name.substring(0, col.name.length - 2) else col.name
+                return col.name.substring(0, col.name.length - 2) else col.name
         }
     }
 }

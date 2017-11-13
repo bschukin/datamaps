@@ -8,3 +8,7 @@ INSERT INTO JiraWorker (ID, name, email, genderId) VALUES (1, 'Madonna', 'madonn
 INSERT INTO JiraWorker (ID, name, email, genderId) VALUES (2, 'John Lennon', 'john@google.com', 2);
 INSERT INTO JiraWorker (ID, name, email, genderId) VALUES (3, 'Fillip Bedrosovich', 'filya@google.com', 3);
 INSERT INTO JiraWorker (ID, name, email, genderId) VALUES (4, 'Oleg Gazmanov', 'gazman@google.com', 4);
+
+
+INSERT INTO JiraStaffUnit (ID, name, worker_Id, genderId) VALUES (1, 'Developer', 2, 2);
+INSERT INTO JiraStaffUnit (ID, name, worker_Id, genderId) VALUES (2, 'Tester', 1, 1);

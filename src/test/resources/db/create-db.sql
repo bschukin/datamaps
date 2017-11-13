@@ -13,6 +13,15 @@ CREATE TABLE JiraWorker (
   FOREIGN KEY (genderId) REFERENCES JiraGender(id) ON DELETE CASCADE
 );
 
+CREATE TABLE JiraStaffUnit (
+  id         INTEGER PRIMARY KEY,
+  name VARCHAR(30),
+  worker_Id INTEGER,
+  genderId INTEGER,
+  FOREIGN KEY (worker_Id) REFERENCES JiraWorker(id) ON DELETE CASCADE,
+  FOREIGN KEY (genderId) REFERENCES JiraGender(id) ON DELETE CASCADE
+);
+
 CREATE TABLE JiraDepartment (
   id         INTEGER PRIMARY KEY,
   name VARCHAR(30),

@@ -1,6 +1,5 @@
 package com.datamaps.mappings
 
-import com.datamaps.general.SNF
 import com.datamaps.util.linkedCaseInsMapOf
 
 /**
@@ -40,15 +39,19 @@ class DataProjection {
         this.entity = entity
     }
 
-    operator fun get(field: String): DataProjection {
-        return fields.computeIfAbsent(field,
-                { t -> throw SNF("field '${field}' of '${entity}' entity not found") })
+    operator fun get(field: String): DataProjection? {
+        return fields.get(field)
     }
 
     fun group(gr:String):DataProjection
     {
         groups.add(gr)
         return this
+    }
+
+    fun gfull():DataProjection
+    {
+        return group(FULL)
     }
 
     fun entity(name: String ):DataProjection

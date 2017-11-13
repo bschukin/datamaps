@@ -44,6 +44,11 @@ class DataMapping(var name: String, var table: String) {
                 { t -> throw SNF("field '${field}' of '${name}' entity not found") })
     }
 
+    override fun toString(): String {
+        return "DataMapping(name='$name', table='$table')"
+    }
+
+
 }
 
 const val ID: String = "ID"
@@ -53,7 +58,6 @@ const val FULL: String = "FULL";
 
 class DataField(var name: String) {
 
-    var type: FieldType? = null
     var javaType: Class<Any>? = null
     lateinit var sqlcolumn: String
 
@@ -71,6 +75,12 @@ class DataField(var name: String) {
 
     val isM1: Boolean
         get() = manyToOne!=null
+
+    override fun toString(): String {
+        return "DataField(name='$name')"
+    }
+
+
 }
 
 

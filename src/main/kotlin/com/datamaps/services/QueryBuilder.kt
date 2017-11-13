@@ -6,6 +6,7 @@ import com.datamaps.mappings.DataField
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.mappings.DataProjection
+import com.datamaps.util.caseInsMapOf
 import org.springframework.stereotype.Service
 import java.util.*
 import java.util.stream.Collectors.joining
@@ -41,7 +42,10 @@ class QueryBuilder {
 
     class QueryBuildContext {
 
+        var columnAliases = caseInsMapOf<String>()
         var aliasCounters = mutableMapOf<String, Int>()
+        var aliasColumnCounters = mutableMapOf<String, Int>()
+
         var selectColumns = mutableSetOf<String>()
         var joins = mutableSetOf<String>()
         lateinit var from: String
@@ -59,7 +63,7 @@ class QueryBuilder {
         }
 
         fun addSelect(alias: String, column: String) {
-            selectColumns.add(alias + "." + column)
+            selectColumns.add(" ${alias}.${column}  AS  ${getColumnAlias(alias, column)}")
         }
 
         fun addJoin(alias: String) {
@@ -71,6 +75,17 @@ class QueryBuilder {
             val counter = aliasCounters.computeIfPresent(table) { s, integer -> integer + 1 }!!
             return table + counter;
         }
+
+
+
+        fun getColumnAlias(table:String, identifier: String): String {
+            var fullName = table + "." + identifier
+            return columnAliases.computeIfAbsent(fullName, { o -> run {
+                aliasColumnCounters.putIfAbsent(identifier, 0)
+                val counter = aliasColumnCounters.computeIfPresent(identifier) { s, integer -> integer + 1 }!!
+                identifier + counter
+            }})
+        }
     }
 
     class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String, var field: String?) {
@@ -78,7 +93,7 @@ class QueryBuilder {
     }
 
 
-    private fun buildDataProjection(qr: QueryBuildContext, dp: DataProjection, field: String?) {
+    fun buildDataProjection(qr: QueryBuildContext, dp: DataProjection, field: String?) {
 
         val isRoot = field == null
 
@@ -89,7 +104,8 @@ class QueryBuilder {
             dataMappingsService.getRefDataMapping(qr.stack.peek().dm, field!!)
 
         //если мы на руте - берем рутовую проекцию, иначе берем проекцию с поля
-        val projection = if (isRoot) dp else dp[field!!]
+        val projection = if (isRoot) dp else
+            dp.fields.getOrDefault(field!!, DataProjection(dm.name, field))
 
         //генерим алиас
         val alias = qr.getAlias(dm.table)
@@ -118,7 +134,7 @@ class QueryBuilder {
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
                     entityField.isM1 -> run{
                         buildSimpleField(qr, dm, alias, entityField)
-                        buildDataProjection(qr, dp, entityField.name)
+                        buildDataProjection(qr, projection, entityField.name)
                     }
                     else -> throw NIY()
                 }
@@ -160,9 +176,10 @@ class QueryBuilder {
     //  U   поля указанные в списке fields
     private fun getAllFieldsOnLevel(dp: DataProjection, dm: DataMapping): Set<String> {
         val allFields = mutableSetOf<String>()
-
+        allFields.add(dm.idColumn!!.toLowerCase())
         // поля дефлотной группы
-        allFields.addAll(dm.defaultGroup.fields.map { f -> f.toLowerCase() })
+        if(dp.fields.size==0)
+            allFields.addAll(dm.defaultGroup.fields.map { f -> f.toLowerCase() })
 
         //поля всех указанных групп (groups)
         dp.groups.forEach { gr ->
@@ -172,7 +189,7 @@ class QueryBuilder {
                 allFields.addAll(datagroup.fields.map { f -> f.toLowerCase() })
             }
         }
-        //
+        //поля, указанные как оля
         dp.fields.forEach { f -> allFields.add(f.key.toLowerCase()) }
 
         return allFields
