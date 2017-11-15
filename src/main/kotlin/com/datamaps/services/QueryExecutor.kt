@@ -18,7 +18,7 @@ class QueryExecutor {
 
     fun findAll(q:SqlQueryContext): List<DataMap>
     {
-        var mc = MappingContext()
+        var mc = MappingContext(q)
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
                 mapRow(resultSet, q, mc)

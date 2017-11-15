@@ -1,6 +1,8 @@
 package com.datamaps.mappings
 
+import com.datamaps.maps.DataMap
 import com.google.gson.Gson
+import org.json.JSONObject
 import org.testng.annotations.Test
 
 /**
@@ -61,6 +63,15 @@ class GsonTests {
         var result = Gson().fromJson(json, Foo::class.java);
         println(result.name)
         println(result.map)
+
+        var dm = DataMap("Jira", 1L)
+        dm["bbbb"] = "zzzz"
+        dm["xxx"] = DataMap("Worker", 2L)
+        dm("xxx")["сссс"]  = "ага"
+        val s =  Gson().toJson(dm)
+
+        val spacesToIndentEachLevel = 2
+        println(JSONObject(s).toString(spacesToIndentEachLevel))
     }
 
 

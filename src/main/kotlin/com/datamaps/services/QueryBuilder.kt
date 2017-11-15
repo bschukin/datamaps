@@ -6,7 +6,7 @@ import com.datamaps.mappings.DataField
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.mappings.DataProjection
-import org.springframework.core.convert.support.DefaultConversionService
+import com.datamaps.util.DataConverter
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
 
@@ -18,6 +18,9 @@ import javax.annotation.Resource
 class QueryBuilder {
     @Resource
     lateinit var dataMappingsService: DataMappingsService;
+
+    @Resource
+    lateinit var dataConverter: DataConverter
 
     fun createQueryForEntity(qr: QueryBuildContext, parent: DataProjection, field: String) {
 
@@ -57,7 +60,7 @@ class QueryBuilder {
         val alias = qr.getAlias(dm.table)
 
         //запомним рутовый алиас
-        if(isRoot)
+        if (isRoot)
             qr.rootAlias = alias
 
         val ql = QueryLevel(dm, projection, alias, field, if (isRoot) null else qr.stack.peek())
@@ -115,11 +118,24 @@ class QueryBuilder {
         val columnAlias = qr.addSelect(entityAlias, entityField.sqlcolumn)
         val ql = qr.stack.peek()
         qr.addMapper(columnAlias, { mc, rs ->
-            val datamap = mc.create(entityAlias, dm.name,
-                    DefaultConversionService.getSharedInstance().convert(rs.getObject(columnAlias), Long::class.java) as Long
-            )
-            if (ql.parentLinkField != null) {
-                mc.curr(ql.parent!!.alias)[ql.parentLinkField!!] = datamap
+            val id = dataConverter.convert(rs.getObject(columnAlias), Long::class.java)
+            when {
+                id == null ->
+                    //ql.parentLinkField?.let {
+                        mc.curr(ql.parent!!.alias)?.let {
+                            mc.curr(ql.parent.alias)!!.nullf(ql.parentLinkField!!)
+                        }
+                    //}
+
+                else -> {
+                    val datamap = mc.create(entityAlias, dm.name, id)
+
+                    ql.parentLinkField?.let {
+                        mc.curr(ql.parent!!.alias)!![ql.parentLinkField] = datamap
+                    }
+
+                }
+
             }
         })
     }
@@ -129,7 +145,8 @@ class QueryBuilder {
 
         //добавляем простой маппер
         qr.addMapper(columnAlias, { mc, rs ->
-            mc.curr(entityAlias)[entityField.name] = rs.getObject(columnAlias)
+            if (mc.curr(entityAlias) != null)
+                mc.curr(entityAlias)!![entityField.name] = rs.getObject(columnAlias)
         })
 
     }

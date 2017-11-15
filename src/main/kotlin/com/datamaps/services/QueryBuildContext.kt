@@ -84,12 +84,12 @@ class QueryBuildContext {
     }
 }
 
-class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String, var parentLinkField: String?, var parent:QueryLevel?) {
+class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String, val parentLinkField: String?, val parent:QueryLevel?) {
 
 }
 
 
-class MappingContext {
+class MappingContext(val q: SqlQueryContext) {
 
     //карта карт: "Ентити" -> {карта {id of entity}->{DataMap}  }
     var mapOfMaps = caseInsMapOf<MutableMap<Long, DataMap>>()
@@ -109,12 +109,13 @@ class MappingContext {
         val datamap = map.computeIfAbsent(id, { DataMap(entityName, id) })
         curr[alias] = datamap
 
-        resultMap.putIfAbsent(id, datamap)
+        if(alias==q.qr.rootAlias)
+            resultMap.putIfAbsent(id, datamap)
 
         return datamap
     }
 
-    fun curr(name: String): DataMap = curr[name]!!
+    fun curr(name: String): DataMap? = curr[name]
 
     fun clear()= curr.clear()
 
