@@ -41,7 +41,7 @@ class DataMapping(var name: String, var table: String) {
 
     operator fun get(field: String): DataField {
         return fields.computeIfAbsent(field.toLowerCase(),
-                { t -> throw SNF("field '${field}' of '${name}' entity not found") })
+                { t -> throw SNF("parentLinkField '${field}' of '${name}' entity not found") })
     }
 
     override fun toString(): String {

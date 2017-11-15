@@ -6,10 +6,8 @@ import com.datamaps.mappings.DataField
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.mappings.DataProjection
-import com.datamaps.util.caseInsMapOf
+import org.springframework.core.convert.support.DefaultConversionService
 import org.springframework.stereotype.Service
-import java.util.*
-import java.util.stream.Collectors.joining
 import javax.annotation.Resource
 
 /**
@@ -25,71 +23,19 @@ class QueryBuilder {
 
     }
 
-    fun createQueryByEntityNameAndId(name: String, id: Long): SqlQuery {
+    fun createQueryByEntityNameAndId(name: String, id: Long): SqlQueryContext {
         var dm = dataMappingsService.getDataMapping(name)
         //val query = Query()
         throw NIY()
     }
 
-    fun createQueryByDataProjection(dp: DataProjection): SqlQuery {
+    fun createQueryByDataProjection(dp: DataProjection): SqlQueryContext {
 
         val qr = QueryBuildContext()
 
         buildDataProjection(qr, dp, null)
 
         return builqSqlQuery(qr, dp)
-    }
-
-    class QueryBuildContext {
-
-        var columnAliases = caseInsMapOf<String>()
-        var aliasCounters = mutableMapOf<String, Int>()
-        var aliasColumnCounters = mutableMapOf<String, Int>()
-
-        var selectColumns = mutableSetOf<String>()
-        var joins = mutableSetOf<String>()
-        lateinit var from: String
-
-        var stack = Stack<QueryLevel>()
-
-        fun getSelectString(): String {
-            return selectColumns.stream()
-                    .collect(joining(", "))
-        }
-
-        fun getJoinString(): String {
-            return joins.stream()
-                    .collect(joining(" "))
-        }
-
-        fun addSelect(alias: String, column: String) {
-            selectColumns.add(" ${alias}.${column}  AS  ${getColumnAlias(alias, column)}")
-        }
-
-        fun addJoin(alias: String) {
-            joins.add(alias)
-        }
-
-        fun getAlias(table: String): String {
-            aliasCounters.putIfAbsent(table, 0)
-            val counter = aliasCounters.computeIfPresent(table) { s, integer -> integer + 1 }!!
-            return table + counter;
-        }
-
-
-
-        fun getColumnAlias(table:String, identifier: String): String {
-            var fullName = table + "." + identifier
-            return columnAliases.computeIfAbsent(fullName, { o -> run {
-                aliasColumnCounters.putIfAbsent(identifier, 0)
-                val counter = aliasColumnCounters.computeIfPresent(identifier) { s, integer -> integer + 1 }!!
-                identifier + counter
-            }})
-        }
-    }
-
-    class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String, var field: String?) {
-
     }
 
 
@@ -110,7 +56,11 @@ class QueryBuilder {
         //генерим алиас
         val alias = qr.getAlias(dm.table)
 
-        val ql = QueryLevel(dm, projection, alias, field)
+        //запомним рутовый алиас
+        if(isRoot)
+            qr.rootAlias = alias
+
+        val ql = QueryLevel(dm, projection, alias, field, if (isRoot) null else qr.stack.peek())
         //ддля рута - формируем клауз FROM
         if (isRoot)
             qr.from = dm.table + " as " + alias
@@ -131,11 +81,10 @@ class QueryBuilder {
             run {
                 val entityField = dm[f]
                 when {
+                    entityField.sqlcolumn == dm.idColumn -> buildIDfield(qr, dm, alias, entityField)
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
-                    entityField.isM1 -> run{
-                        buildSimpleField(qr, dm, alias, entityField)
-                        buildDataProjection(qr, projection, entityField.name)
-                    }
+                    entityField.isM1 -> buildDataProjection(qr, projection, entityField.name)
+
                     else -> throw NIY()
                 }
             }
@@ -143,29 +92,46 @@ class QueryBuilder {
         qr.stack.pop()
     }
 
+
     private fun buildJoin(qr: QueryBuildContext, parent: QueryLevel?, me: QueryLevel): String {
-        var ref = parent!!.dm[me.field!!]
+        var ref = parent!!.dm[me.parentLinkField!!]
 
         return "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
                 "${parent.alias}.${ref.sqlcolumn}=${me.alias}.${ref.manyToOne!!.joinColumn}"
     }
 
-    private fun buildM1Field(qr: QueryBuildContext, dm: DataMapping, alias: String, entityField: DataField) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
-    private fun builqSqlQuery(qr: QueryBuildContext, dp: DataProjection): SqlQuery {
+    private fun builqSqlQuery(qr: QueryBuildContext, dp: DataProjection): SqlQueryContext {
 
         val sql = "SELECT \n\t" +
                 qr.getSelectString() + "\n" +
                 "FROM " + qr.from +
                 qr.getJoinString()
 
-        return SqlQuery(sql, dp, emptyMap())
+        return SqlQueryContext(sql, dp, emptyMap(), qr)
     }
 
-    private fun buildSimpleField(qr: QueryBuildContext, dm: DataMapping, alias: String, entityField: DataField) {
-        qr.addSelect(alias, entityField.sqlcolumn)
+    private fun buildIDfield(qr: QueryBuildContext, dm: DataMapping, entityAlias: String, entityField: DataField) {
+        val columnAlias = qr.addSelect(entityAlias, entityField.sqlcolumn)
+        val ql = qr.stack.peek()
+        qr.addMapper(columnAlias, { mc, rs ->
+            val datamap = mc.create(entityAlias, dm.name,
+                    DefaultConversionService.getSharedInstance().convert(rs.getObject(columnAlias), Long::class.java) as Long
+            )
+            if (ql.parentLinkField != null) {
+                mc.curr(ql.parent!!.alias)[ql.parentLinkField!!] = datamap
+            }
+        })
+    }
+
+    private fun buildSimpleField(qr: QueryBuildContext, dm: DataMapping, entityAlias: String, entityField: DataField) {
+        val columnAlias = qr.addSelect(entityAlias, entityField.sqlcolumn)
+
+        //добавляем простой маппер
+        qr.addMapper(columnAlias, { mc, rs ->
+            mc.curr(entityAlias)[entityField.name] = rs.getObject(columnAlias)
+        })
+
     }
 
 
@@ -178,7 +144,7 @@ class QueryBuilder {
         val allFields = mutableSetOf<String>()
         allFields.add(dm.idColumn!!.toLowerCase())
         // поля дефлотной группы
-        if(dp.fields.size==0)
+        if (dp.fields.size == 0)
             allFields.addAll(dm.defaultGroup.fields.map { f -> f.toLowerCase() })
 
         //поля всех указанных групп (groups)

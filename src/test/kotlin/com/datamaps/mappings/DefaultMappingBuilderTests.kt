@@ -46,8 +46,10 @@ class DefaultMappingBuilderTests : BaseSpringTests() {
         val dt = defaultMappingBuilder.buildDefault("JiraStaffUnit")
         assertNotNull(dt)
 
-        Assert.assertEquals(dt.fields.size, 3)
-        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "NAME", "WORKER"))
+        println( dt.fields)
+
+        Assert.assertEquals(dt.fields.size, 4)
+        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "NAME", "WORKER", "GENDER"))
 
         Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "NAME"))
     }

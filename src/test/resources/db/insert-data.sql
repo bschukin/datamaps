@@ -1,7 +1,7 @@
-INSERT INTO JiraGender (ID, GENDER, ISCLASSIC) VALUES (1, 'WOMAN', 1);
-INSERT INTO JiraGender (ID, GENDER, ISCLASSIC) VALUES (2, 'MAN', 1);
-INSERT INTO JiraGender (ID, GENDER, ISCLASSIC) VALUES (3, 'FOO', 0);
-INSERT INTO JiraGender (ID, GENDER, ISCLASSIC) VALUES (4, 'BAR', 0);
+INSERT INTO JiraGender (ID, GENDER, ISCLASSIC) VALUES (1, 'woman', 1);
+INSERT INTO JiraGender (ID, GENDER, ISCLASSIC) VALUES (2, 'man', 1);
+INSERT INTO JiraGender (ID, GENDER, ISCLASSIC) VALUES (3, 'foo', 0);
+INSERT INTO JiraGender (ID, GENDER, ISCLASSIC) VALUES (4, 'bar', 0);
 
 
 INSERT INTO JiraWorker (ID, name, email, genderId) VALUES (1, 'Madonna', 'madonna@google.com', 1);

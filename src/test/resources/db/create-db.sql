@@ -2,7 +2,7 @@
 CREATE TABLE JiraGender (
   id         INTEGER PRIMARY KEY,
   gender VARCHAR(30),
-  isClassic         INTEGER
+  isClassic         bigint
   );
 
 CREATE TABLE JiraWorker (

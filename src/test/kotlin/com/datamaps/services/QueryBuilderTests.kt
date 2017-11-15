@@ -45,17 +45,18 @@ class QueryBuilderTests : BaseSpringTests() {
                 /*  */.end()
 
         //1 тест на  структуру по которой построится запрос
-        val qr = QueryBuilder.QueryBuildContext()
+        val qr = QueryBuildContext()
         queryBuilder.buildDataProjection(qr, dp, null)
 
-        assertEquals(qr.selectColumns.size, 6)
+        assertEquals(qr.selectColumns.size, 5)
 
         //2 строим сам запрос
         var q = queryBuilder.createQueryByDataProjection(dp)
 
         println(q.sql)
         assertBodyEquals("SELECT \n" +
-                "\t JIRAWORKER1.ID  AS  ID1,  JIRAWORKER1.NAME  AS  NAME1,  JIRAWORKER1.EMAIL  AS  EMAIL1,  JIRAWORKER1.GENDERID  AS  GENDERID1,  JIRAGENDER1.ID  AS  ID2,  JIRAGENDER1.GENDER  AS  GENDER1\n" +
+                "\t JIRAWORKER1.ID  AS  ID1,  JIRAWORKER1.NAME  AS  NAME1,  JIRAWORKER1.EMAIL  AS  EMAIL1,  " +
+                "JIRAGENDER1.ID  AS  ID2,  JIRAGENDER1.GENDER  AS  GENDER1\n" +
                 "FROM JIRAWORKER as JIRAWORKER1\n" +
                 "LEFT JOIN JIRAGENDER as JIRAGENDER1 ON JIRAWORKER1.GENDERID=JIRAGENDER1.ID", q.sql)
 
@@ -63,7 +64,7 @@ class QueryBuilderTests : BaseSpringTests() {
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
                 println("${resultSet.getInt("ID")}==>${resultSet.getString("NAME")}, " +
-                        resultSet.getString("GENDERID"))
+                        resultSet.getString("ID2"))
             }
         })
     }
@@ -78,10 +79,10 @@ class QueryBuilderTests : BaseSpringTests() {
                 /*  */.end()
 
         //1 тест на  структуру по которой построится запрос
-        val qr = QueryBuilder.QueryBuildContext()
+        val qr = QueryBuildContext()
         queryBuilder.buildDataProjection(qr, dp, null)
 
-        assertEquals(qr.selectColumns.size, 5)
+        assertEquals(qr.selectColumns.size, 4)
     }
 
 
@@ -97,10 +98,10 @@ class QueryBuilderTests : BaseSpringTests() {
                 .field("gender")
 
         //1 тест на  структуру по которой построится запрос
-        val qr = QueryBuilder.QueryBuildContext()
+        val qr = QueryBuildContext()
         queryBuilder.buildDataProjection(qr, dp, null)
 
-        assertEquals(qr.selectColumns.size, 14)
+        assertEquals(qr.selectColumns.size, 11)
         assertEquals(qr.joins.size, 3)
 
         //2 строим сам запрос
@@ -108,11 +109,7 @@ class QueryBuilderTests : BaseSpringTests() {
 
         println(q.sql)
         assertBodyEquals("SELECT \n" +
-                "\t JIRASTAFFUNIT1.ID  AS  ID1,  JIRASTAFFUNIT1.NAME  AS  NAME1,  JIRASTAFFUNIT1.WORKER_ID  AS  WORKER_ID1,  " +
-                "JIRAWORKER1.ID  AS  ID2,  JIRAWORKER1.NAME  AS  NAME2,  JIRAWORKER1.EMAIL  AS  EMAIL1,  JIRAWORKER1.GENDERID  AS  GENDERID1,  " +
-                "JIRAGENDER1.ID  AS  ID3,  JIRAGENDER1.GENDER  AS  GENDER1,  JIRAGENDER1.ISCLASSIC  AS  ISCLASSIC1,  " +
-                "JIRASTAFFUNIT1.GENDERID  AS  GENDERID2,  JIRAGENDER2.ID  AS  ID4,  JIRAGENDER2.GENDER  AS  GENDER2,  " +
-                "JIRAGENDER2.ISCLASSIC  AS  ISCLASSIC2\n" +
+                "\t JIRASTAFFUNIT1.ID  AS  ID1,  JIRASTAFFUNIT1.NAME  AS  NAME1,  JIRAWORKER1.ID  AS  ID2,  JIRAWORKER1.NAME  AS  NAME2,  JIRAWORKER1.EMAIL  AS  EMAIL1,  JIRAGENDER1.ID  AS  ID3,  JIRAGENDER1.GENDER  AS  GENDER1,  JIRAGENDER1.ISCLASSIC  AS  ISCLASSIC1,  JIRAGENDER2.ID  AS  ID4,  JIRAGENDER2.GENDER  AS  GENDER2,  JIRAGENDER2.ISCLASSIC  AS  ISCLASSIC2\n" +
                 "FROM JIRASTAFFUNIT as JIRASTAFFUNIT1\n" +
                 "LEFT JOIN JIRAWORKER as JIRAWORKER1 ON JIRASTAFFUNIT1.WORKER_ID=JIRAWORKER1.ID \n" +
                 "LEFT JOIN JIRAGENDER as JIRAGENDER1 ON JIRAWORKER1.GENDERID=JIRAGENDER1.ID \n" +
@@ -122,7 +119,7 @@ class QueryBuilderTests : BaseSpringTests() {
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
                 println("${resultSet.getInt("ID")}==>${resultSet.getString("NAME")}, " +
-                        resultSet.getString("GENDERID"))
+                        resultSet.getString("ID2"))
             }
         })
 
@@ -136,20 +133,20 @@ class QueryBuilderTests : BaseSpringTests() {
                 .field("parent")
                 /*  */.inner()
                 /*      */.field("name")
-                ///*      */.field("parent")
+                ///*      */.parentLinkField("parent")
                 /*  */.end()
 
         //1 тест на  структуру по которой построится запрос
-        val qr = QueryBuilder.QueryBuildContext()
+        val qr = QueryBuildContext()
         queryBuilder.buildDataProjection(qr, dp, null)
 
-        assertEquals(qr.selectColumns.size, 5)
+        assertEquals(qr.selectColumns.size, 4)
         //2 строим сам запрос
         var q = queryBuilder.createQueryByDataProjection(dp)
 
         println(q.sql)
         assertBodyEquals("SELECT \n" +
-                "\t JIRADEPARTMENT1.ID  AS  ID1,  JIRADEPARTMENT1.NAME  AS  NAME1,  JIRADEPARTMENT1.PARENTID  AS  PARENTID1,  JIRADEPARTMENT2.ID  AS  ID2,  JIRADEPARTMENT2.NAME  AS  NAME2\n" +
+                "\t JIRADEPARTMENT1.ID  AS  ID1,  JIRADEPARTMENT1.NAME  AS  NAME1,  JIRADEPARTMENT2.ID  AS  ID2,  JIRADEPARTMENT2.NAME  AS  NAME2\n" +
                 "FROM JIRADEPARTMENT as JIRADEPARTMENT1\n" +
                 "LEFT JOIN JIRADEPARTMENT as JIRADEPARTMENT2 ON JIRADEPARTMENT1.PARENTID=JIRADEPARTMENT2.ID", q.sql)
 
