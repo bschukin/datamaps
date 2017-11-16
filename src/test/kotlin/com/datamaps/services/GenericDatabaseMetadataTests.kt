@@ -1,6 +1,7 @@
 package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
+import com.datamaps.assertEqIgnoreCase
 import org.testng.Assert
 import org.testng.Assert.assertNotNull
 import org.testng.annotations.Test
@@ -76,6 +77,45 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
         assertNotNull(keys.stream().filter({ fk -> fk.pkTable.equals("JiraDepartment", true)}).findFirst())
         Assert.assertTrue(keys.stream().filter({ fk -> fk.pkTable.equals("JiraDepartment", true)})
                 .findFirst().get().pkColumn.equals("id".toUpperCase()))
+    }
+
+
+    @Test
+    //тест на получение потенциальных коллекций один ко многим по экспортированным ключам
+     fun testGetExportedKeys()
+    {
+        //JiraGender не имет коллекций
+        var table = genericDbMetadataService.getTableInfo("JiraGender")
+
+        Assert.assertTrue(table.oneToManyCollections.size==0)
+        Assert.assertTrue(table.exportedKeys.size>1)
+
+        //JiraWorker имеет коллекцию
+        table = genericDbMetadataService.getTableInfo("JiraWorker")
+
+        println(table.oneToManyCollections.size)
+        Assert.assertTrue(table.oneToManyCollections.size==1)
+        Assert.assertTrue(table.exportedKeys.size>1)
+
+        var fk = table.oneToManyCollections[0]
+        assertEqIgnoreCase(fk.pkTable, "JiraWorker")
+        assertEqIgnoreCase(fk.pkColumn, "ID")
+        assertEqIgnoreCase(fk.fkTable, "JiraWorker_JiraDepartment")
+        assertEqIgnoreCase(fk.fkColumn, "jiraWorkerId")
+
+
+        //JiraProject имеет коллекцию
+        table = genericDbMetadataService.getTableInfo("JiraProject")
+
+        println(table.oneToManyCollections.size)
+        Assert.assertTrue(table.oneToManyCollections.size==1)
+
+        fk = table.oneToManyCollections[0]
+        assertEqIgnoreCase(fk.pkTable, "JiraProject")
+        assertEqIgnoreCase(fk.pkColumn, "ID")
+        assertEqIgnoreCase(fk.fkTable, "JiraTask")
+        assertEqIgnoreCase(fk.fkColumn, "jiraProjectId")
+
     }
 
 }

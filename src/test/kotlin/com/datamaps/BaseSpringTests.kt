@@ -29,5 +29,9 @@ fun eraseAllWs(string:String):String =  string.replace("\\s".toRegex(),"")
 
 
 fun assertBodyEquals(string1:String, string2:String) {
-    Assert.assertEquals(eraseAllWs(string1), eraseAllWs(string2))
+    Assert.assertEquals(eraseAllWs(string1).toLowerCase(), eraseAllWs(string2).toLowerCase())
+}
+
+fun assertEqIgnoreCase(string1:String, string2:String) {
+    Assert.assertEquals(string1.toLowerCase(), string2.toLowerCase())
 }

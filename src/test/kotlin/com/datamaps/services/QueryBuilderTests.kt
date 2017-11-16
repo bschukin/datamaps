@@ -146,7 +146,8 @@ class QueryBuilderTests : BaseSpringTests() {
 
         println(q.sql)
         assertBodyEquals("SELECT \n" +
-                "\t JIRADEPARTMENT1.ID  AS  ID1,  JIRADEPARTMENT1.NAME  AS  NAME1,  JIRADEPARTMENT2.ID  AS  ID2,  JIRADEPARTMENT2.NAME  AS  NAME2\n" +
+                "\t JIRADEPARTMENT1.ID  AS  ID1,  JIRADEPARTMENT1.NAME  AS  NAME1,  JIRADEPARTMENT2.ID  AS  ID2,  " +
+                "JIRADEPARTMENT2.NAME  AS  NAME2\n" +
                 "FROM JIRADEPARTMENT as JIRADEPARTMENT1\n" +
                 "LEFT JOIN JIRADEPARTMENT as JIRADEPARTMENT2 ON JIRADEPARTMENT1.PARENTID=JIRADEPARTMENT2.ID", q.sql)
 
@@ -154,7 +155,7 @@ class QueryBuilderTests : BaseSpringTests() {
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
                 println("${resultSet.getInt("ID")}==>${resultSet.getString("NAME")}, " +
-                        resultSet.getString("GENDERID"))
+                        resultSet.getString("ID2"))
             }
         })
     }

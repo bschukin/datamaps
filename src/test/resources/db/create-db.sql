@@ -10,7 +10,7 @@ CREATE TABLE JiraWorker (
   name VARCHAR(30),
   email  VARCHAR(50),
   genderId INTEGER,
-  FOREIGN KEY (genderId) REFERENCES JiraGender(id) ON DELETE CASCADE
+  FOREIGN KEY (genderId) REFERENCES JiraGender(id)
 );
 
 CREATE TABLE JiraStaffUnit (
@@ -18,8 +18,8 @@ CREATE TABLE JiraStaffUnit (
   name VARCHAR(30),
   worker_Id INTEGER,
   genderId INTEGER,
-  FOREIGN KEY (worker_Id) REFERENCES JiraWorker(id) ON DELETE CASCADE,
-  FOREIGN KEY (genderId) REFERENCES JiraGender(id) ON DELETE CASCADE
+  FOREIGN KEY (worker_Id) REFERENCES JiraWorker(id),
+  FOREIGN KEY (genderId) REFERENCES JiraGender(id)
 );
 
 CREATE TABLE JiraDepartment (
@@ -39,3 +39,14 @@ CREATE TABLE JiraWorker_JiraDepartment (
   FOREIGN KEY (jiraDepartmentId) REFERENCES JiraDepartment(id) ON DELETE SET NULL
 );
 
+CREATE TABLE JiraProject (
+  id         INTEGER PRIMARY KEY,
+  name VARCHAR(30)
+);
+
+CREATE TABLE JiraTask (
+  id         INTEGER PRIMARY KEY,
+  name VARCHAR(30),
+  jiraProjectId INTEGER,
+  FOREIGN KEY (jiraProjectId) REFERENCES JiraProject(id) ON DELETE CASCADE
+);

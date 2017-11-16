@@ -1,12 +1,15 @@
 package com.datamaps.services
 
 import com.datamaps.general.NIY
+import com.datamaps.util.caseInsMapOf
+import com.datamaps.util.linkedCaseInsMapOf
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.util.Assert
 import java.sql.JDBCType
 import java.util.stream.Collectors
 import javax.annotation.Resource
+import kotlin.streams.toList
 
 /**
  * Created by Щукин on 03.11.2017.
@@ -23,29 +26,42 @@ interface DbMetadataService {
     fun getImportedKeys(table: String): List<ForeignKey>
 }
 
-class DbTable(val name: String, val primaryKeyField:String?, val comment: String?) {
-    var columns = linkedMapOf<String, DbColumn>()
+class DbTable(val name: String, val primaryKeyField: String?, val comment: String?) {
 
+    //колонки которые реально присуствуют в таблице
+    var columns = linkedCaseInsMapOf<DbColumn>()
+
+    //колонки - не ссылки
     val simpleColumns: List<DbColumn>
-        get() = columns.values.stream().filter { t -> t.isSimple() }.collect(Collectors.toList())
+        get() = columns.values.stream().filter { t -> t.isSimple() }.toList()
 
+    //колонки - ссылки
     val m1Columns: List<DbColumn>
-        get() = columns.values.stream().filter { t -> t.isManyToOne() }.collect(Collectors.toList())
+        get() = columns.values.stream().filter { t -> t.isManyToOne() }.toList()
+
+    //все экспортированные в другие колонки ключи
+    var exportedKeys = mutableListOf<ForeignKey>()
+
+    val oneToManyCollections: List<ForeignKey>
+        get() = exportedKeys.stream().filter { t -> t.onDelete == ForeignKeyCascade.cascade }.toList()
 
     operator fun get(column: String): DbColumn {
-        if (!columns.containsKey(column.toLowerCase()))
+        if (!columns.containsKey(column))
             throw RuntimeException()
-        return columns.get(column.toLowerCase())!!
+        return columns.get(column)!!
     }
 
     fun addColumn(value: DbColumn) {
-        columns[value.name.toLowerCase()] = value
+        columns[value.name] = value
+    }
+
+    fun addExprotedKey(value: ForeignKey) {
+        exportedKeys.add(value)
     }
 
     override fun toString(): String {
         return "DbTable(name='$name', primaryKeyField=$primaryKeyField, columns=$columns)"
     }
-
 
 
 }
@@ -57,15 +73,14 @@ class DbColumn(val name: String, val jdbcType: JDBCType) {
     var isNullable: Boolean = false
     var importedKey: ForeignKey? = null
 
-    fun isSimple():Boolean
-    {
-        return importedKey==null;
+    fun isSimple(): Boolean {
+        return importedKey == null
     }
 
-    fun isManyToOne():Boolean
-    {
-        return importedKey!=null;
+    fun isManyToOne(): Boolean {
+        return importedKey != null
     }
+
 
     override fun toString(): String {
         return "DbColumn(name='$name', jdbcType=$jdbcType, comment=$comment, importedKey=$importedKey)"
@@ -108,17 +123,16 @@ class GenericDbMetadataService : DbMetadataService {
     @Resource
     lateinit var jdbcTemplate: JdbcTemplate
 
-    val tables = hashMapOf<String, DbTable>()
+    val tables = caseInsMapOf<DbTable>()
 
     override fun getTableInfo(table: String): DbTable {
-        var key = table.toLowerCase()
-        if (tables.contains(key))
-            return tables[key]!!
+        if (tables.contains(table))
+            return tables[table]!!
 
-        val dbtable = readDbMetadata(key)
-        tables[key] = dbtable;
+        val dbtable = readDbMetadata(table)
+        tables[table] = dbtable;
 
-        return dbtable;
+        return dbtable
     }
 
     private fun readDbMetadata(table: String): DbTable {
@@ -128,13 +142,13 @@ class GenericDbMetadataService : DbMetadataService {
 
         val rs = md.getTables(null, null, table.toUpperCase(), null)
         rs.next()
-        if(!(rs.isFirst && rs.isLast))
+        if (!(rs.isFirst && rs.isLast))
             throw RuntimeException("Table '${table}' not found in db");
 
         val pk = md.getPrimaryKeys(null, "PUBLIC", table.toUpperCase())
-        var pkField:String? = null
+        var pkField: String? = null
         while (pk.next()) {
-            if(pkField!=null)
+            if (pkField != null)
                 throw NIY("primary key with multiple columns is not supported")
             pkField = pk.getString("COLUMN_NAME")
         }
@@ -142,7 +156,6 @@ class GenericDbMetadataService : DbMetadataService {
         //читаем таблицу
         val dt = DbTable(rs.getString("TABLE_NAME"), pkField,
                 rs.getString("remarks"))
-
 
 
         //читаем колонки
@@ -167,13 +180,27 @@ class GenericDbMetadataService : DbMetadataService {
             fk.pkColumn = crs.getString("PKCOLUMN_NAME")
             fk.fkTable = crs.getString("FKTABLE_NAME")
             fk.fkColumn = crs.getString("FKCOLUMN_NAME")
-            //print(crs.getString("FK_NAME").toString() + " ")
-            //print(crs.getString("PK_NAME") + " ")
             fk.onDelete = ForeignKeyCascade.values()[crs.getInt("DELETE_RULE")]
             fk.onUpdate = ForeignKeyCascade.values()[crs.getInt("UPDATE_RULE")]
 
             Assert.isTrue(fk.fkTable.equals(dt.name))
             dt[fk.fkColumn].importedKey = fk
+        }
+
+        //читаем связи, которые  мы экспортировали в другие таблицы -
+        //и решаем - является ли связь коллекцией
+        //определеяем это по каскаду
+        crs = md.getExportedKeys(null, "PUBLIC", table.toUpperCase())
+        while (crs.next()) {
+            val fk = ForeignKey()
+            fk.pkTable = crs.getString("PKTABLE_NAME")
+            fk.pkColumn = crs.getString("PKCOLUMN_NAME")
+            fk.fkTable = crs.getString("FKTABLE_NAME")
+            fk.fkColumn = crs.getString("FKCOLUMN_NAME")
+            fk.onDelete = ForeignKeyCascade.values()[crs.getInt("DELETE_RULE")]
+            fk.onUpdate = ForeignKeyCascade.values()[crs.getInt("UPDATE_RULE")]
+
+            dt.addExprotedKey(fk)
         }
 
         return dt

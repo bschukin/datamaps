@@ -120,6 +120,7 @@ class QueryExecutorTests : BaseSpringTests() {
         val list = queryExecutor.findAll(q)
 
         list.forEach { e->println(e) }
+        //todo ассерты
     }
 
     @Test(invocationCount = 1)//JiraDepartment: структура-дерево
@@ -137,5 +138,6 @@ class QueryExecutorTests : BaseSpringTests() {
         val list = queryExecutor.findAll(q)
 
         list.forEach { e->println(e) }
+        //todo ассерты
     }
 }

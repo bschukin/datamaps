@@ -37,7 +37,7 @@ class DataMapping(var name: String, var table: String) {
         get() = groups[FULL]!!
 
 
-    fun add(field: DataField) = fields.put(field.name.toLowerCase(), field)
+    fun add(field: DataField) = fields.put(field.name, field)
 
     operator fun get(field: String): DataField {
         return fields.computeIfAbsent(field.toLowerCase(),
