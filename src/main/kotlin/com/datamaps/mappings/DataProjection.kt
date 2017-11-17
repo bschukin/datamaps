@@ -49,9 +49,19 @@ class DataProjection {
         return this
     }
 
-    fun gfull():DataProjection
+    fun full():DataProjection
     {
         return group(FULL)
+    }
+
+    fun default():DataProjection
+    {
+        return group(FULL)
+    }
+
+    fun refs():DataProjection
+    {
+        return group(REFS)
     }
 
     fun entity(name: String ):DataProjection

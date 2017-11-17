@@ -87,7 +87,9 @@ class QueryBuilder {
                     entityField.sqlcolumn == dm.idColumn -> buildIDfield(qr, dm, alias, entityField)
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
                     entityField.isM1 -> buildDataProjection(qr, projection, entityField.name)
-
+                    entityField.is1N -> {
+                        println()
+                    }
                     else -> throw NIY()
                 }
             }
@@ -121,11 +123,9 @@ class QueryBuilder {
             val id = dataConverter.convert(rs.getObject(columnAlias), Long::class.java)
             when {
                 id == null ->
-                    //ql.parentLinkField?.let {
-                        mc.curr(ql.parent!!.alias)?.let {
-                            mc.curr(ql.parent.alias)!!.nullf(ql.parentLinkField!!)
-                        }
-                    //}
+                    mc.curr(ql.parent!!.alias)?.let {
+                        mc.curr(ql.parent.alias)!!.nullf(ql.parentLinkField!!)
+                    }
 
                 else -> {
                     val datamap = mc.create(entityAlias, dm.name, id)

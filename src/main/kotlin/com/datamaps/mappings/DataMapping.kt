@@ -1,5 +1,6 @@
 package com.datamaps.mappings
 
+import com.datamaps.general.NIS
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
 import com.datamaps.util.linkedCaseInsMapOf
@@ -28,6 +29,8 @@ class DataMapping(var name: String, var table: String) {
     init {
         groups[DEFAULT] = DataGroup(DEFAULT)
         groups[FULL] = DataGroup(FULL)
+        groups[REFS] = DataGroup(REFS)
+        groups[LIST] = DataGroup(LIST)
     }
 
     val defaultGroup: DataGroup
@@ -36,8 +39,13 @@ class DataMapping(var name: String, var table: String) {
     val fullGroup: DataGroup
         get() = groups[FULL]!!
 
+    val lists: DataGroup
+        get() = groups[LIST]!!
 
-    fun add(field: DataField) = fields.put(field.name, field)
+
+    fun add(field: DataField) = fields.merge(field.name, field, { t, u -> throw NIS() })
+
+
 
     operator fun get(field: String): DataField {
         return fields.computeIfAbsent(field.toLowerCase(),
@@ -53,13 +61,15 @@ class DataMapping(var name: String, var table: String) {
 
 const val ID: String = "ID"
 const val DEFAULT: String = "DEFAULT"
-const val FULL: String = "FULL";
+const val REFS: String = "REFS"
+const val FULL: String = "FULL"
+const val LIST: String = "LIST";
 
 
 class DataField(var name: String) {
 
-    var javaType: Class<Any>? = null
-    lateinit var sqlcolumn: String
+    var javaType: Class<*>? = null
+    var sqlcolumn: String? = null
 
     @SerializedName("m-1")
     var manyToOne: ManyToOne? = null;
@@ -75,6 +85,9 @@ class DataField(var name: String) {
 
     val isM1: Boolean
         get() = manyToOne!=null
+
+    val is1N: Boolean
+        get() = oneToMany!=null
 
     override fun toString(): String {
         return "DataField(name='$name')"
@@ -122,7 +135,7 @@ enum class FieldType {
 }
 
 //https://db.apache.org/ojb/docu/guides/jdbc-types.html
-fun <T:Any> getJavaTypeByJDBCType(jdbcType: JDBCType):Class<T>
+fun getJavaTypeByJDBCType(jdbcType: JDBCType):Class<*>
 {
     return when(jdbcType)
     {
@@ -143,6 +156,6 @@ fun <T:Any> getJavaTypeByJDBCType(jdbcType: JDBCType):Class<T>
         JDBCType.CLOB, JDBCType.BLOB  -> throw NIY()
         JDBCType.ARRAY, JDBCType.DISTINCT, JDBCType.DATALINK,JDBCType.STRUCT, JDBCType.REF  -> throw NIY()
         else-> throw NIY()
-    } as Class<T>
+    } as Class<*>
 
 }

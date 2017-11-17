@@ -24,3 +24,13 @@ class SNF : RuntimeException {
     constructor(cause: Throwable) : super(cause) {}
 
 }
+
+//Not impossible situation
+class NIS : RuntimeException {
+    constructor() {}
+
+    constructor(message: String) : super(message) {}
+
+    constructor(cause: Throwable) : super(cause) {}
+
+}

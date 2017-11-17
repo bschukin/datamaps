@@ -17,5 +17,7 @@
     <jdbc:script location="classpath:db/insert-data.sql"/>
   </jdbc:embedded-database>
 
+  <bean id="nameMappingsStrategy" class="com.datamaps.mappings.CamelUnderscoreNameMappingsStrategy"/>
+
 
 </beans>

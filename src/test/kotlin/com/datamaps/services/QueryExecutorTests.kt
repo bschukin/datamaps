@@ -108,11 +108,11 @@ class QueryExecutorTests : BaseSpringTests() {
     @Test(invocationCount = 1)//собираем инфо-п
     fun testBuildQuery05() {
         var dp = DataProjection("JiraStaffUnit")
-                .gfull()
+                .full()
                 .field("name")
                 .field("worker")
                 /*  */.inner()
-                /*      */.gfull()
+                /*      */.full()
                 /*  */.end()
                 .field("gender")
 

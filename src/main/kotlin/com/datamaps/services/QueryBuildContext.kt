@@ -51,7 +51,7 @@ class QueryBuildContext {
                 .collect(Collectors.joining(" "))
     }
 
-    fun addSelect(tableAlias: String, column: String): String {
+    fun addSelect(tableAlias: String, column: String?): String {
         val res = getColumnAlias(tableAlias, column)
         selectColumns.add(" ${tableAlias}.${column}  AS  ${res}")
         return res
@@ -72,11 +72,11 @@ class QueryBuildContext {
     }
 
 
-    fun getColumnAlias(tableAlias: String, identifier: String): String {
+    fun getColumnAlias(tableAlias: String, identifier: String?): String {
         val fullName = tableAlias + "." + identifier
         return columnAliases.computeIfAbsent(fullName, { o ->
             run {
-                aliasColumnCounters.putIfAbsent(identifier, 0)
+                aliasColumnCounters.putIfAbsent(identifier!!, 0)
                 val counter = aliasColumnCounters.computeIfPresent(identifier) { s, integer -> integer + 1 }!!
                 identifier + counter
             }

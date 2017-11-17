@@ -1,7 +1,9 @@
 package com.datamaps.mappings
 
 import com.datamaps.BaseSpringTests
+import com.datamaps.assertEqIgnoreCase
 import org.testng.Assert
+import org.testng.Assert.assertEquals
 import org.testng.Assert.assertNotNull
 import org.testng.annotations.Test
 import javax.annotation.Resource
@@ -18,53 +20,55 @@ class DefaultMappingBuilderTests : BaseSpringTests() {
     @Test
             //тест на маппинг таблицы в которой нет ссылочных полей
     fun testDefaultMappingForVerySimpleTable() {
-        var dt = defaultMappingBuilder.buildDefault("JiraGender")
+        val dt = defaultMappingBuilder.buildDefault("JIRA_GENDER")
         assertNotNull(dt)
-
+        assertEquals(dt.name, "JiraGender")
+        assertEquals(dt.table, "JIRA_GENDER")
         Assert.assertEquals(dt.fields.size, 3)
-        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "GENDER", "ISCLASSIC"))
+        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("id", "gender", "isClassic"))
 
-        Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "GENDER", "ISCLASSIC"))
+        Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("id", "gender", "isClassic"))
     }
 
 
     @Test
     //тест на маппинг таблицы в которой есть простое ссылочное поле
     fun testDefaultMappingForSimpleTable() {
-        var dt = defaultMappingBuilder.buildDefault("JiraWorker")
+        val dt = defaultMappingBuilder.buildDefault("Jira_Worker")
         assertNotNull(dt)
 
-        Assert.assertEquals(dt.fields.size, 4)
-        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "NAME", "EMAIL", "GENDER"))
+        Assert.assertEquals(dt.fields.size, 5)
+        assertEqIgnoreCase(dt.fields.values.stream().map { f -> f.name }.toList(),
+                listOf("ID", "NAME", "EMAIL", "GENDER", "jiraWorkerJiraDepartments"))
 
-        Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "NAME", "EMAIL"))
+        assertEqIgnoreCase(dt.defaultGroup.fields.stream().toList(), listOf("ID", "NAME", "EMAIL"))
     }
 
     @Test
             //тест на маппинг таблицы в которой есть простое ссылочное поле
     fun testDefaultMappingForSimpleTable02() {
-        val dt = defaultMappingBuilder.buildDefault("JiraStaffUnit")
+        val dt = defaultMappingBuilder.buildDefault("JIRA_STAFF_UNIT")
         assertNotNull(dt)
 
         println( dt.fields)
 
         Assert.assertEquals(dt.fields.size, 4)
-        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "NAME", "WORKER", "GENDER"))
+        assertEqIgnoreCase(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("id", "name", "worker", "gender"))
 
-        Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "NAME"))
+        assertEqIgnoreCase(dt.defaultGroup.fields.stream().toList(), listOf("id", "name"))
     }
 
     @Test
             //тест на маппинг таблицы в которой есть простое ссылочное поле
     fun testDefaultMappingForSimpleTable03() {
-        var dt = defaultMappingBuilder.buildDefault("JiraDepartment")
+        val dt = defaultMappingBuilder.buildDefault("JIRA_DEPARTMENT")
         assertNotNull(dt)
         println(dt.fields)
         println(dt.groups)
         Assert.assertEquals(dt.fields.size, 3)
-        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("ID", "NAME", "PARENT"))
+        assertEqIgnoreCase(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("id", "name", "parent"))
 
-        Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("ID", "NAME"))
+        assertEqIgnoreCase(dt.defaultGroup.fields.stream().toList(), listOf("id", "name"))
     }
 
 }
