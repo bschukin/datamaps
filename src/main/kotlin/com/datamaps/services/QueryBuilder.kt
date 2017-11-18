@@ -2,6 +2,7 @@ package com.datamaps.services
 
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
+import com.datamaps.general.throwNIS
 import com.datamaps.mappings.DataField
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
@@ -42,7 +43,7 @@ class QueryBuilder {
     }
 
 
-    fun buildDataProjection(qr: QueryBuildContext, dp: DataProjection, field: String?) {
+    fun buildDataProjection(qr: QueryBuildContext, dp: DataProjection, field: String?=null) {
 
         val isRoot = field == null
 
@@ -86,10 +87,8 @@ class QueryBuilder {
                 when {
                     entityField.sqlcolumn == dm.idColumn -> buildIDfield(qr, dm, alias, entityField)
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
-                    entityField.isM1 -> buildDataProjection(qr, projection, entityField.name)
-                    entityField.is1N -> {
-                        println()
-                    }
+                    entityField.isM1 -> workWithManyToOneField(qr, projection, entityField)
+                    entityField.is1N -> buildDataProjection(qr, projection, entityField.name)
                     else -> throw NIY()
                 }
             }
@@ -98,11 +97,47 @@ class QueryBuilder {
     }
 
 
+    private fun workWithManyToOneField(qr: QueryBuildContext, projection: DataProjection, entityField: DataField) {
+        //1е - сначала надо понять, не являемся ли мы обратнной ссылкой на уже доставаемый объект
+        //в этом случае нам не надо строить всю проекцию для такой обратной ссылки, а просто смаппировать нужный
+        //айдишник в поле данной проекции
+        if(!isBackRef(qr,  entityField))
+            buildDataProjection(qr, projection, entityField.name)
+    }
+
+    private fun isBackRef(qr: QueryBuildContext, entityField: DataField):Boolean{
+        val currLevel = qr.stack.peek()
+        if(currLevel.parent==null)
+            return false
+        val parent = currLevel.parent
+
+        //нашли родительское поле
+        //todo: сделать здесь маппинг
+        val parentField = parent.dm[currLevel.parentLinkField!!]
+        if(parentField.referenceTo()==currLevel.dm.name
+                && parentField.thatSideJoinColumn()==entityField.thisSideJoinColumn()
+                && parentField.thisSideJoinColumn()==entityField.thatSideJoinColumn())
+        {
+            return true
+        }
+        return false
+    }
+
+
     private fun buildJoin(qr: QueryBuildContext, parent: QueryLevel?, me: QueryLevel): String {
         var ref = parent!!.dm[me.parentLinkField!!]
 
-        return "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
-                "${parent.alias}.${ref.sqlcolumn}=${me.alias}.${ref.manyToOne!!.joinColumn}"
+        return when
+        {
+            ref.isM1-> "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
+                    "${parent.alias}.${ref.sqlcolumn}=${me.alias}.${ref.manyToOne!!.joinColumn}"
+
+            ref.is1N->"\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
+                    "${parent.alias}.${parent.dm.idColumn}=${me.alias}.${ref.oneToMany!!.theirJoinColumn}"
+
+            else->throwNIS()
+        }
+
     }
 
 
@@ -172,7 +207,7 @@ class QueryBuilder {
                 allFields.addAll(datagroup.fields.map { f -> f.toLowerCase() })
             }
         }
-        //поля, указанные как оля
+        //поля, указанные как поля
         dp.fields.forEach { f -> allFields.add(f.key.toLowerCase()) }
 
         return allFields

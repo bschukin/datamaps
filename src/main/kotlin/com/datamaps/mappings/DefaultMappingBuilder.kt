@@ -21,7 +21,7 @@ class DefaultMappingBuilder {
     @Resource
     lateinit var nameMappingsStrategy: NameMappingsStrategy
 
-    fun buildDefault(table:String): DataMapping {
+    fun buildDefault(table: String): DataMapping {
 
         var dbtable = dbMetadataService.getTableInfo(table)
         return buildDefault(dbtable)
@@ -29,7 +29,7 @@ class DefaultMappingBuilder {
     }
 
     fun buildDefault(table: DbTable): DataMapping {
-        val dm = DataMapping( getDefaultEntityName(table.name), table.name)
+        val dm = DataMapping(getDefaultEntityName(table.name), table.name)
         dm.idColumn = table.primaryKeyField
         dm.scanFieldsInDb = true
 
@@ -58,6 +58,8 @@ class DefaultMappingBuilder {
                     nameMappingsStrategy.getJavaEntityName(col.importedKey!!.pkTable),
                     col.importedKey!!.pkColumn)
 
+            //включаем в группу ссылок
+            dm.refsGroup.add(df.name)
             //включаем в FULL-группу - здесь лежать все поля
             dm.fullGroup.add(df.name)
             dm.add(df)
@@ -67,7 +69,9 @@ class DefaultMappingBuilder {
         table.oneToManyCollections.forEach { fk ->
             val df = DataField(getDefaultCollectionName(fk))
             df.javaType = List::class.java
-            df.oneToMany = OneToMany(fk.fkTable, fk.fkColumn)
+            df.oneToMany = OneToMany(
+                    nameMappingsStrategy.getJavaEntityName(fk.fkTable),
+                    fk.fkColumn)
 
             //включаем в FULL-группу - здесь лежат все поля
             dm.fullGroup.add(df.name)
@@ -113,14 +117,12 @@ fun defaultGroupCandidate(col: DbColumn): Boolean {
 }
 
 
-
 private fun escapeId(name: String): String {
-    return when
-    {
-        name.equals("id", true)->name
-        name.endsWith("_id", true)-> name.substring(0, name.length - 3)
-        name.endsWith("id", true)-> name.substring(0, name.length - 2)
-        else->name
+    return when {
+        name.equals("id", true) -> name
+        name.endsWith("_id", true) -> name.substring(0, name.length - 3)
+        name.endsWith("id", true) -> name.substring(0, name.length - 2)
+        else -> name
     }
 
 }

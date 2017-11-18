@@ -2,7 +2,6 @@ package com.datamaps.mappings
 
 import com.datamaps.maps.DataMap
 import com.google.gson.Gson
-import org.json.JSONObject
 import org.testng.annotations.Test
 
 /**
@@ -68,10 +67,10 @@ class GsonTests {
         dm["bbbb"] = "zzzz"
         dm["xxx"] = DataMap("Worker", 2L)
         dm("xxx")["сссс"]  = "ага"
+       /// dm("xxx")["parent"]  = dm //todo: а это не умеет gson сериализовать
         val s =  Gson().toJson(dm)
 
-        val spacesToIndentEachLevel = 2
-        println(JSONObject(s).toString(spacesToIndentEachLevel))
+        println(s)
     }
 
 

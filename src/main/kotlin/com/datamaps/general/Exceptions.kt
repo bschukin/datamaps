@@ -34,3 +34,5 @@ class NIS : RuntimeException {
     constructor(cause: Throwable) : super(cause) {}
 
 }
+
+public fun throwNIS(): Nothing = throw NIS()

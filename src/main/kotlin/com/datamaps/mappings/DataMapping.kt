@@ -39,12 +39,14 @@ class DataMapping(var name: String, var table: String) {
     val fullGroup: DataGroup
         get() = groups[FULL]!!
 
+    val refsGroup: DataGroup
+        get() = groups[REFS]!!
+
     val lists: DataGroup
         get() = groups[LIST]!!
 
 
     fun add(field: DataField) = fields.merge(field.name, field, { t, u -> throw NIS() })
-
 
 
     operator fun get(field: String): DataField {
@@ -81,13 +83,35 @@ class DataField(var name: String) {
     var manyToMany: ManyToMany? = null;
 
     val isSimple: Boolean
-        get() = manyToOne==null && oneToMany==null && manyToMany==null
+        get() = manyToOne == null && oneToMany == null && manyToMany == null
 
     val isM1: Boolean
-        get() = manyToOne!=null
+        get() = manyToOne != null
 
     val is1N: Boolean
-        get() = oneToMany!=null
+        get() = oneToMany != null
+
+    fun referenceTo() =
+            when {
+                isM1 -> manyToOne!!.to
+                is1N -> oneToMany!!.to
+                else -> null
+            }
+
+    fun thisSideJoinColumn()=
+            when {
+                isM1 -> sqlcolumn
+                is1N -> "ID" //todo: сделать как следовает
+                else -> null
+            }
+
+    fun thatSideJoinColumn()=
+            when {
+                isM1 -> "ID"//todo: сделать как следовает
+                is1N -> oneToMany!!.theirJoinColumn
+                else -> null
+            }
+
 
     override fun toString(): String {
         return "DataField(name='$name')"
@@ -101,9 +125,8 @@ class DataGroup(var name: String) {
 
     var fields = mutableListOf<String>()
 
-    fun add(field:String)
-    {
-        fields. add(field)
+    fun add(field: String) {
+        fields.add(field)
     }
 }
 
@@ -115,7 +138,7 @@ class ManyToOne(var to: String,
 class OneToMany(var to: String,
                 @SerializedName("their-join-column") var theirJoinColumn: String) {
 
-    var lazy:Boolean=true;
+    //var lazy:Boolean=true;
 
 }
 
@@ -135,10 +158,8 @@ enum class FieldType {
 }
 
 //https://db.apache.org/ojb/docu/guides/jdbc-types.html
-fun getJavaTypeByJDBCType(jdbcType: JDBCType):Class<*>
-{
-    return when(jdbcType)
-    {
+fun getJavaTypeByJDBCType(jdbcType: JDBCType): Class<*> {
+    return when (jdbcType) {
         JDBCType.CHAR, JDBCType.VARCHAR, JDBCType.LONGNVARCHAR -> String::class.java
         JDBCType.NUMERIC, JDBCType.DECIMAL -> BigDecimal::class.java
         JDBCType.INTEGER -> Int::class.java
@@ -150,12 +171,12 @@ fun getJavaTypeByJDBCType(jdbcType: JDBCType):Class<*>
         JDBCType.FLOAT -> Double::class.java
         JDBCType.DOUBLE -> Double::class.java
         JDBCType.BINARY, JDBCType.VARBINARY, JDBCType.LONGVARBINARY -> throw NIY()
-        JDBCType.DATE    -> java.sql.Date::javaClass
-        JDBCType.TIME  -> java.sql.Time::javaClass
-        JDBCType.TIMESTAMP  -> java.sql.Timestamp::javaClass
-        JDBCType.CLOB, JDBCType.BLOB  -> throw NIY()
-        JDBCType.ARRAY, JDBCType.DISTINCT, JDBCType.DATALINK,JDBCType.STRUCT, JDBCType.REF  -> throw NIY()
-        else-> throw NIY()
+        JDBCType.DATE -> java.sql.Date::javaClass
+        JDBCType.TIME -> java.sql.Time::javaClass
+        JDBCType.TIMESTAMP -> java.sql.Timestamp::javaClass
+        JDBCType.CLOB, JDBCType.BLOB -> throw NIY()
+        JDBCType.ARRAY, JDBCType.DISTINCT, JDBCType.DATALINK, JDBCType.STRUCT, JDBCType.REF -> throw NIY()
+        else -> throw NIY()
     } as Class<*>
 
 }

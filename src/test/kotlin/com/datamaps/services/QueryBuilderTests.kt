@@ -90,11 +90,11 @@ class QueryBuilderTests : BaseSpringTests() {
     @Test(invocationCount = 1)//собираем инфо-п
     fun testBuildQuery05() {
         var dp = DataProjection("JiraStaffUnit")
-                .full()
+                .default().refs()
                 .field("name")
                 .field("worker")
                 /*  */.inner()
-                /*      */.full()
+                /*      */.default().refs()
                 /*  */.end()
                 .field("gender")
 
@@ -158,6 +158,25 @@ class QueryBuilderTests : BaseSpringTests() {
                         resultSet.getString("ID2"))
             }
         })
+    }
+
+    @Test(invocationCount = 1)//Коллеция 1-N
+    fun testBuildQuery06() {
+        var dp = DataProjection("JiraProject")
+                .full()
+                /*  */.field("jiraTasks")
+                /*  *//*  */.inner().full().end()
+                /*  */.full()
+
+        //1 тест на  структуру по которой построится запрос
+        val qr = QueryBuildContext()
+        queryBuilder.buildDataProjection(qr, dp)
+
+        assertEquals(qr.selectColumns.size, 4)
+        assertEquals(qr.joins.size, 1)
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
     }
 
 }

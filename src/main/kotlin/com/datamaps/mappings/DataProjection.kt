@@ -56,7 +56,7 @@ class DataProjection {
 
     fun default():DataProjection
     {
-        return group(FULL)
+        return group(DEFAULT)
     }
 
     fun refs():DataProjection
