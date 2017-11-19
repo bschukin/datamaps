@@ -43,7 +43,7 @@ class QueryBuilder {
     }
 
 
-    fun buildDataProjection(qr: QueryBuildContext, dp: DataProjection, field: String?=null) {
+    fun buildDataProjection(qr: QueryBuildContext, dp: DataProjection, field: String? = null) {
 
         val isRoot = field == null
 
@@ -87,7 +87,7 @@ class QueryBuilder {
                 when {
                     entityField.sqlcolumn == dm.idColumn -> buildIDfield(qr, dm, alias, entityField)
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
-                    entityField.isM1 -> workWithManyToOneField(qr, projection, entityField)
+                    entityField.isM1 -> buildManyToOneField(qr, projection, entityField)
                     entityField.is1N -> buildDataProjection(qr, projection, entityField.name)
                     else -> throw NIY()
                 }
@@ -97,27 +97,44 @@ class QueryBuilder {
     }
 
 
-    private fun workWithManyToOneField(qr: QueryBuildContext, projection: DataProjection, entityField: DataField) {
+    private fun buildManyToOneField(qr: QueryBuildContext, projection: DataProjection, entityField: DataField) {
         //1е - сначала надо понять, не являемся ли мы обратнной ссылкой на уже доставаемый объект
         //в этом случае нам не надо строить всю проекцию для такой обратной ссылки, а просто смаппировать нужный
         //айдишник в поле данной проекции
-        if(!isBackRef(qr,  entityField))
+        if (!isBackRef(qr, entityField))
             buildDataProjection(qr, projection, entityField.name)
     }
 
-    private fun isBackRef(qr: QueryBuildContext, entityField: DataField):Boolean{
+    private fun isBackRef(qr: QueryBuildContext, entityField: DataField): Boolean {
         val currLevel = qr.stack.peek()
-        if(currLevel.parent==null)
+        if (currLevel.parent == null)
             return false
         val parent = currLevel.parent
 
         //нашли родительское поле
-        //todo: сделать здесь маппинг
+
         val parentField = parent.dm[currLevel.parentLinkField!!]
-        if(parentField.referenceTo()==currLevel.dm.name
-                && parentField.thatSideJoinColumn()==entityField.thisSideJoinColumn()
-                && parentField.thisSideJoinColumn()==entityField.thatSideJoinColumn())
-        {
+        if (parentField.referenceTo() == currLevel.dm.name
+                && parentField.thatSideJoinColumn() == entityField.thisSideJoinColumn()
+                && parentField.thisSideJoinColumn() == entityField.thatSideJoinColumn()) {
+            //todo: сделать здесь маппинг
+            //итак, это поле является обратной ссылкой на родителя (родитель->дочерняя коллекция->элемент->ссылка на родителя)
+            //при маппировании необходимо в текущую сущность положить ссыль на родителя
+            //смаппируем это на ID текущей сущноси
+            val idAlias = qr.getColumnAlias(currLevel.alias, currLevel.dm.idColumn)
+            qr.addMapper(idAlias, { mc, rs ->
+                val parentmapa = mc.curr[parent.alias]
+                val currentmapa = mc.curr[currLevel.alias]
+                parentmapa?.let {
+                    currentmapa?.let {
+                        currentmapa[entityField.name] = parentmapa
+                        currentmapa.addBackRef(entityField.name)
+                    }
+                }
+
+            }
+            )
+
             return true
         }
         return false
@@ -127,15 +144,14 @@ class QueryBuilder {
     private fun buildJoin(qr: QueryBuildContext, parent: QueryLevel?, me: QueryLevel): String {
         var ref = parent!!.dm[me.parentLinkField!!]
 
-        return when
-        {
-            ref.isM1-> "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
+        return when {
+            ref.isM1 -> "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
                     "${parent.alias}.${ref.sqlcolumn}=${me.alias}.${ref.manyToOne!!.joinColumn}"
 
-            ref.is1N->"\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
+            ref.is1N -> "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
                     "${parent.alias}.${parent.dm.idColumn}=${me.alias}.${ref.oneToMany!!.theirJoinColumn}"
 
-            else->throwNIS()
+            else -> throwNIS()
         }
 
     }
@@ -166,7 +182,12 @@ class QueryBuilder {
                     val datamap = mc.create(entityAlias, dm.name, id)
 
                     ql.parentLinkField?.let {
-                        mc.curr(ql.parent!!.alias)!![ql.parentLinkField] = datamap
+                        val parentField = ql.parent!!.dm[ql.parentLinkField]
+                        when {
+                            parentField.isM1 -> mc.curr(ql.parent.alias)!![ql.parentLinkField] = datamap
+                            parentField.is1N -> mc.curr(ql.parent.alias)!!.list(ql.parentLinkField).add(datamap)
+                            else -> throwNIS()
+                        }
                     }
 
                 }

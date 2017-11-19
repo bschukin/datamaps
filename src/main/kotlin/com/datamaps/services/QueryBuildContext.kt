@@ -37,7 +37,7 @@ class QueryBuildContext {
     lateinit var rootAlias: String
 
     //карта "алиас колонки" - маппер колонки
-    var columnMappers = mutableMapOf<String, RowMapper>()
+    var columnMappers = mutableMapOf<String, MutableList<RowMapper>>()
 
     var stack = Stack<QueryLevel>()
 
@@ -58,7 +58,8 @@ class QueryBuildContext {
     }
 
     fun addMapper(alias: String, rowMapper: RowMapper) {
-        columnMappers.put(alias, rowMapper)
+        columnMappers.putIfAbsent(alias, mutableListOf())
+        columnMappers[alias]!!.add(rowMapper)
     }
 
     fun addJoin(alias: String) {

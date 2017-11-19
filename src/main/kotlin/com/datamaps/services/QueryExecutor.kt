@@ -16,8 +16,7 @@ class QueryExecutor {
     lateinit var jdbcTemplate: JdbcTemplate
 
 
-    fun findAll(q:SqlQueryContext): List<DataMap>
-    {
+    fun findAll(q: SqlQueryContext): List<DataMap> {
         var mc = MappingContext(q)
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
@@ -28,16 +27,14 @@ class QueryExecutor {
         return mc.result()
     }
 
-    fun executeSingle(q:SqlQueryContext): DataMap
-    {
-       TODO("NOT IMPLE")
+    fun executeSingle(q: SqlQueryContext): DataMap {
+        TODO("NOT IMPLE")
     }
 
 
-    fun mapRow(resultSet: ResultSet, q:SqlQueryContext, mc:MappingContext)
-    {
-        q.qr.columnAliases.values.forEach { col->
-                q.qr.columnMappers[col]!!.invoke(mc, resultSet)
+    fun mapRow(resultSet: ResultSet, q: SqlQueryContext, mc: MappingContext) {
+        q.qr.columnAliases.values.forEach { col ->
+            q.qr.columnMappers[col]!!.forEach { mapper -> mapper.invoke(mc, resultSet) }
         }
         mc.clear()
     }

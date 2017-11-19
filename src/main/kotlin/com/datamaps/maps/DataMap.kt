@@ -25,10 +25,17 @@ class DataMap {
     @SerializedName("_")
     var map = caseInsMapOf<Any>()
 
+    private val backRefs = caseInsMapOf<String>()
 
     constructor (name: String, id: Long)  {
         this.name = name
         this.id = id
+    }
+
+    constructor (name: String, id: Long, props:Map<String, Any> )  {
+        this.name = name
+        this.id = id
+        props.forEach { t, u -> map[t]=u }
     }
 
     operator fun get(field: String): Any? {
@@ -57,6 +64,14 @@ class DataMap {
             this[prop] = res
         }
         return res as MutableList<DataMap>;
+    }
+
+    fun addBackRef(name:String) {
+        backRefs[name] = name
+    }
+
+    fun isBackRef(name:String):Boolean {
+        return backRefs.containsKey(name)
     }
 
 
@@ -94,7 +109,18 @@ class DMSerializer : JsonSerializer<DataMap> {
         obj.map.forEach { t, u ->
 
             when{
-                u is DataMap -> jsonObject.add(t, context.serialize(u))
+                u is DataMap -> {
+                    if(obj.isBackRef(t))
+                    jsonObject.add(t, context.serialize(
+                            DataMap(u.name, u.id!!, mapOf("isBackRef" to true)))
+                    )
+                    else jsonObject.add(t, context.serialize(u))
+                }
+                u is Collection<*> ->{
+                    val arr = JsonArray()
+                    u.forEach { e->arr.add(context.serialize(e)) }
+                    jsonObject.add(t, arr)
+                }
                 else ->   jsonObject.addProperty(t,  u?.toString()?: "[null]")
             }
 

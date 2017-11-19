@@ -1,6 +1,7 @@
 package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
+import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.DataProjection
 import com.datamaps.maps.DataMap
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,12 +29,12 @@ class QueryExecutorTests : BaseSpringTests() {
 
         val list = queryExecutor.findAll(q)
 
-        list.forEach { e->println(e) }
+        list.forEach { e -> println(e) }
         Assert.assertEquals(list.size, 4)
 
         val indeх = list.indexOf(DataMap("JiraGender", 1))
-        Assert.assertTrue(indeх >=0)
-        val dm =  list[indeх]
+        Assert.assertTrue(indeх >= 0)
+        val dm = list[indeх]
         Assert.assertTrue(dm["gender"] as String == "woman")
     }
 
@@ -51,25 +52,25 @@ class QueryExecutorTests : BaseSpringTests() {
 
         val list = queryExecutor.findAll(q)
 
-        list.forEach { e->println(e) }
+        list.forEach { e -> println(e) }
 
         Assert.assertEquals(list.size, 5)
 
         //всякие проверочки
         val indeх = list.indexOf(DataMap("JiraWorker", 1))
-        Assert.assertTrue(indeх >=0)
-        val dm =  list[indeх]
+        Assert.assertTrue(indeх >= 0)
+        val dm = list[indeх]
         Assert.assertTrue(dm["email"] as String == "madonna@google.com")
-        Assert.assertTrue( dm("gender")["gender"] == "woman")
+        Assert.assertTrue(dm("gender")["gender"] == "woman")
 
         val indeх2 = list.indexOf(DataMap("JiraWorker", 5))
-        val dm2 =  list[indeх2]
+        val dm2 = list[indeх2]
 
         Assert.assertTrue(dm2["email"] as String == "mylene@francetelecom.fr")
-        Assert.assertTrue( dm2("gender")["gender"] == "woman")
+        Assert.assertTrue(dm2("gender")["gender"] == "woman")
 
         //самый интересный ассерт: убеждаемся, что ссылки на гендер - физически это один и тот же инстанс
-        Assert.assertTrue(dm2["gender"]  === dm["gender"])
+        Assert.assertTrue(dm2["gender"] === dm["gender"])
     }
 
 
@@ -86,23 +87,23 @@ class QueryExecutorTests : BaseSpringTests() {
 
         val list = queryExecutor.findAll(q)
 
-        list.forEach { e->println(e) }
+        list.forEach { e -> println(e) }
 
         //всякие проверочки
         val indeх = list.indexOf(DataMap("JiraWorker", 1))
-        Assert.assertTrue(indeх >=0)
-        val dm =  list[indeх]
-        Assert.assertTrue(dm["email"]  == null)
-        Assert.assertTrue( dm("gender")["gender"] == "woman")
+        Assert.assertTrue(indeх >= 0)
+        val dm = list[indeх]
+        Assert.assertTrue(dm["email"] == null)
+        Assert.assertTrue(dm("gender")["gender"] == "woman")
 
         val indeх2 = list.indexOf(DataMap("JiraWorker", 5))
-        val dm2 =  list[indeх2]
+        val dm2 = list[indeх2]
 
-        Assert.assertTrue(dm2["email"]  == null)
-        Assert.assertTrue( dm2("gender")["gender"] == "woman")
+        Assert.assertTrue(dm2["email"] == null)
+        Assert.assertTrue(dm2("gender")["gender"] == "woman")
 
         //самый интересный ассерт: убеждаемся, что ссылки на гендер - физически это один и тот же инстанс
-        Assert.assertTrue(dm2["gender"]  === dm["gender"])
+        Assert.assertTrue(dm2["gender"] === dm["gender"])
     }
 
     @Test(invocationCount = 1)//собираем инфо-п
@@ -119,7 +120,7 @@ class QueryExecutorTests : BaseSpringTests() {
         val q = queryBuilder.createQueryByDataProjection(dp)
         val list = queryExecutor.findAll(q)
 
-        list.forEach { e->println(e) }
+        list.forEach { e -> println(e) }
         //todo ассерты
     }
 
@@ -128,16 +129,91 @@ class QueryExecutorTests : BaseSpringTests() {
         var dp = DataProjection("JiraDepartment")
                 .field("name")
                 .field("parent")
-               // /*  */.inner()
-                ///*      */.field("name")
-                ///*      */.parentLinkField("parent")
-                ///*  */.end()
+        // /*  */.inner()
+        ///*      */.field("name")
+        ///*      */.parentLinkField("parent")
+        ///*  */.end()
 
         //1 тест на  структуру по которой построится запрос
         val q = queryBuilder.createQueryByDataProjection(dp)
         val list = queryExecutor.findAll(q)
 
-        list.forEach { e->println(e) }
+        list.forEach { e -> println(e) }
         //todo ассерты
+    }
+
+    @Test(invocationCount = 1)//Коллеция 1-N
+    fun testExecQuery06() {
+        var dp = DataProjection("JiraProject")
+                .full()
+                /*  */.field("jiraTasks")
+                /*  *//*  */.inner().full().end()
+                /*  */.full()
+
+        //1 тест на  структуру по которой построится запрос
+        val q = queryBuilder.createQueryByDataProjection(dp)
+
+        val list = queryExecutor.findAll(q)
+
+        val res = StringBuilder()
+        list.forEach { e -> res.append(e.toString()) }
+        list.forEach { e -> println(e) }
+
+        assertBodyEquals("""
+            {
+  "entity": "JiraProject",
+  "id": 1,
+  "name": "SAUMI",
+  "jiraTasks": [
+    {
+      "entity": "JiraTask",
+      "id": 1,
+      "jiraProject": {
+        "entity": "JiraProject",
+        "id": 1,
+        "isBackRef": "true"
+      },
+      "name": "SAUMI-001"
+    },
+    {
+      "entity": "JiraTask",
+      "id": 2,
+      "jiraProject": {
+        "entity": "JiraProject",
+        "id": 1,
+        "isBackRef": "true"
+      },
+      "name": "SAUMI-002"
+    }
+  ]
+}
+{
+  "entity": "JiraProject",
+  "id": 2,
+  "name": "QDP",
+  "jiraTasks": [
+    {
+      "entity": "JiraTask",
+      "id": 3,
+      "jiraProject": {
+        "entity": "JiraProject",
+        "id": 2,
+        "isBackRef": "true"
+      },
+      "name": "QDP-003"
+    },
+    {
+      "entity": "JiraTask",
+      "id": 4,
+      "jiraProject": {
+        "entity": "JiraProject",
+        "id": 2,
+        "isBackRef": "true"
+      },
+      "name": "QDP-004"
+    }
+  ]
+}
+        """.trimIndent(), res.toString())
     }
 }

@@ -20,3 +20,12 @@ INSERT INTO Jira_Department (ID, name, parent_Id) VALUES (1, 'Департаме
 INSERT INTO Jira_Department (ID, name, parent_Id) VALUES (2, 'Отдел', 1);
 INSERT INTO Jira_Department (ID, name, parent_Id) VALUES (3, 'Сектор', 2);
 INSERT INTO Jira_Department (ID, name, parent_Id) VALUES (4, 'Пара', 3);
+
+INSERT INTO Jira_Project (ID, name) VALUES (1, 'SAUMI');
+INSERT INTO Jira_Project (ID, name) VALUES (2, 'QDP');
+
+INSERT INTO Jira_TASK (ID, name, jira_project_id) VALUES (1, 'SAUMI-001', 1);
+INSERT INTO Jira_TASK (ID, name, jira_project_id) VALUES (2, 'SAUMI-002', 1);
+
+INSERT INTO Jira_TASK (ID, name, jira_project_id) VALUES (3, 'QDP-003', 2);
+INSERT INTO Jira_TASK (ID, name, jira_project_id) VALUES (4, 'QDP-004', 2);
