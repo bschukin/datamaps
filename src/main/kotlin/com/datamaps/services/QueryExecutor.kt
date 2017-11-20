@@ -3,6 +3,7 @@ package com.datamaps.services
 import com.datamaps.maps.DataMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import java.sql.ResultSet
 
@@ -15,9 +16,12 @@ class QueryExecutor {
     @Autowired
     lateinit var jdbcTemplate: JdbcTemplate
 
+    @Autowired
+    lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+
 
     fun findAll(q: SqlQueryContext): List<DataMap> {
-        var mc = MappingContext(q)
+        val mc = MappingContext(q)
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
                 mapRow(resultSet, q, mc)
@@ -27,8 +31,15 @@ class QueryExecutor {
         return mc.result()
     }
 
-    fun executeSingle(q: SqlQueryContext): DataMap {
-        TODO("NOT IMPLE")
+    fun executeSingle(q: SqlQueryContext): DataMap? {
+        val mc = MappingContext(q)
+        namedParameterJdbcTemplate.query(q.sql, q.params, { resultSet, i ->
+            run {
+                mapRow(resultSet, q, mc)
+            }
+        })
+
+        return mc.result().firstOrNull()
     }
 
 

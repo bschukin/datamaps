@@ -3,6 +3,7 @@ package com.datamaps.services
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
 import com.datamaps.general.throwNIS
+import com.datamaps.general.validateNIY
 import com.datamaps.mappings.DataField
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
@@ -23,14 +24,10 @@ class QueryBuilder {
     @Resource
     lateinit var dataConverter: DataConverter
 
-    fun createQueryForEntity(qr: QueryBuildContext, parent: DataProjection, field: String) {
-
-    }
-
     fun createQueryByEntityNameAndId(name: String, id: Long): SqlQueryContext {
-        var dm = dataMappingsService.getDataMapping(name)
-        //val query = Query()
-        throw NIY()
+
+        val dp = DataProjection(name, id).default().refs()
+        return createQueryByDataProjection(dp)
     }
 
     fun createQueryByDataProjection(dp: DataProjection): SqlQueryContext {
@@ -93,7 +90,24 @@ class QueryBuilder {
                 }
             }
         }
+
+        buildWhere(qr)
+
         qr.stack.pop()
+    }
+
+    private fun buildWhere(qr: QueryBuildContext) {
+
+        val querylevel = qr.stack.peek()
+        val projection = querylevel.dp
+
+        //пока мы строим только запрос по ID
+        projection.id?.let {
+            validateNIY(projection.isRoot())
+
+            qr.where = "${querylevel.alias}.${querylevel.dm.idColumn} = :_id1"
+            qr.params["_id1"] = projection.id
+        }
     }
 
 

@@ -41,6 +41,12 @@ class QueryBuildContext {
 
     var stack = Stack<QueryLevel>()
 
+    //строка where. пока особо идей по построению фильтров нет - самый простой вариант чтобы
+    //поддержать запрос по id
+    var where  = ""
+
+    var params = mutableMapOf<String, Any?>()
+
     fun getSelectString(): String {
         return selectColumns.stream()
                 .collect(Collectors.joining(", "))

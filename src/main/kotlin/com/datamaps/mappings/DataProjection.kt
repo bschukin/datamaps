@@ -1,5 +1,6 @@
 package com.datamaps.mappings
 
+import com.datamaps.general.validate
 import com.datamaps.util.linkedCaseInsMapOf
 
 /**
@@ -20,18 +21,29 @@ import com.datamaps.util.linkedCaseInsMapOf
 
 class DataProjection {
 
-
-
-    var field: String? = null
+    //для корневой проекции  - сущность по которой надо строить запрос
+    //для вложенных поекций - опционально
     var entity: String? = null
+    //id объекта - возможно указание только для рутовых ОП
+    var id:Long? = null
+    //для вложенных проекций - родительское поле
+    var field: String? = null
+    //группы, которые включеные в проекцию
     var groups = mutableListOf<String>()
+    //поля, включенные в проекцию - в вилей проекций
     var fields = linkedCaseInsMapOf<DataProjection>() //рекурсивные проекции
 
+    //технические поля для чейнов по созданию проекций
     var last: DataProjection? = null
     var prev: DataProjection? = null
 
-    constructor(entity: String?) {
+    constructor(entity: String) {
         this.entity = entity
+    }
+
+    constructor(entity: String, id:Long) {
+        this.entity = entity
+        this.id=  id;
     }
 
     constructor(entity: String?, field: String?) {
@@ -64,11 +76,6 @@ class DataProjection {
         return group(REFS)
     }
 
-    fun entity(name: String ):DataProjection
-    {
-        entity = name
-        return this
-    }
 
     fun field(f:String):DataProjection
     {
@@ -76,10 +83,22 @@ class DataProjection {
         last  = fields[f]
         return this
     }
+
+    fun id(id:Long):DataProjection
+    {
+        validate(isRoot())
+        this.id = id
+        return this
+    }
+
+    fun isRoot() = field==null
+
+
     fun inner():DataProjection {
         this.last!!.prev = this
         return this.last!!
     }
+
     fun end():DataProjection {
         return prev!!
     }

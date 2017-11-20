@@ -9,7 +9,7 @@ import javax.annotation.Resource
  */
 interface DataService {
 
-    operator fun get(entityName: String, id: Long): DataMap
+    operator fun get(entityName: String, id: Long): DataMap?
 
 }
 
@@ -25,7 +25,7 @@ class DataServiceImpl : DataService
     @Resource
     lateinit var queryExecutor: QueryExecutor;
 
-    override fun get(entityName: String, id: Long): DataMap {
+    override fun get(entityName: String, id: Long): DataMap? {
 
         val q = queryBuilder.createQueryByEntityNameAndId(entityName, id);
         return queryExecutor.executeSingle(q);

@@ -14,6 +14,11 @@ class NIY : RuntimeException {
 
 }
 
+fun validateNIY(boolean: Boolean) {
+    if (boolean)
+        throw NIY()
+}
+
 
 //Something not found
 class SNF : RuntimeException {
@@ -35,4 +40,9 @@ class NIS : RuntimeException {
 
 }
 
-public fun throwNIS(): Nothing = throw NIS()
+fun validate(condition: Boolean, message: String? = null) {
+    if (!condition)
+        throwNIS(message)
+}
+
+public fun throwNIS(message: String? = null): Nothing = throw NIS()
