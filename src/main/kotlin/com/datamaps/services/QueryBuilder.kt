@@ -68,6 +68,11 @@ class QueryBuilder {
             qr.addParentPathAlias(qr.stack.peek().alias, field, alias)
 
         val ql = QueryLevel(dm, projection, alias, field, if (isRoot) null else qr.stack.peek())
+
+        //строим дерево
+        if(!isRoot)
+            qr.stack.peek().childProps[field] =ql
+
         //ддля рута - формируем клауз FROM
         if (isRoot)
             qr.from = dm.table + " as " + alias

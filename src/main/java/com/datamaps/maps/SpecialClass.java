@@ -2,8 +2,6 @@ package com.datamaps.maps;
 
 import com.datamaps.services.GenericDbMetadataService;
 
-import java.util.Map;
-
 /**
  * Created by Щукин on 03.11.2017.
  */
@@ -13,7 +11,9 @@ public class SpecialClass {
 
     void test ()
     {
-            Map m;
+      for (int i = 0; i < 10; i++) {
+
+      }
 
     }
 

@@ -97,6 +97,10 @@ class QueryBuildContext {
         return table + counter
     }
 
+    fun getColumnIdentiferForFillter(tableAlias: String, identifier: String): String {
+        val fullName = tableAlias + "." + identifier
+        return columnAliases[fullName] ?: fullName
+    }
 
     fun getColumnAlias(tableAlias: String, identifier: String?): String {
         val fullName = tableAlias + "." + identifier
@@ -110,7 +114,10 @@ class QueryBuildContext {
     }
 }
 
-class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String, val parentLinkField: String?, val parent:QueryLevel?) {
+class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
+                 val parentLinkField: String?, val parent:QueryLevel?) {
+
+    var childProps = caseInsMapOf<QueryLevel>()
 
 }
 

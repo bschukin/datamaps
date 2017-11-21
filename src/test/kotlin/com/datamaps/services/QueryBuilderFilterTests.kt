@@ -3,6 +3,7 @@ package com.datamaps.services
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.DataProjection
+import com.datamaps.mappings.f
 import org.springframework.beans.factory.annotation.Autowired
 import org.testng.annotations.Test
 
@@ -83,5 +84,19 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         alias = q.qr.getAliasByPathFromParent("jsu", "gender")
         assertBodyEquals(alias!!, "jira_gender2")
 
+    }
+
+
+    @Test(invocationCount = 1)//собираем инфо-п
+    fun tesQueryFilter01() {
+        var dp = DataProjection("JiraGender")
+                .filter({
+                    f("gender")
+                })
+
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.qr.where)
+        assertBodyEquals(q.qr.where, "gender1")
     }
 }

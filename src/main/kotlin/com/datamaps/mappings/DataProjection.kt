@@ -27,13 +27,16 @@ class DataProjection {
     //алиас, использованный для данной сущности в запросе (например для использования в фильтрах)
     var queryAlias: String? = null
     //id объекта - возможно указание только для рутовых ОП
-    var id:Long? = null
+    var id: Long? = null
     //для вложенных проекций - родительское поле
     var field: String? = null
     //группы, которые включеные в проекцию
     var groups = mutableListOf<String>()
     //поля, включенные в проекцию - в вилей проекций
     var fields = linkedCaseInsMapOf<DataProjection>() //рекурсивные проекции
+
+    //выражение  where
+    private var filter: exp? = null
 
     //технические поля для чейнов по созданию проекций
     var last: DataProjection? = null
@@ -43,9 +46,9 @@ class DataProjection {
         this.entity = entity
     }
 
-    constructor(entity: String, id:Long) {
+    constructor(entity: String, id: Long) {
         this.entity = entity
-        this.id=  id;
+        this.id = id;
     }
 
     constructor(entity: String?, field: String?) {
@@ -62,62 +65,59 @@ class DataProjection {
         return this
     }
 
-    fun group(gr:String):DataProjection
-    {
+    fun group(gr: String): DataProjection {
         groups.add(gr)
         return this
     }
 
-    fun full():DataProjection
-    {
+    fun full(): DataProjection {
         return group(FULL)
     }
 
-    fun default():DataProjection
-    {
+    fun default(): DataProjection {
         return group(DEFAULT)
     }
 
-    fun refs():DataProjection
-    {
+    fun refs(): DataProjection {
         return group(REFS)
     }
 
 
-    fun field(f:String):DataProjection
-    {
+    fun field(f: String): DataProjection {
         fields[f] = DataProjection(null, f)
-        last  = fields[f]
+        last = fields[f]
         return this
     }
 
-    fun id(id:Long):DataProjection
-    {
+    fun id(id: Long): DataProjection {
         validate(isRoot())
         this.id = id
         return this
     }
 
-    fun isRoot() = field==null
+    fun isRoot() = field == null
 
 
-    fun inner():DataProjection {
+    fun inner(): DataProjection {
         this.last!!.prev = this
         return this.last!!
     }
 
-    fun end():DataProjection {
+    fun end(): DataProjection {
         return prev!!
     }
 
-    fun filter(exp:exp):DataProjection
-    {
+    fun filter(): exp? {
+        return filter
+    }
+
+    fun filter(exp: exp): DataProjection {
+        filter =  exp
         return this
     }
 
-    fun filter( aaa:(m:Unit) -> exp):DataProjection
-    {
-        val exp = aaa(Unit)
+    fun filter(aaa: (m: Unit) -> exp): DataProjection {
+        filter  = aaa(Unit)
         return this
     }
 
@@ -127,45 +127,32 @@ class DataProjection {
 public open class exp() {
 
 
+
     infix fun or(exp: exp): exp {
-        println("OR")
-        return exp()
+        return OR(this, exp)
     }
 
 
     infix fun and(exp: exp): exp {
-        println("and")
-        return exp()
-    }
-
-    infix fun and(boolean: Boolean): exp {
-        println("and boolean")
-        return exp()
-    }
-
-    operator fun  compareTo(b:exp):Int
-    {
-        println("compareTo")
-        return 0
-    }
-
-    operator fun  compareTo(b:Int):Int
-    {
-        println("compareToInt")
-        return 0
+        return AND(this, exp)
     }
 
     infix fun gt(exp1: Any): exp {
-        println("gt")
-        return exp()
+        val exp2 = if(exp1 !is exp) value(exp1) else exp1
+        return binaryOP(this, exp2, ">")
     }
 }
 
-public open class f(name:String):exp() {
+public open class binaryOP(left: exp, right: exp, op:String) : exp() {
 
 }
 
-public open class value(v:Any):exp() {
+
+public open class f(val name: String) : exp() {
+
+}
+
+public open class value(v: Any) : exp() {
 
 }
 
@@ -173,6 +160,7 @@ public open class value(v:Any):exp() {
 public class OR(left: exp, right: exp) : exp() {
 
 }
+
 public class AND(left: exp, right: exp) : exp() {
 
 }

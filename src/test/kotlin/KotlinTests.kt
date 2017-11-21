@@ -1,3 +1,4 @@
+
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.f
 import org.testng.annotations.Test
@@ -37,7 +38,9 @@ class KotlinTests {
 
         val dp = DataProjection("dasd")
                 .filter({
-                    val e = f("hw") gt 10 or f("xxx")
+                    val e = f("hw") gt 10 or ((
+                            f("xxx")
+                            ))
                     e and f("bnn")
                 })
     }
