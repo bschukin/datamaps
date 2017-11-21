@@ -72,10 +72,10 @@ class QueryBuildContext {
         joins.add(alias)
     }
 
-    fun getAlias(table: String): String {
+    fun createTableAlias(table: String): String {
         aliasTableCounters.putIfAbsent(table, 0)
         val counter = aliasTableCounters.computeIfPresent(table) { s, integer -> integer + 1 }!!
-        return table + counter;
+        return table + counter
     }
 
 

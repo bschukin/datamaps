@@ -24,6 +24,8 @@ class DataProjection {
     //для корневой проекции  - сущность по которой надо строить запрос
     //для вложенных поекций - опционально
     var entity: String? = null
+    //алиас, использованный для данной сущности в запросе (например для использования в фильтрах)
+    var queryAlias: String? = null
     //id объекта - возможно указание только для рутовых ОП
     var id:Long? = null
     //для вложенных проекций - родительское поле
@@ -53,6 +55,11 @@ class DataProjection {
 
     operator fun get(field: String): DataProjection? {
         return fields.get(field)
+    }
+
+    fun alias(alias: String): DataProjection {
+        queryAlias = alias
+        return this
     }
 
     fun group(gr:String):DataProjection

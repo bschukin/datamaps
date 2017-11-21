@@ -182,7 +182,7 @@ class QueryBuilderTests : BaseSpringTests() {
                 "LEFT JOIN JIRA_TASK as JIRA_TASK1 ON JIRA_PROJECT1.ID=JIRA_TASK1.JIRA_PROJECT_ID")
     }
 
-    @Test//Коллеция 1-N
+    @Test
     fun testBuildQuery07WithId() {
         var dp = DataProjection("JiraProject", 1)
                 .full()
@@ -204,5 +204,54 @@ class QueryBuilderTests : BaseSpringTests() {
                 "LEFT JOIN JIRA_TASK as JIRA_TASK1 ON JIRA_PROJECT1.ID=JIRA_TASK1.JIRA_PROJECT_ID \n" +
                 "WHERE JIRA_PROJECT1.ID = :_id1")
     }
+
+    @Test//Тест на использования алиасов
+    fun testBuildQuery08WithAlias01() {
+        var dp = DataProjection("JiraProject", 1)
+                .full()
+                .alias("JP")
+                /*  */.field("jiraTasks")
+                /*  *//*  */.inner().full().end()
+
+        //1 тест на  структуру по которой построится запрос
+        val qr = QueryBuildContext()
+        queryBuilder.buildDataProjection(qr, dp)
+
+        assertEquals(qr.selectColumns.size, 4)
+        assertEquals(qr.joins.size, 1)
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        assertBodyEquals(q.sql, "SELECT \n" +
+                "\t JP.ID  AS  ID1,  JP.NAME  AS  NAME1,  JIRA_TASK1.ID  AS  ID2,  JIRA_TASK1.NAME  AS  NAME2\n" +
+                "FROM JIRA_PROJECT as JP\n" +
+                "LEFT JOIN JIRA_TASK as JIRA_TASK1 ON JP.ID=JIRA_TASK1.JIRA_PROJECT_ID \n" +
+                "WHERE JP.ID = :_id1")
+    }
+
+    @Test//Тест на использования алиасов
+    fun testBuildQuery08WithAlias02() {
+        var dp = DataProjection("JiraProject", 1)
+                .full()
+                .alias("JP")
+                /*  */.field("jiraTasks")//еще вводим алиас
+                /*  *//*  */.inner().alias("JT").full().end()
+
+        //1 тест на  структуру по которой построится запрос
+        val qr = QueryBuildContext()
+        queryBuilder.buildDataProjection(qr, dp)
+
+        assertEquals(qr.selectColumns.size, 4)
+        assertEquals(qr.joins.size, 1)
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        assertBodyEquals(q.sql, "SELECT \n" +
+                "\t JP.ID  AS  ID1,  JP.NAME  AS  NAME1,  JT.ID  AS  ID2,  JT.NAME  AS  NAME2\n" +
+                "FROM JIRA_PROJECT as JP\n" +
+                "LEFT JOIN JIRA_TASK as JT ON JP.ID=JT.JIRA_PROJECT_ID \n" +
+                "WHERE JP.ID = :_id1")
+    }
+
 
 }

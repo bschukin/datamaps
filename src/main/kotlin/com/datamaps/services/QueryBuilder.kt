@@ -55,7 +55,7 @@ class QueryBuilder {
             dp.fields.getOrDefault(field!!, DataProjection(dm.name, field))
 
         //генерим алиас
-        val alias = qr.getAlias(dm.table)
+        val alias = projection.queryAlias  ?: qr.createTableAlias(dm.table)
 
         //запомним рутовый алиас
         if (isRoot)
