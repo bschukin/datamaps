@@ -15,7 +15,7 @@ class NIY : RuntimeException {
 }
 
 fun validateNIY(boolean: Boolean) {
-    if (boolean)
+    if (!boolean)
         throw NIY()
 }
 

@@ -102,4 +102,70 @@ class DataProjection {
     fun end():DataProjection {
         return prev!!
     }
+
+    fun filter(exp:exp):DataProjection
+    {
+        return this
+    }
+
+    fun filter( aaa:(m:Unit) -> exp):DataProjection
+    {
+        val exp = aaa(Unit)
+        return this
+    }
+
+}
+
+
+public open class exp() {
+
+
+    infix fun or(exp: exp): exp {
+        println("OR")
+        return exp()
+    }
+
+
+    infix fun and(exp: exp): exp {
+        println("and")
+        return exp()
+    }
+
+    infix fun and(boolean: Boolean): exp {
+        println("and boolean")
+        return exp()
+    }
+
+    operator fun  compareTo(b:exp):Int
+    {
+        println("compareTo")
+        return 0
+    }
+
+    operator fun  compareTo(b:Int):Int
+    {
+        println("compareToInt")
+        return 0
+    }
+
+    infix fun gt(exp1: Any): exp {
+        println("gt")
+        return exp()
+    }
+}
+
+public open class f(name:String):exp() {
+
+}
+
+public open class value(v:Any):exp() {
+
+}
+
+
+public class OR(left: exp, right: exp) : exp() {
+
+}
+public class AND(left: exp, right: exp) : exp() {
+
 }

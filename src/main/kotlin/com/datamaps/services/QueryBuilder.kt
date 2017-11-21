@@ -155,8 +155,8 @@ class QueryBuilder {
     }
 
 
-    private fun buildJoin(qr: QueryBuildContext, parent: QueryLevel?, me: QueryLevel): String {
-        var ref = parent!!.dm[me.parentLinkField!!]
+    private fun buildJoin(qr: QueryBuildContext, parent: QueryLevel, me: QueryLevel): String {
+        val ref = parent.dm[me.parentLinkField!!]
 
         return when {
             ref.isM1 -> "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
@@ -176,9 +176,10 @@ class QueryBuilder {
         val sql = "SELECT \n\t" +
                 qr.getSelectString() + "\n" +
                 "FROM " + qr.from +
-                qr.getJoinString()
+                qr.getJoinString()+
+                ( if(qr.where.isBlank())  " " else " \nWHERE " + qr.where)
 
-        return SqlQueryContext(sql, dp, emptyMap(), qr)
+        return SqlQueryContext(sql, dp, qr.params, qr)
     }
 
     private fun buildIDfield(qr: QueryBuildContext, dm: DataMapping, entityAlias: String, entityField: DataField) {

@@ -6,6 +6,7 @@ import com.datamaps.mappings.DataProjection
 import com.datamaps.maps.DataMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.testng.Assert
+import org.testng.Assert.assertTrue
 import org.testng.annotations.Test
 
 /**
@@ -215,5 +216,28 @@ class QueryExecutorTests : BaseSpringTests() {
   ]
 }
         """.trimIndent(), res.toString())
+    }
+
+    @Test
+    fun testExecQuery07WithId() {
+        var dp = DataProjection("JiraProject", 1L)
+                .full()
+                /*  */.field("jiraTasks")
+                /*  *//*  */.inner().full().end()
+                /*  */.full()
+
+        //1 тест на  структуру по которой построится запрос
+        val q = queryBuilder.createQueryByDataProjection(dp)
+
+        val e = queryExecutor.executeSingle(q)
+
+        println(e)
+
+        with(e!!)
+        {
+            assertTrue(id == 1L)
+            assertTrue(this["name"] == "SAUMI")
+            assertTrue(list("jiraTasks").size == 2)
+        }
     }
 }

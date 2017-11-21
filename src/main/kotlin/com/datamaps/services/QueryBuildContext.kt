@@ -137,5 +137,5 @@ class MappingContext(val q: SqlQueryContext) {
 typealias RowMapper = (MappingContext, ResultSet) -> Unit
 
 class SqlQueryContext(val sql: String, val dataProjection: DataProjection,
-                      val params: Map<String, Any>, var qr:QueryBuildContext) {
+                      val params: Map<String, Any?>, var qr:QueryBuildContext) {
 }

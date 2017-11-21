@@ -1,3 +1,5 @@
+import com.datamaps.mappings.DataProjection
+import com.datamaps.mappings.f
 import org.testng.annotations.Test
 
 /**
@@ -27,6 +29,21 @@ class KotlinTests {
         println(myJson)
 
     }
+
+    @Test
+    fun testInfixFunctions() {
+
+        //val e1 =
+
+        val dp = DataProjection("dasd")
+                .filter({
+                    val e = f("hw") gt 10 or f("xxx")
+                    e and f("bnn")
+                })
+    }
+
+
 }
+
 
 
