@@ -3,7 +3,6 @@ package com.datamaps.services
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
 import com.datamaps.general.throwNIS
-import com.datamaps.general.validateNIY
 import com.datamaps.mappings.DataField
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
@@ -20,6 +19,9 @@ import javax.annotation.Resource
 class QueryBuilder {
     @Resource
     lateinit var dataMappingsService: DataMappingsService;
+
+    @Resource
+    lateinit var filterBuilder: FilterBuilder
 
     @Resource
     lateinit var dataConverter: DataConverter
@@ -61,6 +63,10 @@ class QueryBuilder {
         if (isRoot)
             qr.rootAlias = alias
 
+        //запомним в таблицу алиасов - родительский путь к нам
+        if(!isRoot)
+            qr.addParentPathAlias(qr.stack.peek().alias, field, alias)
+
         val ql = QueryLevel(dm, projection, alias, field, if (isRoot) null else qr.stack.peek())
         //ддля рута - формируем клауз FROM
         if (isRoot)
@@ -98,16 +104,7 @@ class QueryBuilder {
 
     private fun buildWhere(qr: QueryBuildContext) {
 
-        val querylevel = qr.stack.peek()
-        val projection = querylevel.dp
-
-        //пока мы строим только запрос по ID
-        projection.id?.let {
-            validateNIY(projection.isRoot())
-
-            qr.where = "${querylevel.alias}.${querylevel.dm.idColumn} = :_id1"
-            qr.params["_id1"] = projection.id
-        }
+        filterBuilder.buildWhere(qr)
     }
 
 

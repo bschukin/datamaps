@@ -244,7 +244,7 @@ class QueryBuilderTests : BaseSpringTests() {
         assertEquals(qr.selectColumns.size, 4)
         assertEquals(qr.joins.size, 1)
 
-        var q = queryBuilder.createQueryByDataProjection(dp)
+        val q = queryBuilder.createQueryByDataProjection(dp)
         println(q.sql)
         assertBodyEquals(q.sql, "SELECT \n" +
                 "\t JP.ID  AS  ID1,  JP.NAME  AS  NAME1,  JT.ID  AS  ID2,  JT.NAME  AS  NAME2\n" +

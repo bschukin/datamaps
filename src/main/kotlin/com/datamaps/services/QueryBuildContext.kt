@@ -1,5 +1,6 @@
 package com.datamaps.services
 
+import com.datamaps.general.throwNIS
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataProjection
 import com.datamaps.maps.DataMap
@@ -36,6 +37,10 @@ class QueryBuildContext {
     //для определения сущностей составляющих возваращаемый результат
     lateinit var rootAlias: String
 
+    //карта  алиасРоиделя.свойство -> алиас таблицы
+    //используется для вычисления алиаса таблицы при работе с влложеными путями в фильттрах
+    private var parentPathes = mutableMapOf<SPair, String>()
+
     //карта "алиас колонки" - маппер колонки
     var columnMappers = mutableMapOf<String, MutableList<RowMapper>>()
 
@@ -61,6 +66,20 @@ class QueryBuildContext {
         val res = getColumnAlias(tableAlias, column)
         selectColumns.add(" ${tableAlias}.${column}  AS  ${res}")
         return res
+    }
+
+    fun addParentPathAlias(parentAlias: String?, parentProp:String?, alias:String) {
+        val key = SPair(parentAlias?:"", parentProp?:"")
+        parentPathes.merge(key, alias, { t, u -> throwNIS("${key} already exist") })
+    }
+
+    fun getAliasByPathFromParent(parentAlias: String?, parentProp:String):String? {
+
+        if(parentAlias.isNullOrBlank())
+            return rootAlias
+
+        val key = SPair(parentAlias?:"", parentProp)
+        return parentPathes[key]
     }
 
     fun addMapper(alias: String, rowMapper: RowMapper) {
@@ -138,4 +157,35 @@ typealias RowMapper = (MappingContext, ResultSet) -> Unit
 
 class SqlQueryContext(val sql: String, val dataProjection: DataProjection,
                       val params: Map<String, Any?>, var qr:QueryBuildContext) {
+}
+
+class SPair{
+
+    val s1:String
+    val s2:String
+
+    constructor(s1: String, s2: String) {
+        this.s1 = s1.toLowerCase()
+        this.s2 = s2.toLowerCase()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SPair
+
+        if (s1 != other.s1) return false
+        if (s2 != other.s2) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = s1.hashCode()
+        result = 31 * result + s2.hashCode()
+        return result
+    }
+
+
 }
