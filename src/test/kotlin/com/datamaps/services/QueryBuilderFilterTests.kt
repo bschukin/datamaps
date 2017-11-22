@@ -98,7 +98,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
         var q = queryBuilder.createQueryByDataProjection(dp)
         println(q.qr.where)
-        assertBodyEquals(q.qr.where, "gender1")
+        assertBodyEquals(q.qr.where, "jira_gender1.gender")
 
         //часть вторая
         dp = DataProjection("JiraStaffUnit")
@@ -114,7 +114,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         q = queryBuilder.createQueryByDataProjection(dp)
         println(q.sql)
         println(q.qr.where)
-        assertBodyEquals(q.qr.where, "ID3 = ID4")
+        assertBodyEquals(q.qr.where, "jira_gender1.id=jira_gender2.id")
 
 
         //часть вторая
@@ -135,6 +135,13 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         q = queryBuilder.createQueryByDataProjection(dp)
         println(q.sql)
         println(q.qr.where)
-      assertBodyEquals(q.qr.where, "(ID3 = ID4 AND NAME1 = :param0)")
+      assertBodyEquals(q.qr.where, "(jira_gender1.id=jira_gender2.idandjsu.name=:param0)")
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID")}")
+            }
+        })
     }
 }

@@ -117,7 +117,7 @@ class QueryBuildContext {
 
     ///добавить параметр в карту, сгенерировать для него имя и вернуть
     fun addParam(value:Any):String {
-        val name = ":param${paramNameCounter++}"
+        val name = "param${paramNameCounter++}"
         params.put(name, value)
         return name
     }

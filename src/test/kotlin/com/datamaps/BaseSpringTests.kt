@@ -1,6 +1,8 @@
 package com.datamaps
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
 import org.testng.Assert
@@ -18,7 +20,8 @@ import org.testng.Assert
 @ContextConfiguration("classpath:test-app-context.xml")
 class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
 
-
+    @Autowired
+    lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
 
 

@@ -44,7 +44,7 @@ class FilterBuilder {
     }
 
     private fun buildFilterValue(qr: QueryBuildContext, exp: value): String {
-        return qr.addParam(exp.v)
+        return ":${qr.addParam(exp.v)}"
     }
 
 
@@ -62,7 +62,8 @@ class FilterBuilder {
             alias = qr.getAliasByPathFromParent(alias, list[i])!!
             currLevel = currLevel.childProps[list[i]]
         }
-        return qr.getColumnIdentiferForFillter(alias, currLevel.dm.get(list.last()).sqlcolumn!!)
+        //return qr.getColumnIdentiferForFillter(alias, currLevel.dm.get(list.last()).sqlcolumn!!)
+        return "${alias}.${currLevel.dm.get(list.last()).sqlcolumn!!}"
     }
 
 }
