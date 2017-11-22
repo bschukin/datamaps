@@ -124,8 +124,7 @@ class DataProjection {
 }
 
 
-open class exp() {
-
+open class exp {
 
     infix fun or(exp: exp): exp {
         return OR(this, exp)
@@ -145,20 +144,44 @@ open class exp() {
     }
 
     infix fun gt(exp1: Any): exp {
-        return bop(exp1, ">")
+        return bop(exp1, Operation.gt)
+    }
+
+    infix fun ge(exp1: Any): exp {
+        return bop(exp1, Operation.ge)
+    }
+
+    infix fun le(exp1: Any): exp {
+        return bop(exp1, Operation.le)
+    }
+
+    infix fun lt(exp1: Any): exp {
+        return bop(exp1, Operation.lt)
     }
 
     infix fun eq(exp1: Any): exp {
-        return bop(exp1, "=")
+        return bop(exp1, Operation.eq)
     }
 
-    fun bop(exp1: Any, op: String): exp {
+    infix fun like(exp1: Any): exp {
+        return bop(exp1, Operation.like)
+    }
+
+    infix fun IS(nul:NULL): exp {
+        return bop(nul, Operation.isnull)
+    }
+
+    infix fun ISNOT(nul:NULL): exp {
+        return bop(nul, Operation.isnotnull)
+    }
+
+    fun bop(exp1: Any, op: Operation): exp {
         val exp2 = if (exp1 !is exp) value(exp1) else exp1
         return binaryOP(this, exp2, op)
     }
 }
 
-data class binaryOP(var left: exp, var right: exp, var op: String) : exp() {
+data class binaryOP(var left: exp, var right: exp, var op: Operation) : exp() {
 
 }
 
@@ -174,26 +197,53 @@ data class value(val v: Any) : exp() {
 
 data class OR(val left: exp, val right: exp) : exp() {
 
-    constructor (lefta: expLamda, righta: expLamda)
-            : this(lefta(Unit), righta(Unit)) {
+}
 
-    }
+data class NOT(val right: exp) : exp() {
 
 }
 
 data class AND(val left: exp, val right: exp) : exp() {
+}
+
+class NULL() : exp() {
 
 }
 
-infix fun  (() -> exp).and(function: () -> exp): exp {
+infix fun (() -> exp).and(function: () -> exp): exp {
     return AND(this(), function())
 }
 
-infix fun  (() -> exp).or(function: () -> exp): exp {
+infix fun (() -> exp).and(exp:exp): exp {
+    return AND(this(), exp)
+}
+
+infix fun (() -> exp).or(function: () -> exp): exp {
     return OR(this(), function())
 }
 
+infix fun (() -> exp).or(exp:exp): exp {
+    return OR(this(), exp)
+}
 
+fun not(function: () -> exp): exp {
+    return NOT(function())
+}
+
+fun not(exp:exp): exp {
+    return NOT(exp)
+}
 
 
 typealias expLamda = (m: Unit) -> exp
+
+enum class Operation(val value: String) {
+    eq("="),
+    gt(">"),
+    ge(">="),
+    lt("<"),
+    le("<="),
+    like("like"),
+    isnull("is"),
+    isnotnull("is not")
+}

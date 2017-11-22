@@ -25,20 +25,21 @@ class FilterBuilder {
             qr.params["_id1"] = projection.id
         }
 
-        projection.filter()?.let{
-            qr.where  = buildWhereByExp(qr, it)
+        projection.filter()?.let {
+            qr.where = buildWhereByExp(qr, it)
         }
 
     }
 
-    private fun buildWhereByExp(qr: QueryBuildContext, exp: exp):String {
-        return when(exp)
-        {
-            is f ->buildFilterProperty(qr, exp)
-            is value ->buildFilterValue(qr, exp)
-            is binaryOP-> "${buildWhereByExp(qr,exp.left)} ${exp.op} ${buildWhereByExp(qr,exp.right)}"
-            is OR ->"(${buildWhereByExp(qr,exp.left)} OR ${buildWhereByExp(qr,exp.right)})"
-            is AND ->"(${buildWhereByExp(qr,exp.left)} AND ${buildWhereByExp(qr,exp.right)})"
+    private fun buildWhereByExp(qr: QueryBuildContext, exp: exp): String {
+        return when (exp) {
+            is f -> buildFilterProperty(qr, exp)
+            is value -> buildFilterValue(qr, exp)
+            is binaryOP -> "${buildWhereByExp(qr, exp.left)} ${exp.op.value} ${buildWhereByExp(qr, exp.right)}"
+            is OR -> "(${buildWhereByExp(qr, exp.left)} OR ${buildWhereByExp(qr, exp.right)})"
+            is AND -> "(${buildWhereByExp(qr, exp.left)} AND ${buildWhereByExp(qr, exp.right)})"
+            is NOT -> "NOT (${buildWhereByExp(qr, exp.right)})"
+            is NULL -> " NULL "
             else -> throwNIS()
         }
     }
@@ -53,20 +54,17 @@ class FilterBuilder {
     //и получить алиас колонки
     //NB: при создании цепочек свойств мы считаем что свойства пишутся от корневой сущности (или от указанного пользователем алиаса)
     //например: JiraStaffUnit --> Worker-->Gender-->gender будут писаться в фильтре как worker.gender.gender (рута нет)
-    private fun buildFilterProperty(qr: QueryBuildContext, exp: f):String {
+    private fun buildFilterProperty(qr: QueryBuildContext, exp: f): String {
         var alias = qr.rootAlias
         var currLevel = qr.stack.peek()
         var list = exp.name.split('.')
 
         for (i in 0 until list.size - 1) {
-            if(i==0 && qr.isTableAlias(list[i]))
-            {
+            if (i == 0 && qr.isTableAlias(list[i])) {
                 alias = list[i]
-                currLevel  = qr.getAliasQueryLevel(list[i])
+                currLevel = qr.getAliasQueryLevel(list[i])
 
-            }
-            else
-            {
+            } else {
                 alias = qr.getAliasByPathFromParent(alias, list[i])!!
                 currLevel = currLevel.childProps[list[i]]
             }

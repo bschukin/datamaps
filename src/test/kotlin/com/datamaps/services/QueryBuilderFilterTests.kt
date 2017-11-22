@@ -15,7 +15,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     lateinit var queryBuilder: QueryBuilder
 
     @Test
-    fun tesQueryAliases01() {
+    fun testQueryAliases01() {
 
         var dp = DataProjection("JiraGender")
         var q = queryBuilder.createQueryByDataProjection(dp)
@@ -32,7 +32,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     }
 
     @Test(invocationCount = 1)
-    fun tesQueryAliases02() {
+    fun testQueryAliases02() {
         var dp = DataProjection("JiraWorker")
                 .default().refs()
 
@@ -43,7 +43,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     }
 
     @Test(invocationCount = 1)//собираем инфо-п
-    fun tesQueryAliases03() {
+    fun testQueryAliases03() {
         var dp = DataProjection("JiraStaffUnit")
                 .default().refs()
                 .field("name")
@@ -87,7 +87,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
 
     @Test(invocationCount = 1)//собираем инфо-п
-    fun tesQueryFilter01() {
+    fun testQueryFilter01() {
         var dp = DataProjection("JiraGender")
                 .filter({
                     f("gender")
@@ -145,7 +145,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
 
     @Test(invocationCount = 1)//собираем инфо-п
-    fun tesQueryFilterWithAliases01() {
+    fun testQueryFilterWithAliases01() {
 
         var dp = DataProjection("JiraStaffUnit")
                 .alias("jsu")
@@ -183,6 +183,117 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         })
     }
 
+
+    @Test(invocationCount = 1)//собираем инфо-п
+    fun testFilterCompareOperations() {
+
+        //GT
+        var dp = DataProjection("JiraTask")
+                .filter(f("id") gt value(1000))
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        assertBodyEquals(q.qr.where, "JIRA_TASK1.ID > :param0")
+
+        //GE
+        dp = DataProjection("JiraTask")
+                .filter(f("id") ge value(1000))
+
+        q = queryBuilder.createQueryByDataProjection(dp)
+        assertBodyEquals(q.qr.where, "JIRA_TASK1.ID >= :param0")
+
+        //LT
+        dp = DataProjection("JiraTask")
+                .filter(f("id") lt value(1000))
+
+        q = queryBuilder.createQueryByDataProjection(dp)
+        assertBodyEquals(q.qr.where, "JIRA_TASK1.ID < :param0")
+
+        //LE
+        dp = DataProjection("JiraTask")
+                .filter(f("id") le value(1000))
+
+        q = queryBuilder.createQueryByDataProjection(dp)
+        assertBodyEquals(q.qr.where, "JIRA_TASK1.ID <= :param0")
+
+
+        //EQ
+        dp = DataProjection("JiraTask")
+                .filter(f("id") eq value(1000))
+
+        q = queryBuilder.createQueryByDataProjection(dp)
+        assertBodyEquals(q.qr.where, "JIRA_TASK1.ID = :param0")
+
+        //LIKE
+        dp = DataProjection("JiraTask")
+                .filter(f("id") like value("%1000%"))
+
+        q = queryBuilder.createQueryByDataProjection(dp)
+        assertBodyEquals(q.qr.where, "JIRA_TASK1.ID like :param0")
+
+    }
+
+    @Test(invocationCount = 1)//собираем инфо-п
+    fun testFilterIsNullOperations() {
+
+        //IS NILL
+        var dp = DataProjection("JiraTask")
+                .filter(
+                        f("name") IS NULL()
+                )
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        assertBodyEquals(q.qr.where, "JIRA_TASK1.NAME is null")
+
+
+        //IS NOT NULL
+        dp = DataProjection("JiraTask")
+                .filter(
+                        f("name") ISNOT NULL()
+                )
+
+        q = queryBuilder.createQueryByDataProjection(dp)
+        assertBodyEquals(q.qr.where, "JIRA_TASK1.NAME is not null")
+    }
+
+
+    @Test(invocationCount = 1)//собираем инфо-п
+    fun testQueryFilterWithNotOperation() {
+
+        var dp = DataProjection("JiraStaffUnit")
+                .alias("jsu")
+                .default().refs()
+                .field("name")
+                .field("worker")
+                /*  */.inner().alias("www")
+                /*      */.default().refs()
+                /*  */.end()
+                .field("gender")
+                .filter({
+                    {
+                        {
+                            (f("www.gender.id") eq f("gender.id"))
+                        } or
+                                not{ f("www.name") eq value("nanyr") }
+                    } and
+                            not({
+                                f("www.email") eq value("gazman@google.com") or
+                                        { f("name") eq value("zzz") }
+                            })
+                })
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        println(q.qr.where)
+        assertBodyEquals(q.qr.where, "((JIRA_GENDER1.ID = JIRA_GENDER2.ID OR NOT (www.NAME = :param0)) " +
+                "AND NOT ((www.EMAIL = :param1 OR jsu.NAME = :param2)))")
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID")}")
+            }
+        })
+    }
 
 }
 
