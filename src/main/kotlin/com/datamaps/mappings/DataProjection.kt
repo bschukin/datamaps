@@ -112,29 +112,36 @@ class DataProjection {
     }
 
     fun filter(exp: exp): DataProjection {
-        filter =  exp
+        filter = exp
         return this
     }
 
     fun filter(aaa: (m: Unit) -> exp): DataProjection {
-        filter  = aaa(Unit)
+        filter = aaa(Unit)
         return this
     }
 
 }
 
 
-public open class exp() {
-
+open class exp() {
 
 
     infix fun or(exp: exp): exp {
         return OR(this, exp)
     }
 
+    infix fun or(righta: (m: Unit) -> exp): exp {
+        return OR(this, righta(Unit))
+    }
+
 
     infix fun and(exp: exp): exp {
         return AND(this, exp)
+    }
+
+    infix fun and(righta: (m: Unit) -> exp): exp {
+        return AND(this, righta(Unit))
     }
 
     infix fun gt(exp1: Any): exp {
@@ -145,13 +152,13 @@ public open class exp() {
         return bop(exp1, "=")
     }
 
-    fun bop(exp1: Any, op:String): exp {
-        val exp2 = if(exp1 !is exp) value(exp1) else exp1
+    fun bop(exp1: Any, op: String): exp {
+        val exp2 = if (exp1 !is exp) value(exp1) else exp1
         return binaryOP(this, exp2, op)
     }
 }
 
-data class binaryOP(var left: exp, var right: exp, var op:String) : exp() {
+data class binaryOP(var left: exp, var right: exp, var op: String) : exp() {
 
 }
 
@@ -165,10 +172,28 @@ data class value(val v: Any) : exp() {
 }
 
 
-data class OR(val  left: exp, val right: exp) : exp() {
+data class OR(val left: exp, val right: exp) : exp() {
+
+    constructor (lefta: expLamda, righta: expLamda)
+            : this(lefta(Unit), righta(Unit)) {
+
+    }
 
 }
 
 data class AND(val left: exp, val right: exp) : exp() {
 
 }
+
+infix fun  (() -> exp).and(function: () -> exp): exp {
+    return AND(this(), function())
+}
+
+infix fun  (() -> exp).or(function: () -> exp): exp {
+    return OR(this(), function())
+}
+
+
+
+
+typealias expLamda = (m: Unit) -> exp

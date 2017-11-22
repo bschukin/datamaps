@@ -2,9 +2,7 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
-import com.datamaps.mappings.DataProjection
-import com.datamaps.mappings.f
-import com.datamaps.mappings.value
+import com.datamaps.mappings.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.testng.annotations.Test
 
@@ -129,13 +127,13 @@ class QueryBuilderFilterTests : BaseSpringTests() {
                 .field("gender")
                 .filter({
                     f("worker.gender.id") eq f("gender.id") and
-                            (  f("name") eq value(1000) )
+                            (f("name") eq value(1000))
                 })
 
         q = queryBuilder.createQueryByDataProjection(dp)
         println(q.sql)
         println(q.qr.where)
-      assertBodyEquals(q.qr.where, "(jira_gender1.id=jira_gender2.idandjsu.name=:param0)")
+        assertBodyEquals(q.qr.where, "(jira_gender1.id=jira_gender2.id and jsu.name=:param0)")
 
         //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
         namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
@@ -144,4 +142,50 @@ class QueryBuilderFilterTests : BaseSpringTests() {
             }
         })
     }
+
+
+    @Test(invocationCount = 1)//собираем инфо-п
+    fun tesQueryFilterWithAliases01() {
+
+        var dp = DataProjection("JiraStaffUnit")
+                .alias("jsu")
+                .default().refs()
+                .field("name")
+                .field("worker")
+                /*  */.inner().alias("www")
+                /*      */.default().refs()
+                /*  */.end()
+                .field("gender")
+                .filter({
+                    {
+                        {
+                            (f("www.gender.id") eq f("gender.id"))
+                        } or
+                                { f("www.name") eq value("nanyr") }
+                    } and
+                            {
+                                f("www.email") eq value("gazman@google.com") or
+                                        { f("name") eq value("zzz") }
+                            }
+                })
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        println(q.qr.where)
+        assertBodyEquals(q.qr.where, "((JIRA_GENDER1.ID = JIRA_GENDER2.ID OR www.NAME = :param0) " +
+                "AND (www.EMAIL = :param1 OR jsu.NAME = :param2))")
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID")}")
+            }
+        })
+    }
+
+
 }
+
+
+
+

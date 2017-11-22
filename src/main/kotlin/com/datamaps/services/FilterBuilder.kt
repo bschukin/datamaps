@@ -37,7 +37,7 @@ class FilterBuilder {
             is f ->buildFilterProperty(qr, exp)
             is value ->buildFilterValue(qr, exp)
             is binaryOP-> "${buildWhereByExp(qr,exp.left)} ${exp.op} ${buildWhereByExp(qr,exp.right)}"
-            is OR ->TODO()
+            is OR ->"(${buildWhereByExp(qr,exp.left)} OR ${buildWhereByExp(qr,exp.right)})"
             is AND ->"(${buildWhereByExp(qr,exp.left)} AND ${buildWhereByExp(qr,exp.right)})"
             else -> throwNIS()
         }
@@ -59,8 +59,18 @@ class FilterBuilder {
         var list = exp.name.split('.')
 
         for (i in 0 until list.size - 1) {
-            alias = qr.getAliasByPathFromParent(alias, list[i])!!
-            currLevel = currLevel.childProps[list[i]]
+            if(i==0 && qr.isTableAlias(list[i]))
+            {
+                alias = list[i]
+                currLevel  = qr.getAliasQueryLevel(list[i])
+
+            }
+            else
+            {
+                alias = qr.getAliasByPathFromParent(alias, list[i])!!
+                currLevel = currLevel.childProps[list[i]]
+            }
+
         }
         //return qr.getColumnIdentiferForFillter(alias, currLevel.dm.get(list.last()).sqlcolumn!!)
         return "${alias}.${currLevel.dm.get(list.last()).sqlcolumn!!}"

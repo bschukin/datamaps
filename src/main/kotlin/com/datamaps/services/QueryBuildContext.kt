@@ -21,6 +21,9 @@ class QueryBuildContext {
     //карта - таблица - выданное число алиасов
     var aliasTableCounters = mutableMapOf<String, Int>()
 
+    //карта - таблица - выданное число алиасов
+    private val tableAliases = caseInsMapOf<QueryLevel>()
+
     //карта - колонка(без указания таблицы) - выданное число алиасов
     var aliasColumnCounters = mutableMapOf<String, Int>()
 
@@ -48,7 +51,7 @@ class QueryBuildContext {
 
     //строка where. пока особо идей по построению фильтров нет - самый простой вариант чтобы
     //поддержать запрос по id
-    var where  = ""
+    var where = ""
 
     var params = mutableMapOf<String, Any?>()
 
@@ -70,17 +73,26 @@ class QueryBuildContext {
         return res
     }
 
-    fun addParentPathAlias(parentAlias: String?, parentProp:String?, alias:String) {
-        val key = SPair(parentAlias?:"", parentProp?:"")
+    fun addTableAlias(alias: String, queryLevel: QueryLevel) {
+        tableAliases[alias] = queryLevel
+    }
+
+    fun isTableAlias(alias: String): Boolean = tableAliases.containsKey(alias)
+
+    fun getAliasQueryLevel(alias: String): QueryLevel = tableAliases[alias]!!
+
+
+    fun addParentPathAlias(parentAlias: String?, parentProp: String?, alias: String) {
+        val key = SPair(parentAlias ?: "", parentProp ?: "")
         parentPathes.merge(key, alias, { t, u -> throwNIS("${key} already exist") })
     }
 
-    fun getAliasByPathFromParent(parentAlias: String?, parentProp:String?):String? {
+    fun getAliasByPathFromParent(parentAlias: String?, parentProp: String?): String? {
 
-        if(parentAlias.isNullOrBlank())
+        if (parentAlias.isNullOrBlank())
             return rootAlias
 
-        val key = SPair(parentAlias?:"", parentProp?:"")
+        val key = SPair(parentAlias ?: "", parentProp ?: "")
         return parentPathes[key]
     }
 
@@ -99,10 +111,6 @@ class QueryBuildContext {
         return table + counter
     }
 
-    fun getColumnIdentiferForFillter(tableAlias: String, identifier: String): String {
-        val fullName = tableAlias + "." + identifier
-        return columnAliases[fullName] ?: fullName
-    }
 
     fun getColumnAlias(tableAlias: String, identifier: String?): String {
         val fullName = tableAlias + "." + identifier
@@ -116,7 +124,7 @@ class QueryBuildContext {
     }
 
     ///добавить параметр в карту, сгенерировать для него имя и вернуть
-    fun addParam(value:Any):String {
+    fun addParam(value: Any): String {
         val name = "param${paramNameCounter++}"
         params.put(name, value)
         return name
@@ -124,7 +132,7 @@ class QueryBuildContext {
 }
 
 class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
-                 val parentLinkField: String?, val parent:QueryLevel?) {
+                 val parentLinkField: String?, val parent: QueryLevel?) {
 
     var childProps = caseInsMapOf<QueryLevel>()
 
@@ -151,7 +159,7 @@ class MappingContext(val q: SqlQueryContext) {
         val datamap = map.computeIfAbsent(id, { DataMap(entityName, id) })
         curr[alias] = datamap
 
-        if(alias==q.qr.rootAlias)
+        if (alias == q.qr.rootAlias)
             resultMap.putIfAbsent(id, datamap)
 
         return datamap
@@ -159,10 +167,10 @@ class MappingContext(val q: SqlQueryContext) {
 
     fun curr(name: String): DataMap? = curr[name]
 
-    fun clear()= curr.clear()
+    fun clear() = curr.clear()
 
 
-    fun result():List<DataMap> = resultMap.values.toList()
+    fun result(): List<DataMap> = resultMap.values.toList()
 
 }
 
@@ -172,13 +180,13 @@ class MappingContext(val q: SqlQueryContext) {
 typealias RowMapper = (MappingContext, ResultSet) -> Unit
 
 class SqlQueryContext(val sql: String, val dataProjection: DataProjection,
-                      val params: Map<String, Any?>, var qr:QueryBuildContext) {
+                      val params: Map<String, Any?>, var qr: QueryBuildContext) {
 }
 
-class SPair{
+class SPair {
 
-    val s1:String
-    val s2:String
+    val s1: String
+    val s2: String
 
     constructor(s1: String, s2: String) {
         this.s1 = s1.toLowerCase()

@@ -69,6 +69,10 @@ class QueryBuilder {
 
         val ql = QueryLevel(dm, projection, alias, field, if (isRoot) null else qr.stack.peek())
 
+        //зарегистрируем алиас
+        qr.addTableAlias(alias, ql)
+
+
         //строим дерево
         if(!isRoot)
             qr.stack.peek().childProps[field] =ql
