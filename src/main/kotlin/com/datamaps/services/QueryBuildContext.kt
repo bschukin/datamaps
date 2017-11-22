@@ -52,6 +52,8 @@ class QueryBuildContext {
 
     var params = mutableMapOf<String, Any?>()
 
+    var paramNameCounter = 0
+
     fun getSelectString(): String {
         return selectColumns.stream()
                 .collect(Collectors.joining(", "))
@@ -111,6 +113,13 @@ class QueryBuildContext {
                 identifier + counter
             }
         })
+    }
+
+    ///добавить параметр в карту, сгенерировать для него имя и вернуть
+    fun addParam(value:Any):String {
+        val name = ":param${paramNameCounter++}"
+        params.put(name, value)
+        return name
     }
 }
 

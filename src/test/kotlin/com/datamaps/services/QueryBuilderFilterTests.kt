@@ -4,6 +4,7 @@ import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.f
+import com.datamaps.mappings.value
 import org.springframework.beans.factory.annotation.Autowired
 import org.testng.annotations.Test
 
@@ -114,5 +115,26 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         println(q.sql)
         println(q.qr.where)
         assertBodyEquals(q.qr.where, "ID3 = ID4")
+
+
+        //часть вторая
+        dp = DataProjection("JiraStaffUnit")
+                .alias("jsu")
+                .default().refs()
+                .field("name")
+                .field("worker")
+                /*  */.inner()
+                /*      */.default().refs()
+                /*  */.end()
+                .field("gender")
+                .filter({
+                    f("worker.gender.id") eq f("gender.id") and
+                            (  f("name") eq value(1000) )
+                })
+
+        q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        println(q.qr.where)
+      assertBodyEquals(q.qr.where, "(ID3 = ID4 AND NAME1 = :param0)")
     }
 }

@@ -151,24 +151,24 @@ public open class exp() {
     }
 }
 
-public open class binaryOP(var left: exp, var right: exp, var op:String) : exp() {
+data class binaryOP(var left: exp, var right: exp, var op:String) : exp() {
 
 }
 
 
-public open class f(val name: String) : exp() {
+data class f(val name: String) : exp() {
 
 }
 
-public open class value(v: Any) : exp() {
+data class value(val v: Any) : exp() {
 
 }
 
 
-public class OR(left: exp, right: exp) : exp() {
+data class OR(val  left: exp, val right: exp) : exp() {
 
 }
 
-public class AND(left: exp, right: exp) : exp() {
+data class AND(val left: exp, val right: exp) : exp() {
 
 }

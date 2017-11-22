@@ -35,12 +35,16 @@ class FilterBuilder {
         return when(exp)
         {
             is f ->buildFilterProperty(qr, exp)
-            is value ->TODO()
+            is value ->buildFilterValue(qr, exp)
             is binaryOP-> "${buildWhereByExp(qr,exp.left)} ${exp.op} ${buildWhereByExp(qr,exp.right)}"
             is OR ->TODO()
-            is AND ->TODO()
+            is AND ->"(${buildWhereByExp(qr,exp.left)} AND ${buildWhereByExp(qr,exp.right)})"
             else -> throwNIS()
         }
+    }
+
+    private fun buildFilterValue(qr: QueryBuildContext, exp: value): String {
+        return qr.addParam(exp.v)
     }
 
 
