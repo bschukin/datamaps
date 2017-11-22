@@ -98,5 +98,21 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         var q = queryBuilder.createQueryByDataProjection(dp)
         println(q.qr.where)
         assertBodyEquals(q.qr.where, "gender1")
+
+        //часть вторая
+        dp = DataProjection("JiraStaffUnit")
+                .default().refs()
+                .field("name")
+                .field("worker")
+                /*  */.inner()
+                /*      */.default().refs()
+                /*  */.end()
+                .field("gender")
+                .filter(f("worker.gender.id") eq f("gender.id"))
+
+        q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        println(q.qr.where)
+        assertBodyEquals(q.qr.where, "ID3 = ID4")
     }
 }

@@ -73,12 +73,12 @@ class QueryBuildContext {
         parentPathes.merge(key, alias, { t, u -> throwNIS("${key} already exist") })
     }
 
-    fun getAliasByPathFromParent(parentAlias: String?, parentProp:String):String? {
+    fun getAliasByPathFromParent(parentAlias: String?, parentProp:String?):String? {
 
         if(parentAlias.isNullOrBlank())
             return rootAlias
 
-        val key = SPair(parentAlias?:"", parentProp)
+        val key = SPair(parentAlias?:"", parentProp?:"")
         return parentPathes[key]
     }
 

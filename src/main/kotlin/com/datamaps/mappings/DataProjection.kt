@@ -138,12 +138,20 @@ public open class exp() {
     }
 
     infix fun gt(exp1: Any): exp {
+        return bop(exp1, ">")
+    }
+
+    infix fun eq(exp1: Any): exp {
+        return bop(exp1, "=")
+    }
+
+    fun bop(exp1: Any, op:String): exp {
         val exp2 = if(exp1 !is exp) value(exp1) else exp1
-        return binaryOP(this, exp2, ">")
+        return binaryOP(this, exp2, op)
     }
 }
 
-public open class binaryOP(left: exp, right: exp, op:String) : exp() {
+public open class binaryOP(var left: exp, var right: exp, var op:String) : exp() {
 
 }
 
