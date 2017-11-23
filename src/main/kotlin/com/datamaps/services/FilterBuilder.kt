@@ -26,7 +26,10 @@ class FilterBuilder {
         }
 
         projection.filter()?.let {
-            qr.where = buildWhereByExp(qr, it)
+            if(!qr.where.isBlank())
+                qr.where += " AND "
+
+            qr.where += buildWhereByExp(qr, it)
         }
 
     }
