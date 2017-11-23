@@ -42,6 +42,9 @@ class DataProjection {
     var last: DataProjection? = null
     var prev: DataProjection? = null
 
+    var limit: Int? = null
+    var offset: Int? = null
+
     constructor(entity: String) {
         this.entity = entity
     }
@@ -121,6 +124,15 @@ class DataProjection {
         return this
     }
 
+    fun limit(l: Int): DataProjection {
+        limit = l
+        return this
+    }
+
+    fun offset(l: Int): DataProjection {
+        offset = l
+        return this
+    }
 }
 
 

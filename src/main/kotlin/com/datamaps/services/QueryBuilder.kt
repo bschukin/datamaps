@@ -108,7 +108,19 @@ class QueryBuilder {
 
         buildWhere(qr)
 
+        addOffsetLimit(qr)
+
         qr.stack.pop()
+    }
+
+    private fun addOffsetLimit(qr: QueryBuildContext) {
+
+        if(qr.stack.empty() || qr.stack.peek().dp.limit==null) return
+
+        var queryLevel = qr.stack.peek()
+        queryLevel.dp.limit.let {
+            qr.offsetLimit =  "LIMIT ${ queryLevel.dp.limit}  ${queryLevel.dp.offset}"
+        }
     }
 
     private fun buildWhere(qr: QueryBuildContext) {
@@ -180,6 +192,9 @@ class QueryBuilder {
     private fun builqSqlQuery(qr: QueryBuildContext, dp: DataProjection): SqlQueryContext {
 
         val sql = "SELECT \n\t" +
+                qr.offsetLimit.apply {
+                    " " + qr.offsetLimit + " "
+                }+
                 qr.getSelectString() + "\n" +
                 "FROM " + qr.from +
                 qr.getJoinString()+

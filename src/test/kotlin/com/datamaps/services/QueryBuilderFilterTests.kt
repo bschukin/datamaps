@@ -339,6 +339,31 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     }
 
 
+
+    @Test
+    fun testQueryFilterLimitOffset() {
+
+        var dp = DataProjection("JiraTask")
+                .id(1L)
+                .filter({
+                    f("name") IN listOf("SAUMI-001", "SAUMI-002")
+                })
+                .limit(100)
+                .offset(100)
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        println(q.qr.where)
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID")}")
+            }
+        })
+    }
+
+
 }
 
 
