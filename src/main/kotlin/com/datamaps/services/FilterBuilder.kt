@@ -35,7 +35,7 @@ class FilterBuilder {
         return when (exp) {
             is f -> buildFilterProperty(qr, exp)
             is value -> buildFilterValue(qr, exp)
-            is binaryOP -> "${buildWhereByExp(qr, exp.left)} ${exp.op.value} ${buildWhereByExp(qr, exp.right)}"
+            is binaryOP -> buildBinaryOperation(qr, exp)
             is OR -> "(${buildWhereByExp(qr, exp.left)} OR ${buildWhereByExp(qr, exp.right)})"
             is AND -> "(${buildWhereByExp(qr, exp.left)} AND ${buildWhereByExp(qr, exp.right)})"
             is NOT -> "NOT (${buildWhereByExp(qr, exp.right)})"
@@ -43,6 +43,17 @@ class FilterBuilder {
             else -> throwNIS()
         }
     }
+
+    private fun buildBinaryOperation(qr: QueryBuildContext, exp: binaryOP):String {
+
+        return when {
+            exp.op == Operation.inn -> "${buildWhereByExp(qr, exp.left)} ${exp.op.value} (${buildWhereByExp(qr, exp.right)})"
+            else-> "${buildWhereByExp(qr, exp.left)} ${exp.op.value} ${buildWhereByExp(qr, exp.right)}"
+        }
+
+    }
+
+
 
     private fun buildFilterValue(qr: QueryBuildContext, exp: value): String {
         return ":${qr.addParam(exp.v)}"

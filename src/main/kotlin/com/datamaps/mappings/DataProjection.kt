@@ -175,7 +175,11 @@ open class exp {
         return bop(nul, Operation.isnotnull)
     }
 
-    fun bop(exp1: Any, op: Operation): exp {
+    infix fun IN(list:List<*>): exp {
+        return bop(list, Operation.inn)
+    }
+
+    private fun bop(exp1: Any, op: Operation): exp {
         val exp2 = if (exp1 !is exp) value(exp1) else exp1
         return binaryOP(this, exp2, op)
     }
@@ -245,5 +249,6 @@ enum class Operation(val value: String) {
     le("<="),
     like("like"),
     isnull("is"),
-    isnotnull("is not")
+    isnotnull("is not"),
+    inn("in")
 }

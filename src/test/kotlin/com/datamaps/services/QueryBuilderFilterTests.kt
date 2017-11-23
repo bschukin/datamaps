@@ -273,7 +273,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
                         {
                             (f("www.gender.id") eq f("gender.id"))
                         } or
-                                not{ f("www.name") eq value("nanyr") }
+                                not { f("www.name") eq value("nanyr") }
                     } and
                             not({
                                 f("www.email") eq value("gazman@google.com") or
@@ -294,6 +294,28 @@ class QueryBuilderFilterTests : BaseSpringTests() {
             }
         })
     }
+
+    @Test
+    fun testQueryFilterWithIntOperation() {
+
+        var dp = DataProjection("JiraTask")
+                .filter({
+                        f("name") IN listOf("xxx", "bbbb")
+                })
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        println(q.qr.where)
+        assertBodyEquals(q.qr.where, "Jira_task1.name in (:param0)")
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID")}")
+            }
+        })
+    }
+
 
 }
 
