@@ -34,7 +34,7 @@ class SNF : RuntimeException {
 class NIS : RuntimeException {
     constructor() {}
 
-    constructor(message: String) : super(message) {}
+    constructor(message: String?) : super(message) {}
 
     constructor(cause: Throwable) : super(cause) {}
 
@@ -45,4 +45,4 @@ fun validate(condition: Boolean, message: String? = null) {
         throwNIS(message)
 }
 
-public fun throwNIS(message: String? = null): Nothing = throw NIS()
+public fun throwNIS(message: String? = null): Nothing = throw NIS(message)

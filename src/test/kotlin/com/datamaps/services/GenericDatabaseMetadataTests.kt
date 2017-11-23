@@ -1,6 +1,7 @@
 package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
+import com.datamaps.assertBodyEquals
 import com.datamaps.assertEqIgnoreCase
 import org.testng.Assert
 import org.testng.Assert.assertNotNull
@@ -17,12 +18,13 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
     @Resource
     lateinit var genericDbMetadataService:DbMetadataService;
 
+
     @Test
     public fun testGetTableInfo()
     {
         var table = genericDbMetadataService.getTableInfo("Jira_Worker")
         println(table)
-        Assert.assertEquals(table.name, "Jira_Worker".toUpperCase())
+        assertBodyEquals(table.name, "Jira_Worker")
         Assert.assertEquals(table.columns.size, 4)
 
         Assert.assertEquals(table["email"].jdbcType, JDBCType.VARCHAR)
@@ -30,11 +32,11 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
 
         table = genericDbMetadataService.getTableInfo("Jira_Department")
         println(table)
-        Assert.assertEquals(table.name, "Jira_Department".toUpperCase())
+        assertBodyEquals(table.name, "Jira_Department".toUpperCase())
         Assert.assertEquals(table.columns.size, 3)
 
         Assert.assertEquals(table["name"].jdbcType, JDBCType.VARCHAR)
-        Assert.assertEquals(table["name"].comment, "Name of deparment")
+        assertBodyEquals(table["name"].comment!!, "Name of deparment")
     }
 
     @Test
@@ -46,8 +48,8 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
         var genderID  = table["gender_Id"]
         Assert.assertNotNull(genderID)
         Assert.assertNotNull(genderID.importedKey)
-        Assert.assertEquals(genderID.importedKey!!.pkTable, "Jira_Gender".toUpperCase())
-        Assert.assertEquals(genderID.importedKey!!.pkColumn, "id".toUpperCase())
+        assertEqIgnoreCase(genderID.importedKey!!.pkTable, "Jira_Gender")
+        assertEqIgnoreCase(genderID.importedKey!!.pkColumn, "id")
 
         Assert.assertNotNull( genericDbMetadataService.getTableInfo(genderID.importedKey!!
                 .pkTable)[genderID.importedKey!!.pkColumn] )
@@ -59,8 +61,8 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
         var parentId  = table["parent_id"]
         Assert.assertNotNull(parentId)
         Assert.assertNotNull(parentId.importedKey)
-        Assert.assertEquals(parentId.importedKey!!.pkTable, "Jira_Department".toUpperCase())
-        Assert.assertEquals(parentId.importedKey!!.pkColumn, "id".toUpperCase())
+        assertEqIgnoreCase(parentId.importedKey!!.pkTable, "Jira_Department")
+        assertEqIgnoreCase(parentId.importedKey!!.pkColumn, "id")
 
         Assert.assertNotNull( genericDbMetadataService.getTableInfo(parentId.importedKey!!
                 .pkTable)[parentId.importedKey!!.pkColumn] )
@@ -76,7 +78,7 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
                 .findFirst().get().pkColumn.equals("id", true))
         assertNotNull(keys.stream().filter({ fk -> fk.pkTable.equals("Jira_Department", true)}).findFirst())
         Assert.assertTrue(keys.stream().filter({ fk -> fk.pkTable.equals("Jira_Department", true)})
-                .findFirst().get().pkColumn.equals("id".toUpperCase()))
+                .findFirst().get().pkColumn.equals("id", true))
     }
 
 

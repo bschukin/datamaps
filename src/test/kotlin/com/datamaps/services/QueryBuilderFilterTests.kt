@@ -127,7 +127,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
                 .field("gender")
                 .filter({
                     f("worker.gender.id") eq f("gender.id") and
-                            (f("name") eq value(1000))
+                            (f("name") eq value("qqq"))
                 })
 
         q = queryBuilder.createQueryByDataProjection(dp)
@@ -290,7 +290,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
         namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
             run {
-                println("${resultSet.getInt("ID")}")
+                println("${resultSet.getInt("ID1")}")
             }
         })
     }
@@ -333,7 +333,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
         namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
             run {
-                println("${resultSet.getInt("ID")}")
+                println("${resultSet.getInt("ID1")}")
             }
         })
     }
@@ -344,12 +344,8 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     fun testQueryFilterLimitOffset() {
 
         var dp = DataProjection("JiraTask")
-                .id(1L)
-                .filter({
-                    f("name") IN listOf("SAUMI-001", "SAUMI-002")
-                })
-                .limit(100)
-                .offset(100)
+                .limit(1)
+                .offset(1)
 
         var q = queryBuilder.createQueryByDataProjection(dp)
         println(q.sql)
@@ -358,7 +354,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
         namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
             run {
-                println("${resultSet.getInt("ID")}")
+                println("${resultSet.getInt("ID1")}")
             }
         })
     }

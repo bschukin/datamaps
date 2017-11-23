@@ -1,3 +1,5 @@
+revoke usage on schema public from public;
+
 DROP TABLE  IF EXISTS JIRA_GENDER CASCADE;
 
 CREATE TABLE  JIRA_GENDER (

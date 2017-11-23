@@ -30,8 +30,7 @@ class QueryBuilderTests : BaseSpringTests() {
         //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
-                println("${resultSet.getInt("ID")}==>${resultSet.getString("GENDER")}, " +
-                        resultSet.getString("IS_CLASSIC"))
+                println("${resultSet.getInt("ID1")}")
             }
         })
     }
@@ -64,8 +63,7 @@ class QueryBuilderTests : BaseSpringTests() {
         //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
-                println("${resultSet.getInt("ID")}==>${resultSet.getString("NAME")}, " +
-                        resultSet.getString("ID2"))
+                println("${resultSet.getInt("ID1")}")
             }
         })
     }
@@ -119,8 +117,7 @@ class QueryBuilderTests : BaseSpringTests() {
         //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
-                println("${resultSet.getInt("ID")}==>${resultSet.getString("NAME")}, " +
-                        resultSet.getString("ID2"))
+                println("${resultSet.getInt("ID1")}")
             }
         })
 
@@ -154,8 +151,7 @@ class QueryBuilderTests : BaseSpringTests() {
         //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
         jdbcTemplate.query(q.sql, { resultSet, i ->
             run {
-                println("${resultSet.getInt("ID")}==>${resultSet.getString("NAME")}, " +
-                        resultSet.getString("ID2"))
+                println("${resultSet.getInt("ID1")}")
             }
         })
     }

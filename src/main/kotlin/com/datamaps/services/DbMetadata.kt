@@ -111,6 +111,10 @@ enum class ForeignKeyCascade(val value: Int) {
 
 @Service
 class GenericDbMetadataService : DbMetadataService {
+
+    @Resource
+    lateinit var  dbDialect: DbDialect
+
     override fun getImportedKeys(table: String): List<ForeignKey> {
 
         return getTableInfo(table).columns
@@ -140,12 +144,12 @@ class GenericDbMetadataService : DbMetadataService {
         val c = jdbcTemplate.dataSource.connection
         val md = c.metaData
 
-        val rs = md.getTables(null, null, table.toUpperCase(), null)
+        val rs = md.getTables(null, null, dbDialect.getDbIdentifier(table), null)
         rs.next()
         if (!(rs.isFirst && rs.isLast))
             throw RuntimeException("Table '${table}' not found in db");
 
-        val pk = md.getPrimaryKeys(null, "PUBLIC", table.toUpperCase())
+        val pk = md.getPrimaryKeys(null, dbDialect.getCurrentScheme(), dbDialect.getDbIdentifier(table))
         var pkField: String? = null
         while (pk.next()) {
             if (pkField != null)
@@ -159,7 +163,7 @@ class GenericDbMetadataService : DbMetadataService {
 
 
         //читаем колонки
-        var crs = md.getColumns(null, "PUBLIC", table.toUpperCase(), null)
+        var crs = md.getColumns(null, dbDialect.getCurrentScheme(), dbDialect.getDbIdentifier(table), null)
         while (crs.next()) {
 
             val column = DbColumn(crs.getString("COLUMN_NAME"),
@@ -173,7 +177,7 @@ class GenericDbMetadataService : DbMetadataService {
         }
 
         //читаем внешние ключи, на которые мы ссылаемся
-        crs = md.getImportedKeys(null, "PUBLIC", table.toUpperCase())
+        crs = md.getImportedKeys(null, dbDialect.getCurrentScheme(),  dbDialect.getDbIdentifier(table))
         while (crs.next()) {
             val fk = ForeignKey()
             fk.pkTable = crs.getString("PKTABLE_NAME")
@@ -190,7 +194,7 @@ class GenericDbMetadataService : DbMetadataService {
         //читаем связи, которые  мы экспортировали в другие таблицы -
         //и решаем - является ли связь коллекцией
         //определеяем это по каскаду
-        crs = md.getExportedKeys(null, "PUBLIC", table.toUpperCase())
+        crs = md.getExportedKeys(null, dbDialect.getCurrentScheme(),  dbDialect.getDbIdentifier(table))
         while (crs.next()) {
             val fk = ForeignKey()
             fk.pkTable = crs.getString("PKTABLE_NAME")
