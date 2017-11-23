@@ -40,6 +40,11 @@ class NIS : RuntimeException {
 
 }
 
+fun checkNIS(boolean: Boolean) {
+    if (!boolean)
+        throw NIS()
+}
+
 fun validate(condition: Boolean, message: String? = null) {
     if (!condition)
         throwNIS(message)

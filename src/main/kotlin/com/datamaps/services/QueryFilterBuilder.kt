@@ -9,12 +9,28 @@ import org.springframework.stereotype.Service
  * Created by b.schukin on 21.11.2017.
  */
 @Service
-class FilterBuilder {
+class QueryFilterBuilder {
 
+
+    fun buildOrders(qr: QueryBuildContext) {
+        if (qr.root.dp.orders().size == 0)
+            return
+
+        val projection = qr.root.dp
+
+        qr.orderBy +=
+                projection.orders().map { m ->
+                    buildFieldOrder(qr, m)
+                }.joinToString(", ")
+    }
+
+    private fun buildFieldOrder(qr: QueryBuildContext, f: f): String {
+        return buildFilterProperty(qr, f) + (if (f.asc) " ASC" else " DESC")
+    }
 
     fun buildWhere(qr: QueryBuildContext) {
 
-        val querylevel = qr.stack.peek()
+        val querylevel = qr.root
         val projection = querylevel.dp
 
         //пока мы строим только запрос по ID
@@ -26,7 +42,7 @@ class FilterBuilder {
         }
 
         projection.filter()?.let {
-            if(!qr.where.isBlank())
+            if (!qr.where.isBlank())
                 qr.where += " AND "
 
             qr.where += buildWhereByExp(qr, it)
@@ -47,15 +63,14 @@ class FilterBuilder {
         }
     }
 
-    private fun buildBinaryOperation(qr: QueryBuildContext, exp: binaryOP):String {
+    private fun buildBinaryOperation(qr: QueryBuildContext, exp: binaryOP): String {
 
         return when {
             exp.op == Operation.inn -> "${buildWhereByExp(qr, exp.left)} ${exp.op.value} (${buildWhereByExp(qr, exp.right)})"
-            else-> "${buildWhereByExp(qr, exp.left)} ${exp.op.value} ${buildWhereByExp(qr, exp.right)}"
+            else -> "${buildWhereByExp(qr, exp.left)} ${exp.op.value} ${buildWhereByExp(qr, exp.right)}"
         }
 
     }
-
 
 
     private fun buildFilterValue(qr: QueryBuildContext, exp: value): String {
@@ -70,7 +85,7 @@ class FilterBuilder {
     //например: JiraStaffUnit --> Worker-->Gender-->gender будут писаться в фильтре как worker.gender.gender (рута нет)
     private fun buildFilterProperty(qr: QueryBuildContext, exp: f): String {
         var alias = qr.rootAlias
-        var currLevel = qr.stack.peek()
+        var currLevel = qr.root
         var list = exp.name.split('.')
 
         for (i in 0 until list.size - 1) {
@@ -80,12 +95,13 @@ class FilterBuilder {
 
             } else {
                 alias = qr.getAliasByPathFromParent(alias, list[i])!!
-                currLevel = currLevel.childProps[list[i]]
+                currLevel = currLevel.childProps[list[i]]!!
             }
 
         }
         //return qr.getColumnIdentiferForFillter(alias, currLevel.dm.get(list.last()).sqlcolumn!!)
         return "${alias}.${currLevel.dm.get(list.last()).sqlcolumn!!}"
     }
+
 
 }

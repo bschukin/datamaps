@@ -38,6 +38,10 @@ class DataProjection {
     //выражение  where
     private var filter: exp? = null
 
+    //выражение  where
+    private val orders= mutableListOf<ExpressionField>()
+
+
     //технические поля для чейнов по созданию проекций
     var last: DataProjection? = null
     var prev: DataProjection? = null
@@ -124,6 +128,11 @@ class DataProjection {
         return this
     }
 
+    fun order(vararg fields:f): DataProjection {
+        orders.addAll(fields)
+        return this
+    }
+
     fun limit(l: Int): DataProjection {
         limit = l
         return this
@@ -133,6 +142,8 @@ class DataProjection {
         offset = l
         return this
     }
+
+    fun orders() = orders
 }
 
 
@@ -179,17 +190,18 @@ open class exp {
         return bop(exp1, Operation.like)
     }
 
-    infix fun IS(nul:NULL): exp {
+    infix fun IS(nul: NULL): exp {
         return bop(nul, Operation.isnull)
     }
 
-    infix fun ISNOT(nul:NULL): exp {
+    infix fun ISNOT(nul: NULL): exp {
         return bop(nul, Operation.isnotnull)
     }
 
-    infix fun IN(list:List<*>): exp {
+    infix fun IN(list: List<*>): exp {
         return bop(list, Operation.inn)
     }
+
 
     private fun bop(exp1: Any, op: Operation): exp {
         val exp2 = if (exp1 !is exp) value(exp1) else exp1
@@ -202,9 +214,23 @@ data class binaryOP(var left: exp, var right: exp, var op: Operation) : exp() {
 }
 
 
+
+
 data class f(val name: String) : exp() {
 
+    var asc = true
+
+    fun asc(): f {
+        asc = true
+        return this
+    }
+    fun desc(): f {
+        asc = false
+        return this
+    }
 }
+
+typealias ExpressionField = f
 
 data class value(val v: Any) : exp() {
 
@@ -230,7 +256,7 @@ infix fun (() -> exp).and(function: () -> exp): exp {
     return AND(this(), function())
 }
 
-infix fun (() -> exp).and(exp:exp): exp {
+infix fun (() -> exp).and(exp: exp): exp {
     return AND(this(), exp)
 }
 
@@ -238,7 +264,7 @@ infix fun (() -> exp).or(function: () -> exp): exp {
     return OR(this(), function())
 }
 
-infix fun (() -> exp).or(exp:exp): exp {
+infix fun (() -> exp).or(exp: exp): exp {
     return OR(this(), exp)
 }
 
@@ -246,7 +272,7 @@ fun not(function: () -> exp): exp {
     return NOT(function())
 }
 
-fun not(exp:exp): exp {
+fun not(exp: exp): exp {
     return NOT(exp)
 }
 

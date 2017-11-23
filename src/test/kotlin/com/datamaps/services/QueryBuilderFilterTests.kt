@@ -359,6 +359,33 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         })
     }
 
+    @Test
+    fun testQueryOrderBy() {
+
+        var dp = DataProjection("JiraStaffUnit")
+                .alias("jsu")
+                .field("worker")
+                /*  */.inner().alias("www")
+                /*      */.default().refs()
+                /*  */.end()
+                .field("gender")
+                .order(f("name"),
+                        f("www.name").asc(),
+                        f("gender.gender").desc())
+                .limit(2)
+                .offset(1)
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+
+        assertBodyEquals(q.qr.orderBy, "jsu.NAME ASC, www.NAME ASC, JIRA_GENDER2.GENDER DESC")
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID1")}")
+            }
+        })
+    }
 
 }
 

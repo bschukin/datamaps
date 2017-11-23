@@ -40,6 +40,9 @@ class QueryBuildContext {
     //для определения сущностей составляющих возваращаемый результат
     lateinit var rootAlias: String
 
+    //корень  "дерева" запроса
+    lateinit var root: QueryLevel
+
     //карта  алиасРоиделя.свойство -> алиас таблицы
     //используется для вычисления алиаса таблицы при работе с влложеными путями в фильттрах
     private var parentPathes = mutableMapOf<SPair, String>()
@@ -49,9 +52,11 @@ class QueryBuildContext {
 
     var stack = Stack<QueryLevel>()
 
-    //строка where. пока особо идей по построению фильтров нет - самый простой вариант чтобы
-    //поддержать запрос по id
+    //строка where
     var where = ""
+
+    //строка order
+    var orderBy = ""
 
     var params = mutableMapOf<String, Any?>()
 
@@ -132,6 +137,8 @@ class QueryBuildContext {
         params.put(name, value)
         return name
     }
+
+
 }
 
 class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,

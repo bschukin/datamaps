@@ -46,7 +46,7 @@ class QueryBuilderTests : BaseSpringTests() {
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
-        queryBuilder.buildDataProjection(qr, dp, null)
+        queryBuilder.buildMainQueryStructure(qr, dp, null)
 
         assertEquals(qr.selectColumns.size, 5)
 
@@ -79,7 +79,7 @@ class QueryBuilderTests : BaseSpringTests() {
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
-        queryBuilder.buildDataProjection(qr, dp, null)
+        queryBuilder.buildMainQueryStructure(qr, dp, null)
 
         assertEquals(qr.selectColumns.size, 4)
     }
@@ -98,7 +98,7 @@ class QueryBuilderTests : BaseSpringTests() {
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
-        queryBuilder.buildDataProjection(qr, dp, null)
+        queryBuilder.buildMainQueryStructure(qr, dp, null)
 
         assertEquals(qr.selectColumns.size, 11)
         assertEquals(qr.joins.size, 3)
@@ -136,7 +136,7 @@ class QueryBuilderTests : BaseSpringTests() {
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
-        queryBuilder.buildDataProjection(qr, dp, null)
+        queryBuilder.buildMainQueryStructure(qr, dp, null)
 
         assertEquals(qr.selectColumns.size, 4)
         //2 строим сам запрос
@@ -165,7 +165,7 @@ class QueryBuilderTests : BaseSpringTests() {
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
-        queryBuilder.buildDataProjection(qr, dp)
+        queryBuilder.buildMainQueryStructure(qr, dp)
 
         assertEquals(qr.selectColumns.size, 4)
         assertEquals(qr.joins.size, 1)
@@ -187,7 +187,7 @@ class QueryBuilderTests : BaseSpringTests() {
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
-        queryBuilder.buildDataProjection(qr, dp)
+        queryBuilder.buildMainQueryStructure(qr, dp)
 
         assertEquals(qr.selectColumns.size, 4)
         assertEquals(qr.joins.size, 1)
@@ -211,7 +211,7 @@ class QueryBuilderTests : BaseSpringTests() {
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
-        queryBuilder.buildDataProjection(qr, dp)
+        queryBuilder.buildMainQueryStructure(qr, dp)
 
         assertEquals(qr.selectColumns.size, 4)
         assertEquals(qr.joins.size, 1)
@@ -235,7 +235,7 @@ class QueryBuilderTests : BaseSpringTests() {
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
-        queryBuilder.buildDataProjection(qr, dp)
+        queryBuilder.buildMainQueryStructure(qr, dp)
 
         assertEquals(qr.selectColumns.size, 4)
         assertEquals(qr.joins.size, 1)

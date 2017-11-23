@@ -21,7 +21,7 @@ class QueryBuilder {
     lateinit var dataMappingsService: DataMappingsService;
 
     @Resource
-    lateinit var filterBuilder: FilterBuilder
+    lateinit var filterBuilder: QueryFilterBuilder
 
     @Resource
     lateinit var dbDialect: DbDialect
@@ -39,13 +39,20 @@ class QueryBuilder {
 
         val qr = QueryBuildContext()
 
-        buildDataProjection(qr, dp, null)
+
+        buildMainQueryStructure(qr, dp, null)
+
+        buildWhere(qr)
+
+        addOffsetLimit(qr, dp)
+
+        buildOrders(qr)
 
         return builqSqlQuery(qr, dp)
     }
 
 
-    fun buildDataProjection(qr: QueryBuildContext, dp: DataProjection, field: String? = null) {
+    fun buildMainQueryStructure(qr: QueryBuildContext, dp: DataProjection, field: String? = null):QueryLevel {
 
         val isRoot = field == null
 
@@ -60,25 +67,27 @@ class QueryBuilder {
             dp.fields.getOrDefault(field!!, DataProjection(dm.name, field))
 
         //генерим алиас
-        val alias = projection.queryAlias  ?: qr.createTableAlias(dm.table)
+        val alias = projection.queryAlias ?: qr.createTableAlias(dm.table)
 
         //запомним рутовый алиас
         if (isRoot)
             qr.rootAlias = alias
 
         //запомним в таблицу алиасов - родительский путь к нам
-        if(!isRoot)
+        if (!isRoot)
             qr.addParentPathAlias(qr.stack.peek().alias, field, alias)
 
         val ql = QueryLevel(dm, projection, alias, field, if (isRoot) null else qr.stack.peek())
 
+        if(isRoot)
+            qr.root = ql
         //зарегистрируем алиас
         qr.addTableAlias(alias, ql)
 
 
         //строим дерево
-        if(!isRoot)
-            qr.stack.peek().childProps[field] =ql
+        if (!isRoot)
+            qr.stack.peek().childProps[field] = ql
 
         //ддля рута - формируем клауз FROM
         if (isRoot)
@@ -103,29 +112,25 @@ class QueryBuilder {
                     entityField.sqlcolumn == dm.idColumn -> buildIDfield(qr, dm, alias, entityField)
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
                     entityField.isM1 -> buildManyToOneField(qr, projection, entityField)
-                    entityField.is1N -> buildDataProjection(qr, projection, entityField.name)
+                    entityField.is1N -> buildMainQueryStructure(qr, projection, entityField.name)
                     else -> throw NIY()
                 }
             }
         }
 
-        buildWhere(qr)
 
-        addOffsetLimit(qr)
-
-        qr.stack.pop()
+        return qr.stack.pop()
     }
 
-    private fun addOffsetLimit(qr: QueryBuildContext) {
+    private fun addOffsetLimit(qr: QueryBuildContext, dp: DataProjection) {
 
-        if(qr.stack.empty() || qr.stack.peek().dp.limit==null) return
+        if (dp.limit == null) return
 
-        var queryLevel = qr.stack.peek()
-        queryLevel.dp.offset.let {
-            qr.offset =  queryLevel.dp.offset
+        dp.offset.let {
+            qr.offset = dp.offset
         }
-        queryLevel.dp.limit.let {
-            qr.limit =  queryLevel.dp.limit
+        dp.limit.let {
+            qr.limit = dp.limit
         }
     }
 
@@ -134,13 +139,18 @@ class QueryBuilder {
         filterBuilder.buildWhere(qr)
     }
 
+    private fun buildOrders(qr: QueryBuildContext) {
+
+        filterBuilder.buildOrders(qr)
+    }
+
 
     private fun buildManyToOneField(qr: QueryBuildContext, projection: DataProjection, entityField: DataField) {
         //1е - сначала надо понять, не являемся ли мы обратнной ссылкой на уже доставаемый объект
         //в этом случае нам не надо строить всю проекцию для такой обратной ссылки, а просто смаппировать нужный
         //айдишник в поле данной проекции
         if (!isBackRef(qr, entityField))
-            buildDataProjection(qr, projection, entityField.name)
+            buildMainQueryStructure(qr, projection, entityField.name)
     }
 
     private fun isBackRef(qr: QueryBuildContext, entityField: DataField): Boolean {
@@ -198,12 +208,14 @@ class QueryBuilder {
     private fun builqSqlQuery(qr: QueryBuildContext, dp: DataProjection): SqlQueryContext {
 
         val sql = "SELECT \n\t" +
-                dbDialect.getLimitOffsetQueryInSelect(qr.limit, qr.offset)+
+                dbDialect.getLimitOffsetQueryInSelect(qr.limit, qr.offset) +
                 qr.getSelectString() + "\n" +
                 "FROM " + qr.from +
-                qr.getJoinString()+
-                ( if(qr.where.isBlank())  " " else " \nWHERE " + qr.where)+
+                qr.getJoinString() +
+                (if (qr.where.isBlank()) " " else " \nWHERE " + qr.where) +
+                (if (qr.orderBy.isBlank()) " " else " \nORDER BY " + qr.orderBy)+
                 dbDialect.getLimitOffsetQueryInWhere(qr.limit, qr.offset)
+
 
         return SqlQueryContext(sql, dp, qr.params, qr)
     }
