@@ -3,7 +3,6 @@ package com.datamaps.mappings
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertEqIgnoreCase
 import org.testng.Assert
-import org.testng.Assert.assertEquals
 import org.testng.Assert.assertNotNull
 import org.testng.annotations.Test
 import javax.annotation.Resource
@@ -22,12 +21,12 @@ class DefaultMappingBuilderTests : BaseSpringTests() {
     fun testDefaultMappingForVerySimpleTable() {
         val dt = defaultMappingBuilder.buildDefault("JIRA_GENDER")
         assertNotNull(dt)
-        assertEquals(dt.name, "JiraGender")
-        assertEquals(dt.table, "JIRA_GENDER")
+        assertEqIgnoreCase(dt.name, "JiraGender")
+        assertEqIgnoreCase(dt.table, "JIRA_GENDER")
         Assert.assertEquals(dt.fields.size, 3)
-        Assert.assertEquals(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("id", "gender", "isClassic"))
+        assertEqIgnoreCase(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("id", "gender", "isClassic"))
 
-        Assert.assertEquals(dt.defaultGroup.fields.stream().toList(), listOf("id", "gender", "isClassic"))
+        assertEqIgnoreCase(dt.defaultGroup.fields.stream().toList(), listOf("id", "gender", "isClassic"))
     }
 
 

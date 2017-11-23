@@ -24,6 +24,9 @@ class QueryBuilder {
     lateinit var filterBuilder: FilterBuilder
 
     @Resource
+    lateinit var dbDialect: DbDialect
+
+    @Resource
     lateinit var dataConverter: DataConverter
 
     fun createQueryByEntityNameAndId(name: String, id: Long): SqlQueryContext {
@@ -118,8 +121,11 @@ class QueryBuilder {
         if(qr.stack.empty() || qr.stack.peek().dp.limit==null) return
 
         var queryLevel = qr.stack.peek()
+        queryLevel.dp.offset.let {
+            qr.offset =  queryLevel.dp.offset
+        }
         queryLevel.dp.limit.let {
-            qr.offsetLimit =  "LIMIT ${ queryLevel.dp.limit}  ${queryLevel.dp.offset}"
+            qr.limit =  queryLevel.dp.limit
         }
     }
 
@@ -192,13 +198,12 @@ class QueryBuilder {
     private fun builqSqlQuery(qr: QueryBuildContext, dp: DataProjection): SqlQueryContext {
 
         val sql = "SELECT \n\t" +
-                qr.offsetLimit.apply {
-                    " " + qr.offsetLimit + " "
-                }+
+                dbDialect.getLimitOffsetQueryInSelect(qr.limit, qr.offset)+
                 qr.getSelectString() + "\n" +
                 "FROM " + qr.from +
                 qr.getJoinString()+
-                ( if(qr.where.isBlank())  " " else " \nWHERE " + qr.where)
+                ( if(qr.where.isBlank())  " " else " \nWHERE " + qr.where)+
+                dbDialect.getLimitOffsetQueryInWhere(qr.limit, qr.offset)
 
         return SqlQueryContext(sql, dp, qr.params, qr)
     }

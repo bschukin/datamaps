@@ -57,7 +57,8 @@ class QueryBuildContext {
 
     var paramNameCounter = 0
 
-    var offsetLimit = ""
+    var offset:Int? = null
+    var limit:Int? = null
 
     fun getSelectString(): String {
         return selectColumns.stream()
