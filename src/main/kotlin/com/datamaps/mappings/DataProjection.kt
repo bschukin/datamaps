@@ -11,7 +11,7 @@ import com.datamaps.util.linkedCaseInsMapOf
  *
  * JiraWorker
  * {
- *    {{"default"}},
+ *    {{"scalars"}},
  *        "gender" {
  *              fields = "gender"
  *        }
@@ -19,7 +19,7 @@ import com.datamaps.util.linkedCaseInsMapOf
  *
  */
 
-class DataProjection {
+open class DataProjection {
 
     //для корневой проекции  - сущность по которой надо строить запрос
     //для вложенных поекций - опционально
@@ -43,11 +43,6 @@ class DataProjection {
 
     //выражение  where
     private val orders= mutableListOf<ExpressionField>()
-
-
-    //технические поля для чейнов по созданию проекций
-    var last: DataProjection? = null
-    var prev: DataProjection? = null
 
     var limit: Int? = null
     var offset: Int? = null
@@ -84,20 +79,32 @@ class DataProjection {
         return group(FULL)
     }
 
-    fun default(): DataProjection {
+    fun scalars(): DataProjection {
         return group(DEFAULT)
     }
 
-    fun refs(): DataProjection {
+
+    fun withRefs(): DataProjection {
         return group(REFS)
+    }
+
+    fun withCollections(): DataProjection {
+        return group(LIST)
     }
 
 
     fun field(f: String): DataProjection {
-        fields[f] = DataProjection(null, f)
-        last = fields[f]
+        fields[f] = slice(f)
         return this
     }
+
+
+     fun with(slice: ()->DataProjection):DataProjection {
+         val sl = slice()
+         fields[sl.parentField] = sl
+         return this
+    }
+
 
     fun id(id: Long): DataProjection {
         validate(isRoot())
@@ -112,15 +119,6 @@ class DataProjection {
 
     fun isRoot() = parentField == null
 
-
-    fun inner(): DataProjection {
-        this.last!!.prev = this
-        return this.last!!
-    }
-
-    fun end(): DataProjection {
-        return prev!!
-    }
 
     fun filter(): exp? {
         return filter
@@ -154,6 +152,10 @@ class DataProjection {
     fun orders() = orders
 }
 
+class slice(f:String):DataProjection(null, f)
+{
+
+}
 
 open class exp {
 
@@ -286,6 +288,9 @@ fun not(exp: exp): exp {
 
 
 typealias expLamda = (m: Unit) -> exp
+typealias projection = DataProjection
+
+//typealias slice = DataProjection
 
 enum class Operation(val value: String) {
     eq("="),

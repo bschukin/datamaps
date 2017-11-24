@@ -4,6 +4,8 @@ import com.datamaps.BaseSpringTests
 import com.datamaps.assertEqIgnoreCase
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.f
+import com.datamaps.mappings.projection
+import com.datamaps.mappings.slice
 import org.springframework.beans.factory.annotation.Autowired
 import org.testng.Assert
 import org.testng.Assert.assertEquals
@@ -46,26 +48,28 @@ class QueryBuilderFormulasTests : BaseSpringTests() {
 
     @Test(invocationCount = 1)
     fun testFormula02OnNestedEntity() {
-        var dp = DataProjection("JiraWorker")
-                .default().refs()
-                .field("gender")
-                .inner().formula("genderCaption", """
+        var dp = projection("JiraWorker")
+                .with {
+                    slice("gender")
+                            .formula("genderCaption", """
                     case when {{id}}=1 then 'Ж'
                          when {{id}}=2 then 'М'
                          else 'О' end
-                """).end()
+                """)
+                }
                 .filter(f("gender.genderCaption") eq "Ж")
 
         var q = queryBuilder.createQueryByDataProjection(dp)
         println(q.sql)
         var res = dataService.findAll(dp)
-        res.forEach { r->println(r) }
+        res.forEach { r -> println(r) }
 
         assertEquals(res.size, 2)
         assertEquals(res[0]("gender")["genderCaption"], "Ж")
         assertEquals(res[1]("gender")["genderCaption"], "Ж")
         assertNotEquals(res[0].id, res[1].id)
     }
+
 
 
 }

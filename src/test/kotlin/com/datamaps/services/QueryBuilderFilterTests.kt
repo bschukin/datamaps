@@ -34,7 +34,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     @Test(invocationCount = 1)
     fun testQueryAliases02() {
         var dp = DataProjection("JiraWorker")
-                .default().refs()
+                .scalars().withRefs()
 
         var q = queryBuilder.createQueryByDataProjection(dp)
 
@@ -45,12 +45,12 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     @Test(invocationCount = 1)//собираем инфо-п
     fun testQueryAliases03() {
         var dp = DataProjection("JiraStaffUnit")
-                .default().refs()
+                .scalars().withRefs()
                 .field("name")
-                .field("worker")
-                /*  */.inner()
-                /*      */.default().refs()
-                /*  */.end()
+                .with {
+                    slice("worker")
+                            .scalars().withRefs()
+                }
                 .field("gender")
 
         var q = queryBuilder.createQueryByDataProjection(dp)
@@ -64,12 +64,12 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
         //часть вторая - использование   алиасов
         dp = DataProjection("JiraStaffUnit").alias("jsu")
-                .default().refs()
+                .scalars().withRefs()
                 .field("name")
-                .field("worker")
-                /*  */.inner()
-                /*      */.default().refs()
-                /*  */.end()
+                .with {
+                    slice("worker")
+                            .scalars().withRefs()
+                }
                 .field("gender")
 
         q = queryBuilder.createQueryByDataProjection(dp)
@@ -88,7 +88,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
     @Test(invocationCount = 1)//собираем инфо-п
     fun testQueryFilter01() {
-        var dp = DataProjection("JiraGender")
+        var dp = projection("JiraGender")
                 .filter({
                     f("gender")
                 })
@@ -99,14 +99,13 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         assertBodyEquals(q.qr.where, "jira_gender1.gender")
 
         //часть вторая
-        dp = DataProjection("JiraStaffUnit")
-                .default().refs()
+        dp = projection("JiraStaffUnit")
+                .scalars().withRefs()
                 .field("name")
-                .field("worker")
-                /*  */.inner()
-                /*      */.default().refs()
-                /*  */.end()
-                .field("gender")
+                .with {
+                    slice("worker")
+                            .scalars().withRefs()
+                }
                 .filter(f("worker.gender.id") eq f("gender.id"))
 
         q = queryBuilder.createQueryByDataProjection(dp)
@@ -116,14 +115,14 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
 
         //часть вторая
-        dp = DataProjection("JiraStaffUnit")
+        dp = projection("JiraStaffUnit")
                 .alias("jsu")
-                .default().refs()
+                .scalars().withRefs()
                 .field("name")
-                .field("worker")
-                /*  */.inner()
-                /*      */.default().refs()
-                /*  */.end()
+                .with {
+                    slice("worker")
+                            .scalars().withRefs()
+                }
                 .field("gender")
                 .filter({
                     f("worker.gender.id") eq f("gender.id") and
@@ -149,12 +148,12 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
         var dp = DataProjection("JiraStaffUnit")
                 .alias("jsu")
-                .default().refs()
+                .scalars().withRefs()
                 .field("name")
-                .field("worker")
-                /*  */.inner().alias("www")
-                /*      */.default().refs()
-                /*  */.end()
+                .with {
+                    slice("worker").alias("www")
+                            .scalars().withRefs()
+                }
                 .field("gender")
                 .filter({
                     {
@@ -261,12 +260,12 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
         var dp = DataProjection("JiraStaffUnit")
                 .alias("jsu")
-                .default().refs()
+                .scalars().withRefs()
                 .field("name")
-                .field("worker")
-                /*  */.inner().alias("www")
-                /*      */.default().refs()
-                /*  */.end()
+                .with {
+                    slice("worker").alias("www")
+                            .scalars().withRefs()
+                }
                 .field("gender")
                 .filter({
                     {
@@ -300,7 +299,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
         var dp = DataProjection("JiraTask")
                 .filter({
-                        f("name") IN listOf("xxx", "bbbb")
+                    f("name") IN listOf("xxx", "bbbb")
                 })
 
         var q = queryBuilder.createQueryByDataProjection(dp)
@@ -339,7 +338,6 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     }
 
 
-
     @Test
     fun testQueryFilterLimitOffset() {
 
@@ -364,10 +362,10 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
         var dp = DataProjection("JiraStaffUnit")
                 .alias("jsu")
-                .field("worker")
-                /*  */.inner().alias("www")
-                /*      */.default().refs()
-                /*  */.end()
+                .with {
+                    slice("worker").alias("www")
+                            .scalars().withRefs()
+                }
                 .field("gender")
                 .order(f("name"),
                         f("www.name").asc(),

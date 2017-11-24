@@ -32,7 +32,7 @@ class QueryBuilder {
 
     fun createQueryByEntityNameAndId(name: String, id: Long): SqlQueryContext {
 
-        val dp = DataProjection(name, id).default().refs()
+        val dp = DataProjection(name, id).scalars().withRefs()
         return createQueryByDataProjection(dp)
     }
 

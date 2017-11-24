@@ -1,9 +1,11 @@
 package com.datamaps.maps;
 
+import com.datamaps.mappings.DataProjection;
 import com.datamaps.services.GenericDbMetadataService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * Created by Щукин on 03.11.2017.
@@ -14,10 +16,12 @@ public class SpecialClass {
 
     void test ()
     {
-      List list = new ArrayList();
-      for (int i = 0; i < list.size()-1; i++) {
+      test2(s -> new DataProjection(s));
 
-      }
+    }
+
+    void test2(Function<String, DataProjection> function)
+    {
 
     }
 

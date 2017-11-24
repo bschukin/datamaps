@@ -3,6 +3,7 @@ package com.datamaps.services
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.DataProjection
+import com.datamaps.mappings.slice
 import com.datamaps.maps.DataMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.testng.Assert
@@ -44,10 +45,10 @@ class QueryExecutorTests : BaseSpringTests() {
     fun testExecQuery02() {
         var dp = DataProjection("JiraWorker")
                 .group("full")
-                .field("gender")
-                /*  */.inner()
-                /*      */.field("gender")
-                /*  */.end()
+                .with {
+                    slice("gender")
+                            .field("gender")
+                }
 
         val q = queryBuilder.createQueryByDataProjection(dp)
 
@@ -79,10 +80,10 @@ class QueryExecutorTests : BaseSpringTests() {
     fun testExecQuery03() {
         var dp = DataProjection("JiraWorker")
                 .field("name")
-                .field("gender")
-                /*  */.inner()
-                /*      */.field("gender")
-                /*  */.end()
+                .with {
+                    slice("gender")
+                            .field("gender")
+                }
 
         val q = queryBuilder.createQueryByDataProjection(dp)
 
@@ -112,10 +113,10 @@ class QueryExecutorTests : BaseSpringTests() {
         var dp = DataProjection("JiraStaffUnit")
                 .full()
                 .field("name")
-                .field("worker")
-                /*  */.inner()
-                /*      */.full()
-                /*  */.end()
+                .with {
+                    slice("worker")
+                            .full()
+                }
                 .field("gender")
 
         val q = queryBuilder.createQueryByDataProjection(dp)
@@ -147,10 +148,10 @@ class QueryExecutorTests : BaseSpringTests() {
     fun testExecQuery06() {
         var dp = DataProjection("JiraProject")
                 .full()
-                /*  */.field("jiraTasks")
-                /*  *//*  */.inner().full().end()
-                /*  */.full()
-
+                .with {
+                    slice("jiraTasks")
+                            .full()
+                }
         //1 тест на  структуру по которой построится запрос
         val q = queryBuilder.createQueryByDataProjection(dp)
 
@@ -222,10 +223,10 @@ class QueryExecutorTests : BaseSpringTests() {
     fun testExecQuery07WithId() {
         var dp = DataProjection("JiraProject", 1L)
                 .full()
-                /*  */.field("jiraTasks")
-                /*  *//*  */.inner().full().end()
-                /*  */.full()
-
+                .with {
+                    slice("jiraTasks")
+                            .full()
+                }
         //1 тест на  структуру по которой построится запрос
         val q = queryBuilder.createQueryByDataProjection(dp)
 

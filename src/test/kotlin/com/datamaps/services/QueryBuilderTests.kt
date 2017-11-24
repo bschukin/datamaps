@@ -3,6 +3,8 @@ package com.datamaps.services
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.DataProjection
+import com.datamaps.mappings.projection
+import com.datamaps.mappings.slice
 import org.springframework.beans.factory.annotation.Autowired
 import org.testng.Assert.assertEquals
 import org.testng.annotations.Test
@@ -38,14 +40,14 @@ class QueryBuilderTests : BaseSpringTests() {
     @Test(invocationCount = 1)//простейшие тесты на квери: на таблицу c вложенными сущностями M-1
     fun testBuildQuery02() {
         var dp = DataProjection("JiraWorker")
-                .default().refs()
-                .field("gender")
-                /*  */.inner()
-                /*      */.field("gender")
-                /*  */.end()
+                .scalars().withRefs()
+                .with {
+                    slice("gender")
+                            .field("gender")
+                }
 
         //1 тест на  структуру по которой построится запрос
-        val qr = QueryBuildContext()
+        var qr = QueryBuildContext()
         queryBuilder.buildMainQueryStructure(qr, dp, null)
 
         assertEquals(qr.selectColumns.size, 5)
@@ -66,34 +68,68 @@ class QueryBuilderTests : BaseSpringTests() {
                 println("${resultSet.getInt("ID1")}")
             }
         })
+
+        //тоже самое но со слайсами
+        dp = projection("JiraWorker")
+                .scalars().withRefs()
+                .with {
+                    slice("gender")
+                            .field("gender")
+                }
+
+        //1 тест на  структуру по которой построится запрос
+        qr = QueryBuildContext()
+        queryBuilder.buildMainQueryStructure(qr, dp, null)
+
+        assertEquals(qr.selectColumns.size, 5)
+
+        //2 строим сам запрос
+        val q2 = queryBuilder.createQueryByDataProjection(dp)
+        assertBodyEquals(q2.sql, q.sql)
     }
+
 
     @Test(invocationCount = 1)//обрежем jiraWorker поосновательней
     fun testBuildQuery03() {
         var dp = DataProjection("JiraWorker")
                 .field("name")
-                .field("gender")
-                /*  */.inner()
-                /*      */.field("gender")
-                /*  */.end()
+                .with {
+                    slice("gender")
+                            .field("gender")
+                }
 
         //1 тест на  структуру по которой построится запрос
-        val qr = QueryBuildContext()
+        var qr = QueryBuildContext()
         queryBuilder.buildMainQueryStructure(qr, dp, null)
 
         assertEquals(qr.selectColumns.size, 4)
+
+        //тоже самое но со слайсами
+        dp = projection("JiraWorker")
+                .field("name")
+                .with {
+                    slice("gender")
+                            .field("gender")
+                }
+
+        //1 тест на  структуру по которой построится запрос
+        qr = QueryBuildContext()
+        queryBuilder.buildMainQueryStructure(qr, dp, null)
+
+        assertEquals(qr.selectColumns.size, 4)
+
     }
 
 
     @Test(invocationCount = 1)//собираем инфо-п
     fun testBuildQuery05() {
         var dp = DataProjection("JiraStaffUnit")
-                .default().refs()
+                .scalars().withRefs()
                 .field("name")
-                .field("worker")
-                /*  */.inner()
-                /*      */.default().refs()
-                /*  */.end()
+                .with {
+                    slice("worker")
+                            .scalars().withRefs()
+                }
                 .field("gender")
 
         //1 тест на  структуру по которой построится запрос
@@ -128,11 +164,10 @@ class QueryBuilderTests : BaseSpringTests() {
     fun testBuildQuery04() {
         var dp = DataProjection("JiraDepartment")
                 .field("name")
-                .field("parent")
-                /*  */.inner()
-                /*      */.field("name")
-                ///*      */.parentLinkField("parent")
-                /*  */.end()
+                .with {
+                    slice("parent")
+                            .field("name")
+                }
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
@@ -160,9 +195,10 @@ class QueryBuilderTests : BaseSpringTests() {
     fun testBuildQuery06() {
         var dp = DataProjection("JiraProject")
                 .full()
-                /*  */.field("jiraTasks")
-                /*  *//*  */.inner().full().end()
-
+                .with {
+                    slice("JiraTasks")
+                            .full()
+                }
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
         queryBuilder.buildMainQueryStructure(qr, dp)
@@ -180,11 +216,12 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test
     fun testBuildQuery07WithId() {
-        var dp = DataProjection("JiraProject", 1)
+        var dp = projection("JiraProject", 1)
                 .full()
-                /*  */.field("jiraTasks")
-                /*  *//*  */.inner().full().end()
-
+                .with {
+                    slice("jiraTasks")
+                            .full()
+                }
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
         queryBuilder.buildMainQueryStructure(qr, dp)
@@ -206,9 +243,10 @@ class QueryBuilderTests : BaseSpringTests() {
         var dp = DataProjection("JiraProject", 1)
                 .full()
                 .alias("JP")
-                /*  */.field("jiraTasks")
-                /*  *//*  */.inner().full().end()
-
+                .with {
+                    slice("jiraTasks")
+                            .full()
+                }
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
         queryBuilder.buildMainQueryStructure(qr, dp)
@@ -230,9 +268,11 @@ class QueryBuilderTests : BaseSpringTests() {
         var dp = DataProjection("JiraProject", 1)
                 .full()
                 .alias("JP")
-                /*  */.field("jiraTasks")//еще вводим алиас
-                /*  *//*  */.inner().alias("JT").full().end()
-
+                .with {
+                    slice("jiraTasks")
+                            .alias("JT")
+                            .full()
+                }
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
         queryBuilder.buildMainQueryStructure(qr, dp)

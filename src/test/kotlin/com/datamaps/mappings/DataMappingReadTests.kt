@@ -19,7 +19,7 @@ class DataMappingReadTests {
             "fields":[
                 {
                     "name": "caption",
-                    group: "default",
+                    group: "scalars",
                     type:"string"
                 },
                 {
