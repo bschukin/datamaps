@@ -8,6 +8,7 @@ import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.mappings.DataProjection
 import com.datamaps.util.DataConverter
+import org.apache.commons.lang.text.StrSubstitutor
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
 
@@ -18,7 +19,7 @@ import javax.annotation.Resource
 @Service
 class QueryBuilder {
     @Resource
-    lateinit var dataMappingsService: DataMappingsService;
+    lateinit var dataMappingsService: DataMappingsService
 
     @Resource
     lateinit var filterBuilder: QueryFilterBuilder
@@ -116,6 +117,11 @@ class QueryBuilder {
                     else -> throw NIY()
                 }
             }
+        }
+
+        //а теперь бежим по формулам
+        dp.formulas.forEach{ (formulaName,formulaBody)->
+            buildFormula(qr, ql, formulaName, formulaBody)
         }
 
 
@@ -260,6 +266,19 @@ class QueryBuilder {
 
     }
 
+    private fun buildFormula(qr: QueryBuildContext, ql:QueryLevel, formulaName:String, formula:String) {
+        //val formulaAlias = qr.getColumnAlias(ql.alias, formulaName)
+        var formulaSelect = applyColumnNamesInFormula(formula, qr, ql)
+
+        qr.addSelectFormula(formulaName, formulaSelect)
+        //добавляем простой маппер
+        qr.addMapper(formulaName, { mc, rs ->
+            if (mc.curr(formulaName) != null)
+                mc.curr(ql.alias)!![formulaName] = rs.getObject(formulaName)
+        })
+
+    }
+
 
     //получаем список всех полей которые мы будем селектить
     //все поля =
@@ -288,4 +307,10 @@ class QueryBuilder {
     }
 
 
+    fun applyColumnNamesInFormula(formula:String, qr:QueryBuildContext, ql:QueryLevel):String
+    {
+        var resolver = QueryVariablesResolver(qr,ql)
+        var s = StrSubstitutor(resolver, "{{", "}}", '/')
+        return s.replace(formula)
+    }
 }

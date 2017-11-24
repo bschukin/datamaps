@@ -7,6 +7,8 @@ import com.datamaps.mappings.f
 import com.datamaps.maps.DataMap
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf
+import org.apache.commons.lang.text.StrLookup
+import org.apache.commons.lang.text.StrSubstitutor
 import java.sql.ResultSet
 import java.util.*
 import java.util.stream.Collectors
@@ -82,6 +84,10 @@ class QueryBuildContext {
         return res
     }
 
+    fun addSelectFormula(formulaName:String, formula:String){
+        selectColumns.add(" (${formula}) AS  ${formulaName}")
+    }
+
     fun addTableAlias(alias: String, queryLevel: QueryLevel) {
         tableAliases[alias] = queryLevel
     }
@@ -145,10 +151,11 @@ class QueryBuildContext {
     //или (при returnTableQualifiedName=false - вернуть уникальный алиас колонки в запросе)
     //NB: при создании цепочек свойств мы считаем что свойства пишутся от корневой сущности (или от указанного пользователем алиаса)
     //например: JiraStaffUnit --> Worker-->Gender-->gender будут писаться в фильтре как worker.gender.gender (рута нет)
-    fun getFieldNameInQuery(exp: f, returnTableQualifiedName: Boolean = true): String {
-        var alias = rootAlias
-        var currLevel = root
-        val list = exp.name.split('.')
+    fun getFieldNameInQuery(name: String, startAlias: String = rootAlias, startLevel:QueryLevel=root,
+                            returnTableQualifiedName: Boolean = true): String {
+        var alias = startAlias
+        var currLevel = startLevel
+        val list = name.split('.')
 
         for (i in 0 until list.size - 1) {
             if (i == 0 && isTableAlias(list[i])) {
@@ -165,10 +172,10 @@ class QueryBuildContext {
         if (returnTableQualifiedName)
             return "${alias}.${currLevel.dm.get(list.last()).sqlcolumn!!}"
         else
-            return getColumnIdentiferForFillter(alias, currLevel.dm.get(list.last()).sqlcolumn!!)
+            return getColumnIdentiferForFilter(alias, currLevel.dm.get(list.last()).sqlcolumn!!)
     }
 
-    fun getColumnIdentiferForFillter(tableAlias: String, identifier: String): String {
+    fun getColumnIdentiferForFilter(tableAlias: String, identifier: String): String {
         val fullName = tableAlias + "." + identifier
         return columnAliases[fullName] ?: fullName
     }
@@ -256,4 +263,12 @@ class SPair {
     }
 
 
+}
+
+
+class QueryVariablesResolver(val qr:QueryBuildContext, val ql:QueryLevel): StrLookup()
+{
+    override fun lookup(key: String?): String {
+        return qr.getFieldNameInQuery(key!!, ql.alias, ql,true)
+    }
 }

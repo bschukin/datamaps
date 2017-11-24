@@ -25,7 +25,7 @@ class QueryFilterBuilder {
     }
 
     private fun buildFieldOrder(qr: QueryBuildContext, f: f): String {
-        return qr.getFieldNameInQuery(f) + (if (f.asc) " ASC" else " DESC")
+        return qr.getFieldNameInQuery(f.name) + (if (f.asc) " ASC" else " DESC")
     }
 
     fun buildWhere(qr: QueryBuildContext) {
@@ -52,7 +52,7 @@ class QueryFilterBuilder {
 
     private fun buildWhereByExp(qr: QueryBuildContext, exp: exp): String {
         return when (exp) {
-            is f -> qr.getFieldNameInQuery(exp)
+            is f -> qr.getFieldNameInQuery(exp.name)
             is value -> buildFilterValue(qr, exp)
             is binaryOP -> buildBinaryOperation(qr, exp)
             is OR -> "(${buildWhereByExp(qr, exp.left)} OR ${buildWhereByExp(qr, exp.right)})"
