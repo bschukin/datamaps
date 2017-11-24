@@ -22,7 +22,7 @@ class QueryExecutor {
 
     fun findAll(q: SqlQueryContext): List<DataMap> {
         val mc = MappingContext(q)
-        jdbcTemplate.query(q.sql, { resultSet, i ->
+        namedParameterJdbcTemplate.query(q.sql, q.params, { resultSet, i ->
             run {
                 mapRow(resultSet, q, mc)
             }

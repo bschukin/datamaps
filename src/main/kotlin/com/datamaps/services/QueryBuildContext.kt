@@ -84,7 +84,8 @@ class QueryBuildContext {
         return res
     }
 
-    fun addSelectFormula(formulaName:String, formula:String){
+    fun addSelectFormula(formulaName: String, formula: String) {
+        columnAliases[formulaName] = formulaName
         selectColumns.add(" (${formula}) AS  ${formulaName}")
     }
 
@@ -151,7 +152,7 @@ class QueryBuildContext {
     //или (при returnTableQualifiedName=false - вернуть уникальный алиас колонки в запросе)
     //NB: при создании цепочек свойств мы считаем что свойства пишутся от корневой сущности (или от указанного пользователем алиаса)
     //например: JiraStaffUnit --> Worker-->Gender-->gender будут писаться в фильтре как worker.gender.gender (рута нет)
-    fun getFieldNameInQuery(name: String, startAlias: String = rootAlias, startLevel:QueryLevel=root,
+    fun getFieldNameInQuery(name: String, startAlias: String = rootAlias, startLevel: QueryLevel = root,
                             returnTableQualifiedName: Boolean = true): String {
         var alias = startAlias
         var currLevel = startLevel
@@ -170,9 +171,9 @@ class QueryBuildContext {
         }
 
         if (returnTableQualifiedName)
-            return "${alias}.${currLevel.dm.get(list.last()).sqlcolumn!!}"
+            return currLevel.getSqlColumn(alias, list.last())
         else
-            return getColumnIdentiferForFilter(alias, currLevel.dm.get(list.last()).sqlcolumn!!)
+            return getColumnIdentiferForFilter(alias, currLevel.getSqlColumn(alias, list.last(), false))
     }
 
     fun getColumnIdentiferForFilter(tableAlias: String, identifier: String): String {
@@ -187,6 +188,15 @@ class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
 
     var childProps = caseInsMapOf<QueryLevel>()
 
+    fun getSqlColumn(alias: String, name: String, useAlias: Boolean = true): String {
+        if (dp.formulas.containsKey(name))
+            return "(${dp.formulas[name]!!})"
+
+        return if (useAlias)
+            "${alias}.${dm.get(name).sqlcolumn!!}"
+        else
+            dm.get(name).sqlcolumn!!
+    }
 }
 
 
@@ -266,9 +276,8 @@ class SPair {
 }
 
 
-class QueryVariablesResolver(val qr:QueryBuildContext, val ql:QueryLevel): StrLookup()
-{
+class QueryVariablesResolver(val qr: QueryBuildContext, val ql: QueryLevel) : StrLookup() {
     override fun lookup(key: String?): String {
-        return qr.getFieldNameInQuery(key!!, ql.alias, ql,true)
+        return qr.getFieldNameInQuery(key!!, ql.alias, ql, true)
     }
 }
