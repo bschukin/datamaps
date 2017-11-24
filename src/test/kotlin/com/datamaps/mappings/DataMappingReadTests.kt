@@ -55,7 +55,7 @@ class DataMappingReadTests {
         result.fields.forEach { df ->
             run {
                /* println("===")
-                println(df.field)
+                println(df.parentField)
                 //println(df.group)
                 println(df.type)
                 println(df.sqlcolumn)

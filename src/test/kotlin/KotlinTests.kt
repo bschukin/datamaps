@@ -1,6 +1,7 @@
 
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.f
+import org.apache.commons.lang.text.StrSubstitutor
 import org.testng.annotations.Test
 
 /**
@@ -43,6 +44,18 @@ class KotlinTests {
                             ))
                     e and f("bnn")
                 })
+    }
+
+    @Test
+    fun testStrSubstitor() {
+
+        var myStr = "hello {{world}}"
+        val map = mutableMapOf<String, String>()
+        map.put("world", "hell")
+        var s = StrSubstitutor(map, "{{", "}}")
+
+        println(s.replace(myStr))
+
     }
 
 

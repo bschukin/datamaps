@@ -25,7 +25,7 @@ class QueryFilterBuilder {
     }
 
     private fun buildFieldOrder(qr: QueryBuildContext, f: f): String {
-        return buildFilterProperty(qr, f) + (if (f.asc) " ASC" else " DESC")
+        return qr.getFieldNameInQuery(f) + (if (f.asc) " ASC" else " DESC")
     }
 
     fun buildWhere(qr: QueryBuildContext) {
@@ -52,7 +52,7 @@ class QueryFilterBuilder {
 
     private fun buildWhereByExp(qr: QueryBuildContext, exp: exp): String {
         return when (exp) {
-            is f -> buildFilterProperty(qr, exp)
+            is f -> qr.getFieldNameInQuery(exp)
             is value -> buildFilterValue(qr, exp)
             is binaryOP -> buildBinaryOperation(qr, exp)
             is OR -> "(${buildWhereByExp(qr, exp.left)} OR ${buildWhereByExp(qr, exp.right)})"
@@ -77,31 +77,6 @@ class QueryFilterBuilder {
         return ":${qr.addParam(exp.v)}"
     }
 
-
-    //нам надо для филттруемой проперти - выстроить путь к ней (если он не был построен)
-    // (если колонка например не участвует в селекте)
-    //и получить алиас колонки
-    //NB: при создании цепочек свойств мы считаем что свойства пишутся от корневой сущности (или от указанного пользователем алиаса)
-    //например: JiraStaffUnit --> Worker-->Gender-->gender будут писаться в фильтре как worker.gender.gender (рута нет)
-    private fun buildFilterProperty(qr: QueryBuildContext, exp: f): String {
-        var alias = qr.rootAlias
-        var currLevel = qr.root
-        var list = exp.name.split('.')
-
-        for (i in 0 until list.size - 1) {
-            if (i == 0 && qr.isTableAlias(list[i])) {
-                alias = list[i]
-                currLevel = qr.getAliasQueryLevel(list[i])
-
-            } else {
-                alias = qr.getAliasByPathFromParent(alias, list[i])!!
-                currLevel = currLevel.childProps[list[i]]!!
-            }
-
-        }
-        //return qr.getColumnIdentiferForFillter(alias, currLevel.dm.get(list.last()).sqlcolumn!!)
-        return "${alias}.${currLevel.dm.get(list.last()).sqlcolumn!!}"
-    }
 
 
 }

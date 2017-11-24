@@ -3,6 +3,7 @@ package com.datamaps.services
 import com.datamaps.general.throwNIS
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataProjection
+import com.datamaps.mappings.f
 import com.datamaps.maps.DataMap
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf
@@ -15,7 +16,7 @@ import java.util.stream.Collectors
  */
 class QueryBuildContext {
 
-    //карта ключ: {tableAlias.field}-->{уникальный алиас колонки в запросе}
+    //карта ключ: {tableAlias.parentField}-->{уникальный алиас колонки в запросе}
     var columnAliases = linkedCaseInsMapOf<String>()
 
     //карта - таблица - выданное число алиасов
@@ -62,8 +63,8 @@ class QueryBuildContext {
 
     var paramNameCounter = 0
 
-    var offset:Int? = null
-    var limit:Int? = null
+    var offset: Int? = null
+    var limit: Int? = null
 
     fun getSelectString(): String {
         return selectColumns.stream()
@@ -138,6 +139,39 @@ class QueryBuildContext {
         return name
     }
 
+    //нам надо для фильтруемой проперти - выстроить путь к ней (если он не был построен)
+    // (если колонка например не участвует в селекте)
+    //и получить имя фильтрумой колонки в запросе (то есть имя алиаса таблицы - наименование колонки)
+    //или (при returnTableQualifiedName=false - вернуть уникальный алиас колонки в запросе)
+    //NB: при создании цепочек свойств мы считаем что свойства пишутся от корневой сущности (или от указанного пользователем алиаса)
+    //например: JiraStaffUnit --> Worker-->Gender-->gender будут писаться в фильтре как worker.gender.gender (рута нет)
+    fun getFieldNameInQuery(exp: f, returnTableQualifiedName: Boolean = true): String {
+        var alias = rootAlias
+        var currLevel = root
+        val list = exp.name.split('.')
+
+        for (i in 0 until list.size - 1) {
+            if (i == 0 && isTableAlias(list[i])) {
+                alias = list[i]
+                currLevel = getAliasQueryLevel(list[i])
+
+            } else {
+                alias = getAliasByPathFromParent(alias, list[i])!!
+                currLevel = currLevel.childProps[list[i]]!!
+            }
+
+        }
+
+        if (returnTableQualifiedName)
+            return "${alias}.${currLevel.dm.get(list.last()).sqlcolumn!!}"
+        else
+            return getColumnIdentiferForFillter(alias, currLevel.dm.get(list.last()).sqlcolumn!!)
+    }
+
+    fun getColumnIdentiferForFillter(tableAlias: String, identifier: String): String {
+        val fullName = tableAlias + "." + identifier
+        return columnAliases[fullName] ?: fullName
+    }
 
 }
 

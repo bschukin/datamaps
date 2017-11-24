@@ -29,11 +29,14 @@ class DataProjection {
     //id объекта - возможно указание только для рутовых ОП
     var id: Long? = null
     //для вложенных проекций - родительское поле
-    var field: String? = null
+    var parentField: String? = null
     //группы, которые включеные в проекцию
     var groups = mutableListOf<String>()
     //поля, включенные в проекцию - в вилей проекций
     var fields = linkedCaseInsMapOf<DataProjection>() //рекурсивные проекции
+
+    //вычислимые поля (формулы)
+    var formulas = linkedCaseInsMapOf<String>()
 
     //выражение  where
     private var filter: exp? = null
@@ -59,7 +62,7 @@ class DataProjection {
     }
 
     constructor(entity: String?, field: String?) {
-        this.field = field
+        this.parentField = field
         this.entity = entity
     }
 
@@ -102,7 +105,12 @@ class DataProjection {
         return this
     }
 
-    fun isRoot() = field == null
+    fun formula(name: String, formula:String): DataProjection {
+        formulas[name] = formula
+        return this
+    }
+
+    fun isRoot() = parentField == null
 
 
     fun inner(): DataProjection {

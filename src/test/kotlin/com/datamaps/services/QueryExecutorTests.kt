@@ -131,7 +131,7 @@ class QueryExecutorTests : BaseSpringTests() {
                 .field("name")
                 .field("parent")
         // /*  */.inner()
-        ///*      */.field("name")
+        ///*      */.parentField("name")
         ///*      */.parentLinkField("parent")
         ///*  */.end()
 
