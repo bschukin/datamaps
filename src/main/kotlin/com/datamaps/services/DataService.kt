@@ -1,5 +1,6 @@
 package com.datamaps.services
 
+import com.datamaps.mappings.DataProjection
 import com.datamaps.maps.DataMap
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
@@ -11,6 +12,7 @@ interface DataService {
 
     operator fun get(entityName: String, id: Long): DataMap?
 
+    fun findAll(dp: DataProjection):List<DataMap>
 }
 
 
@@ -19,6 +21,8 @@ interface DataService {
 @Service
 class DataServiceImpl : DataService
 {
+
+
     @Resource
     lateinit var queryBuilder: QueryBuilder;
 
@@ -29,5 +33,11 @@ class DataServiceImpl : DataService
 
         val q = queryBuilder.createQueryByEntityNameAndId(entityName, id);
         return queryExecutor.executeSingle(q);
+    }
+
+    override fun findAll(dp: DataProjection):List<DataMap> {
+        val q = queryBuilder.createQueryByDataProjection(dp)
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        return queryExecutor.findAll(q)
     }
 }

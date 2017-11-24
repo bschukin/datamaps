@@ -39,6 +39,10 @@ fun assertEqIgnoreCase(string1:String, string2:String) {
     Assert.assertEquals(string1.toLowerCase(), string2.toLowerCase())
 }
 
+fun assertEqIgnoreCase(obj:Any?, string2:String) {
+    Assert.assertEquals(obj.toString().toLowerCase(), string2.toLowerCase())
+}
+
 fun assertEqIgnoreCase(list1:List<*>, list2:List<*>) {
     if(list1.size!=list2.size)
         Assert.fail("lists have different size: ${list1.size} vs ${list2.size}")

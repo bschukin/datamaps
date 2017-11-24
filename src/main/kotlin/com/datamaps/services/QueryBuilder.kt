@@ -53,22 +53,22 @@ class QueryBuilder {
     }
 
 
-    fun buildMainQueryStructure(qr: QueryBuildContext, dp: DataProjection, field: String? = null):QueryLevel {
+    fun buildMainQueryStructure(qr: QueryBuildContext, parentProjection: DataProjection, field: String? = null):QueryLevel {
 
         val isRoot = field == null
 
         //если мы на руте - берем рутовый маппинг
         val dm = if (isRoot)
-            dataMappingsService.getDataMapping(dp.entity!!)
+            dataMappingsService.getDataMapping(parentProjection.entity!!)
         else
             dataMappingsService.getRefDataMapping(qr.stack.peek().dm, field!!)
 
         //если мы на руте - берем рутовую проекцию, иначе берем проекцию с поля
-        val projection = if (isRoot) dp else
-            dp.fields.getOrDefault(field!!, DataProjection(dm.name, field))
+        val currProjection = if (isRoot) parentProjection else
+            parentProjection.fields.getOrDefault(field!!, DataProjection(dm.name, field))
 
         //генерим алиас
-        val alias = projection.queryAlias ?: qr.createTableAlias(dm.table)
+        val alias = currProjection.queryAlias ?: qr.createTableAlias(dm.table)
 
         //запомним рутовый алиас
         if (isRoot)
@@ -78,7 +78,7 @@ class QueryBuilder {
         if (!isRoot)
             qr.addParentPathAlias(qr.stack.peek().alias, field, alias)
 
-        val ql = QueryLevel(dm, projection, alias, field, if (isRoot) null else qr.stack.peek())
+        val ql = QueryLevel(dm, currProjection, alias, field, if (isRoot) null else qr.stack.peek())
 
         if(isRoot)
             qr.root = ql
@@ -103,7 +103,7 @@ class QueryBuilder {
 
         //получаем список всех полей которые мы будем селектить
         //все поля =  поля всех указанных групп (groups) U поля указанные в списке fields
-        val allFields = getAllFieldsOnLevel(projection, dm)
+        val allFields = getAllFieldsOnLevel(currProjection, dm)
 
         //бежим по всем полям и решаем что с кажным из них делать
         allFields.forEach { f ->
@@ -112,15 +112,15 @@ class QueryBuilder {
                 when {
                     entityField.sqlcolumn == dm.idColumn -> buildIDfield(qr, dm, alias, entityField)
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
-                    entityField.isM1 -> buildManyToOneField(qr, projection, entityField)
-                    entityField.is1N -> buildMainQueryStructure(qr, projection, entityField.name)
+                    entityField.isM1 -> buildManyToOneField(qr, currProjection, entityField)
+                    entityField.is1N -> buildMainQueryStructure(qr, currProjection, entityField.name)
                     else -> throw NIY()
                 }
             }
         }
 
         //а теперь бежим по формулам
-        dp.formulas.forEach{ (formulaName,formulaBody)->
+        currProjection.formulas.forEach{ (formulaName,formulaBody)->
             buildFormula(qr, ql, formulaName, formulaBody)
         }
 
