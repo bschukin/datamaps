@@ -56,6 +56,9 @@ open class DataProjection {
     var limit: Int? = null
     var offset: Int? = null
 
+    constructor() {
+    }
+
     constructor(entity: String) {
         this.entity = entity
     }
@@ -84,6 +87,10 @@ open class DataProjection {
         return this
     }
 
+
+    fun onlyId(): DataProjection {
+        return field("id")
+    }
     fun full(): DataProjection {
         return group(FULL)
     }
@@ -157,12 +164,13 @@ open class DataProjection {
     }
 
     fun filter(exp: exp): DataProjection {
-        filter = exp
+        filter = if (filter == null)  exp else (filter!! and exp)
         return this
     }
 
     fun filter(aaa: (m: Unit) -> exp): DataProjection {
-        filter = aaa(Unit)
+        val exp = aaa(Unit)
+        filter = if (filter == null)  exp else (filter!! and exp)
         return this
     }
 

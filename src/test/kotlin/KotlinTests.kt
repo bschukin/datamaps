@@ -1,7 +1,6 @@
 
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.f
-import org.apache.commons.lang.text.StrLookup
 import org.apache.commons.lang.text.StrSubstitutor
 import org.testng.annotations.Test
 

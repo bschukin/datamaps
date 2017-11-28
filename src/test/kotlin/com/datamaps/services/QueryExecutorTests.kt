@@ -5,7 +5,6 @@ import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.slice
 import com.datamaps.maps.DataMap
-import org.springframework.beans.factory.annotation.Autowired
 import org.testng.Assert
 import org.testng.Assert.assertTrue
 import org.testng.annotations.Test
@@ -15,11 +14,6 @@ import org.testng.annotations.Test
  */
 class QueryExecutorTests : BaseSpringTests() {
 
-    @Autowired
-    lateinit var queryBuilder: QueryBuilder
-
-    @Autowired
-    lateinit var queryExecutor: QueryExecutor
 
     @Test
             //простейшие тесты на квери: на лысую таблицу (без вложенных сущностей)

@@ -5,7 +5,6 @@ import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.projection
 import com.datamaps.mappings.slice
-import org.springframework.beans.factory.annotation.Autowired
 import org.testng.Assert.assertEquals
 import org.testng.annotations.Test
 
@@ -14,8 +13,6 @@ import org.testng.annotations.Test
  */
 class QueryBuilderTests : BaseSpringTests() {
 
-    @Autowired
-    lateinit var queryBuilder: QueryBuilder
 
     @Test
             //простейшие тесты на квери: на лысую таблицу (без вложенных сущностей)
@@ -287,6 +284,26 @@ class QueryBuilderTests : BaseSpringTests() {
                 "FROM JIRA_PROJECT as JP\n" +
                 "LEFT JOIN JIRA_TASK as JT ON JP.ID=JT.JIRA_PROJECT_ID \n" +
                 "WHERE JP.ID = :_id1")
+    }
+
+
+    @Test
+    fun testOnlyId() {
+        var dp = projection("JiraProject", 1)
+                .onlyId()
+
+        //1 тест на  структуру по которой построится запрос
+        val qr = QueryBuildContext()
+        queryBuilder.buildMainQueryStructure(qr, dp)
+
+
+        val q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+
+        assertBodyEquals(q.sql, "SELECT \n" +
+                "\t jira_project1.id  AS  id1\n" +
+                "FROM jira_project as jira_project1 \n" +
+                "WHERE jira_project1.id = :_id1  ")
     }
 
 

@@ -4,6 +4,7 @@ import com.datamaps.general.NIY
 import com.datamaps.general.SNF
 import com.datamaps.general.throwNIS
 import com.datamaps.mappings.*
+import com.datamaps.maps.DataMap
 import com.datamaps.util.DataConverter
 import org.apache.commons.lang.text.StrSubstitutor
 import org.springframework.stereotype.Service
@@ -31,6 +32,16 @@ class QueryBuilder {
 
         val dp = DataProjection(name, id).scalars().withRefs()
         return createQueryByDataProjection(dp)
+    }
+
+    fun createUpgradeQueryByMapsAndSlices(maps: List<DataMap>, slice: projection): SqlQueryContext {
+
+        slice.entity = maps[0].entity
+
+        slice.onlyId()
+                .filter(f("id") IN maps.map { dm -> dm.id })
+
+        return createQueryByDataProjection(slice)
     }
 
     fun createQueryByDataProjection(dp: DataProjection): SqlQueryContext {
@@ -304,36 +315,36 @@ class QueryBuilder {
     }
 
 
-        //получаем список всех полей которые мы будем селектить
-        //все поля =
-        //      поля дефлотной группы
-        //  U   поля всех указанных групп (groups)
-        //  U   поля указанные в списке fields
-        private fun getAllFieldsOnLevel(dp: DataProjection, dm: DataMapping): Set<String> {
-            val allFields = mutableSetOf<String>()
-            allFields.add(dm.idColumn!!.toLowerCase())
-            // поля дефлотной группы
-            if (dp.fields.size == 0)
-                allFields.addAll(dm.defaultGroup.fields.map { f -> f.toLowerCase() })
+    //получаем список всех полей которые мы будем селектить
+    //все поля =
+    //      поля дефлотной группы
+    //  U   поля всех указанных групп (groups)
+    //  U   поля указанные в списке fields
+    private fun getAllFieldsOnLevel(dp: DataProjection, dm: DataMapping): Set<String> {
+        val allFields = mutableSetOf<String>()
+        allFields.add(dm.idColumn!!.toLowerCase())
+        // поля дефлотной группы
+        if (dp.fields.size == 0)
+            allFields.addAll(dm.defaultGroup.fields.map { f -> f.toLowerCase() })
 
-            //поля всех указанных групп (groups)
-            dp.groups.forEach { gr ->
-                run {
-                    val datagroup = dm.groups.computeIfAbsent(gr,
-                            { t -> throw SNF("group ${gr} of ${dp.entity} entity not found") })
-                    allFields.addAll(datagroup.fields.map { f -> f.toLowerCase() })
-                }
+        //поля всех указанных групп (groups)
+        dp.groups.forEach { gr ->
+            run {
+                val datagroup = dm.groups.computeIfAbsent(gr,
+                        { t -> throw SNF("group ${gr} of ${dp.entity} entity not found") })
+                allFields.addAll(datagroup.fields.map { f -> f.toLowerCase() })
             }
-            //поля, указанные как поля
-            dp.fields.forEach { f -> allFields.add(f.key.toLowerCase()) }
-
-            return allFields
         }
+        //поля, указанные как поля
+        dp.fields.forEach { f -> allFields.add(f.key.toLowerCase()) }
 
-
-        fun applyColumnNamesInFormula(formula: String, qr: QueryBuildContext, ql: QueryLevel): String {
-            var resolver = QueryVariablesResolver(qr, ql)
-            var s = StrSubstitutor(resolver, "{{", "}}", '/')
-            return s.replace(formula)
-        }
+        return allFields
     }
+
+
+    fun applyColumnNamesInFormula(formula: String, qr: QueryBuildContext, ql: QueryLevel): String {
+        var resolver = QueryVariablesResolver(qr, ql)
+        var s = StrSubstitutor(resolver, "{{", "}}", '/')
+        return s.replace(formula)
+    }
+}

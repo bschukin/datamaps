@@ -55,7 +55,7 @@ class DataMapping(var name: String, var table: String) {
     }
 
     override fun toString(): String {
-        return "DataMapping(name='$name', table='$table')"
+        return "DataMapping(entity='$name', table='$table')"
     }
 
 
@@ -114,7 +114,7 @@ class DataField(var name: String) {
 
 
     override fun toString(): String {
-        return "DataField(name='$name')"
+        return "DataField(entity='$name')"
     }
 
 

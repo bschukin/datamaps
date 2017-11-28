@@ -6,7 +6,6 @@ import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.f
 import com.datamaps.mappings.projection
 import com.datamaps.mappings.slice
-import org.springframework.beans.factory.annotation.Autowired
 import org.testng.Assert
 import org.testng.Assert.assertEquals
 import org.testng.Assert.assertNotEquals
@@ -17,10 +16,7 @@ import org.testng.annotations.Test
  */
 class QueryBuilderFormulasTests : BaseSpringTests() {
 
-    @Autowired
-    lateinit var queryBuilder: QueryBuilder
-    @Autowired
-    lateinit var dataService: DataService
+
 
     //базовый тест на
     @Test

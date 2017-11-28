@@ -12,7 +12,7 @@ import java.lang.reflect.Type
 class DataMap {
 
     @SerializedName("entity")
-    var name:String
+    var entity:String
 
     var id: Long? = null
         get() = field
@@ -28,12 +28,12 @@ class DataMap {
     private val backRefs = caseInsMapOf<String>()
 
     constructor (name: String, id: Long)  {
-        this.name = name
+        this.entity = name
         this.id = id
     }
 
     constructor (name: String, id: Long, props:Map<String, Any> )  {
-        this.name = name
+        this.entity = name
         this.id = id
         props.forEach { t, u -> map[t]=u }
     }
@@ -83,14 +83,14 @@ class DataMap {
         if (this === other) return true
         other as DataMap
 
-        if (!name.equals(other.name, true)) return false
+        if (!entity.equals(other.entity, true)) return false
         if (id != other.id) return false
 
         return true
     }
 
     override fun hashCode(): Int {
-        var result = name.hashCode()
+        var result = entity.hashCode()
         result = 31 * result + (id?.hashCode() ?: 0)
         return result
     }
@@ -104,7 +104,7 @@ class DMSerializer : JsonSerializer<DataMap> {
 
         val jsonObject = JsonObject()
 
-        jsonObject.addProperty("entity", obj.name)
+        jsonObject.addProperty("entity", obj.entity)
         jsonObject.addProperty("id", obj.id)
         obj.map.forEach { t, u ->
 
@@ -112,7 +112,7 @@ class DMSerializer : JsonSerializer<DataMap> {
                 u is DataMap -> {
                     if(obj.isBackRef(t))
                     jsonObject.add(t, context.serialize(
-                            DataMap(u.name, u.id!!, mapOf("isBackRef" to true)))
+                            DataMap(u.entity, u.id!!, mapOf("isBackRef" to true)))
                     )
                     else jsonObject.add(t, context.serialize(u))
                 }
@@ -134,4 +134,8 @@ fun printDataMap(dm: DataMap): String {
             .registerTypeAdapter(DataMap::class.java, DMSerializer())
             .setPrettyPrinting().create()
     return gson.toJson(dm)
+}
+
+fun mergeDataMaps(tos: List<DataMap>, froms:List<DataMap>):  List<DataMap> {
+   TODO()
 }

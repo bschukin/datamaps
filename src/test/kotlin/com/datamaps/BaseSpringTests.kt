@@ -1,5 +1,8 @@
 package com.datamaps
 
+import com.datamaps.services.DataService
+import com.datamaps.services.QueryBuilder
+import com.datamaps.services.QueryExecutor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.env.Environment
@@ -7,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
 import org.testng.Assert
+import javax.annotation.Resource
 
 
 /**
@@ -27,6 +31,14 @@ class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
     @Autowired
     lateinit var env: Environment
 
+    @Autowired
+    lateinit var queryBuilder: QueryBuilder
+
+    @Autowired
+    lateinit var dataService: DataService
+
+    @Resource
+    lateinit var queryExecutor: QueryExecutor
 
     fun isProstgress():Boolean = env.activeProfiles.contains("postgresql")
 

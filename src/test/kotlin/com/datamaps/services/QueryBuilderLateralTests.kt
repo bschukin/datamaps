@@ -2,7 +2,6 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.mappings.projection
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.testng.annotations.Test
 
@@ -13,10 +12,6 @@ import org.testng.annotations.Test
 //@SpringBootTest
 class QueryBuilderLateralTests : BaseSpringTests() {
 
-    @Autowired
-    lateinit var queryBuilder: QueryBuilder
-    @Autowired
-    lateinit var dataService: DataService
 
 
     @Test

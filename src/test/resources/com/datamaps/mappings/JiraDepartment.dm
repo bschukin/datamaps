@@ -1,5 +1,5 @@
 {
-  "name": "JiraDepartment",
+  "entity": "JiraDepartment",
   "table": "DEPARTMENT",
   "fields": [         //это дефолтная группа полей
     {

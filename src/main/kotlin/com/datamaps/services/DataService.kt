@@ -1,6 +1,7 @@
 package com.datamaps.services
 
 import com.datamaps.mappings.DataProjection
+import com.datamaps.mappings.projection
 import com.datamaps.maps.DataMap
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
@@ -13,6 +14,8 @@ interface DataService {
     operator fun get(entityName: String, id: Long): DataMap?
 
     fun findAll(dp: DataProjection):List<DataMap>
+
+    fun upgrade(maps: List<DataMap>, slice: projection):List<DataMap>
 }
 
 
@@ -22,12 +25,11 @@ interface DataService {
 class DataServiceImpl : DataService
 {
 
+    @Resource
+    lateinit var queryBuilder: QueryBuilder
 
     @Resource
-    lateinit var queryBuilder: QueryBuilder;
-
-    @Resource
-    lateinit var queryExecutor: QueryExecutor;
+    lateinit var queryExecutor: QueryExecutor
 
     override fun get(entityName: String, id: Long): DataMap? {
 
@@ -37,7 +39,20 @@ class DataServiceImpl : DataService
 
     override fun findAll(dp: DataProjection):List<DataMap> {
         val q = queryBuilder.createQueryByDataProjection(dp)
-        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
         return queryExecutor.findAll(q)
+    }
+
+    override fun upgrade(maps: List<DataMap>, slice: projection): List<DataMap> {
+
+        if(maps.isEmpty())
+            return maps
+
+        //составляем запрос на slice
+        val q = queryBuilder.createUpgradeQueryByMapsAndSlices(maps, slice)
+        //исполняем запрос
+        val sliceMaps  = queryExecutor.findAll(q)
+
+
+        TODO()
     }
 }

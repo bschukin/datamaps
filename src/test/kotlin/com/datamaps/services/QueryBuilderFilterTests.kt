@@ -3,16 +3,12 @@ package com.datamaps.services
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.*
-import org.springframework.beans.factory.annotation.Autowired
 import org.testng.annotations.Test
 
 /**
  * Created by Щукин on 03.11.2017.
  */
 class QueryBuilderFilterTests : BaseSpringTests() {
-
-    @Autowired
-    lateinit var queryBuilder: QueryBuilder
 
     @Test
     fun testQueryAliases01() {
