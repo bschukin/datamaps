@@ -46,6 +46,31 @@ class QueryBuilderFormulasTests : BaseSpringTests() {
         assertEqIgnoreCase(e[0]["genderCaption"], "Ж")
     }
 
+
+    @Test
+    fun testSelectColumn01WithWhere() {
+        val dp = DataProjection("JiraGender")
+                .formula("genderCaption", """
+                    case when {{id}}=1 then 'Ж'
+                         when {{id}}=2 then 'М'
+                         else 'О' end
+                """)
+                .where("{{genderCaption}} = :param0")
+                .param("param0", 'Ж')
+
+        val q = queryBuilder.createQueryByDataProjection(dp)
+
+        println(q.sql)
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        val e = dataService.findAll(dp)
+        e.forEach {
+            print(e)
+        }
+        Assert.assertEquals(e.size, 1)
+        assertEqIgnoreCase(e[0]["genderCaption"], "Ж")
+    }
+
     @Test(invocationCount = 1)
     fun testFormula02OnNestedEntity() {
         var dp = projection("JiraWorker")
@@ -69,7 +94,5 @@ class QueryBuilderFormulasTests : BaseSpringTests() {
         assertEquals(res[1]("gender")["genderCaption"], "Ж")
         assertNotEquals(res[0].id, res[1].id)
     }
-
-
 
 }

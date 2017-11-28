@@ -3,6 +3,7 @@ package com.datamaps.services
 import com.datamaps.general.throwNIS
 import com.datamaps.general.validateNIY
 import com.datamaps.mappings.*
+import org.apache.commons.lang.text.StrSubstitutor
 import org.springframework.stereotype.Service
 
 /**
@@ -48,6 +49,22 @@ class QueryFilterBuilder {
             qr.where += buildWhereByExp(qr, it)
         }
 
+        projection.where()?.let {
+            if (!qr.where.isBlank())
+                qr.where += " AND "
+
+            qr.where += buildWhereByQOLString(qr, it)
+            qr.params.putAll( qr.root.dp.params )
+        }
+
+    }
+
+    private fun buildWhereByQOLString(qr: QueryBuildContext, it: String): String {
+
+        var resolver = QueryVariablesResolver(qr, qr.root)
+        var s = StrSubstitutor(resolver, "{{", "}}", '/')
+        return s.replace(it)
+
     }
 
     private fun buildWhereByExp(qr: QueryBuildContext, exp: exp): String {
@@ -76,7 +93,6 @@ class QueryFilterBuilder {
     private fun buildFilterValue(qr: QueryBuildContext, exp: value): String {
         return ":${qr.addParam(exp.v)}"
     }
-
 
 
 }

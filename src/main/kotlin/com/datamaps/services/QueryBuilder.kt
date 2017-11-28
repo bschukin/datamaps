@@ -3,10 +3,7 @@ package com.datamaps.services
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
 import com.datamaps.general.throwNIS
-import com.datamaps.mappings.DataField
-import com.datamaps.mappings.DataMapping
-import com.datamaps.mappings.DataMappingsService
-import com.datamaps.mappings.DataProjection
+import com.datamaps.mappings.*
 import com.datamaps.util.DataConverter
 import org.apache.commons.lang.text.StrSubstitutor
 import org.springframework.stereotype.Service
@@ -53,7 +50,7 @@ class QueryBuilder {
     }
 
 
-    fun buildMainQueryStructure(qr: QueryBuildContext, parentProjection: DataProjection, field: String? = null):QueryLevel {
+    fun buildMainQueryStructure(qr: QueryBuildContext, parentProjection: DataProjection, field: String? = null): QueryLevel {
 
         val isRoot = field == null
 
@@ -80,7 +77,7 @@ class QueryBuilder {
 
         val ql = QueryLevel(dm, currProjection, alias, field, if (isRoot) null else qr.stack.peek())
 
-        if(isRoot)
+        if (isRoot)
             qr.root = ql
         //зарегистрируем алиас
         qr.addTableAlias(alias, ql)
@@ -120,13 +117,19 @@ class QueryBuilder {
         }
 
         //а теперь бежим по формулам
-        currProjection.formulas.forEach{ (formulaName,formulaBody)->
+        currProjection.formulas.forEach { (formulaName, formulaBody) ->
             buildFormula(qr, ql, formulaName, formulaBody)
+        }
+
+        //а теперь бежим по латералям
+        currProjection.laterals.forEach { l ->
+            buildLateral(qr, ql, l)
         }
 
 
         return qr.stack.pop()
     }
+
 
     private fun addOffsetLimit(qr: QueryBuildContext, dp: DataProjection) {
 
@@ -219,7 +222,7 @@ class QueryBuilder {
                 "FROM " + qr.from +
                 qr.getJoinString() +
                 (if (qr.where.isBlank()) " " else " \nWHERE " + qr.where) +
-                (if (qr.orderBy.isBlank()) " " else " \nORDER BY " + qr.orderBy)+
+                (if (qr.orderBy.isBlank()) " " else " \nORDER BY " + qr.orderBy) +
                 dbDialect.getLimitOffsetQueryInWhere(qr.limit, qr.offset)
 
 
@@ -266,51 +269,71 @@ class QueryBuilder {
 
     }
 
-    private fun buildFormula(qr: QueryBuildContext, ql:QueryLevel, formulaName:String, formula:String) {
-        //val formulaAlias = qr.getColumnAlias(ql.alias, formulaName)
+    private fun buildFormula(qr: QueryBuildContext, ql: QueryLevel, formulaName: String, formula: String) {
         var formulaSelect = applyColumnNamesInFormula(formula, qr, ql)
         ql.dp.formula(formulaName, formulaSelect)
-        qr.addSelectFormula(formulaName, formulaSelect)
+        qr.addSelectFromFormula(formulaName, formulaSelect)
         //добавляем простой маппер
         qr.addMapper(formulaName, { mc, rs ->
             if (mc.curr(ql.alias) != null)
                 mc.curr(ql.alias)!![formulaName] = rs.getObject(formulaName)
         })
-
     }
 
+    private fun buildLateral(qr: QueryBuildContext, ql: QueryLevel, lateral: Lateral) {
 
-    //получаем список всех полей которые мы будем селектить
-    //все поля =
-    //      поля дефлотной группы
-    //  U   поля всех указанных групп (groups)
-    //  U   поля указанные в списке fields
-    private fun getAllFieldsOnLevel(dp: DataProjection, dm: DataMapping): Set<String> {
-        val allFields = mutableSetOf<String>()
-        allFields.add(dm.idColumn!!.toLowerCase())
-        // поля дефлотной группы
-        if (dp.fields.size == 0)
-            allFields.addAll(dm.defaultGroup.fields.map { f -> f.toLowerCase() })
+        //зарегистрируем алиас таблицы
+        qr.addTableAlias(lateral.table, ql)
 
-        //поля всех указанных групп (groups)
-        dp.groups.forEach { gr ->
+        var sql = applyColumnNamesInFormula(lateral.sql, qr, ql)
+        sql = "\r\nLEFT JOIN LATERAL ${sql} "
+        qr.addJoin(sql)
+
+        //для каждого замапленного латералем маппинга (алиас в латерале ->алиас в маппинге) надо сделать маппинг
+        lateral.mappings.forEach { k, v ->
             run {
-                val datagroup = dm.groups.computeIfAbsent(gr,
-                        { t -> throw SNF("group ${gr} of ${dp.entity} entity not found") })
-                allFields.addAll(datagroup.fields.map { f -> f.toLowerCase() })
+                //добавляем алиас колонки в селект
+                val colAlias = qr.addSelect(lateral.table, k)
+                //добавляем простой маппер
+                qr.addMapper(colAlias, { mc, rs ->
+                    if (mc.curr(ql.alias) != null)
+                        mc.curr(ql.alias)!![v] = rs.getObject(colAlias)
+                })
             }
         }
-        //поля, указанные как поля
-        dp.fields.forEach { f -> allFields.add(f.key.toLowerCase()) }
-
-        return allFields
     }
 
 
-    fun applyColumnNamesInFormula(formula:String, qr:QueryBuildContext, ql:QueryLevel):String
-    {
-        var resolver = QueryVariablesResolver(qr,ql)
-        var s = StrSubstitutor(resolver, "{{", "}}", '/')
-        return s.replace(formula)
+        //получаем список всех полей которые мы будем селектить
+        //все поля =
+        //      поля дефлотной группы
+        //  U   поля всех указанных групп (groups)
+        //  U   поля указанные в списке fields
+        private fun getAllFieldsOnLevel(dp: DataProjection, dm: DataMapping): Set<String> {
+            val allFields = mutableSetOf<String>()
+            allFields.add(dm.idColumn!!.toLowerCase())
+            // поля дефлотной группы
+            if (dp.fields.size == 0)
+                allFields.addAll(dm.defaultGroup.fields.map { f -> f.toLowerCase() })
+
+            //поля всех указанных групп (groups)
+            dp.groups.forEach { gr ->
+                run {
+                    val datagroup = dm.groups.computeIfAbsent(gr,
+                            { t -> throw SNF("group ${gr} of ${dp.entity} entity not found") })
+                    allFields.addAll(datagroup.fields.map { f -> f.toLowerCase() })
+                }
+            }
+            //поля, указанные как поля
+            dp.fields.forEach { f -> allFields.add(f.key.toLowerCase()) }
+
+            return allFields
+        }
+
+
+        fun applyColumnNamesInFormula(formula: String, qr: QueryBuildContext, ql: QueryLevel): String {
+            var resolver = QueryVariablesResolver(qr, ql)
+            var s = StrSubstitutor(resolver, "{{", "}}", '/')
+            return s.replace(formula)
+        }
     }
-}

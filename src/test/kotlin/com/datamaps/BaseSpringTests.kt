@@ -2,6 +2,7 @@ package com.datamaps
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.core.env.Environment
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
@@ -22,6 +23,12 @@ class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
 
     @Autowired
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+
+    @Autowired
+    lateinit var env: Environment
+
+
+    fun isProstgress():Boolean = env.activeProfiles.contains("postgresql")
 
 
 

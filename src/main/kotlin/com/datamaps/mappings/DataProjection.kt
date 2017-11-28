@@ -1,6 +1,7 @@
 package com.datamaps.mappings
 
 import com.datamaps.general.validate
+import com.datamaps.util.lcims
 import com.datamaps.util.linkedCaseInsMapOf
 
 /**
@@ -38,11 +39,19 @@ open class DataProjection {
     //вычислимые поля (формулы)
     var formulas = linkedCaseInsMapOf<String>()
 
+    //вычислимые поля, основанные на латеральных джойнах
+    var laterals = mutableListOf<Lateral>()
+
+    var params = mutableMapOf<String, Any?>()
+
     //выражение  where
     private var filter: exp? = null
 
+    //альтернативный вариант where - "OQL"
+    private var oql: String? = null
+
     //выражение  where
-    private val orders= mutableListOf<ExpressionField>()
+    private val orders = mutableListOf<ExpressionField>()
 
     var limit: Int? = null
     var offset: Int? = null
@@ -99,10 +108,10 @@ open class DataProjection {
     }
 
 
-     fun with(slice: ()->DataProjection):DataProjection {
-         val sl = slice()
-         fields[sl.parentField] = sl
-         return this
+    fun with(slice: () -> DataProjection): DataProjection {
+        val sl = slice()
+        fields[sl.parentField] = sl
+        return this
     }
 
 
@@ -112,13 +121,36 @@ open class DataProjection {
         return this
     }
 
-    fun formula(name: String, formula:String): DataProjection {
+    fun formula(name: String, formula: String): DataProjection {
         formulas[name] = formula
         return this
     }
 
+    fun lateral(table:String, sql: String, vararg pairs: Pair<String, String>): DataProjection
+    {
+        val lmap = linkedCaseInsMapOf<String>()
+        pairs.forEach { pair->
+            lmap[pair.second] = pair.first
+        }
+        laterals.add(Lateral(table, sql, linkedCaseInsMapOf(*pairs)))
+        return this
+    }
+
+    fun isLateral(alias:String):Boolean
+    {
+        return laterals.filter { l->l.table==alias }.isNotEmpty()
+    }
+
     fun isRoot() = parentField == null
 
+    fun where(): String? {
+        return this.oql
+    }
+
+    fun where(oql:String): DataProjection {
+        this.oql = oql
+        return this
+    }
 
     fun filter(): exp? {
         return filter
@@ -150,8 +182,17 @@ open class DataProjection {
     }
 
     fun orders() = orders
+
+    fun param(k: String, v: Any?): DataProjection {
+        this.params[k] = v
+        return this
+    }
 }
 
+data class Lateral(val table: String, val sql:String, val mappings: lcims)
+{
+
+}
 class slice(f:String):DataProjection(null, f)
 {
 

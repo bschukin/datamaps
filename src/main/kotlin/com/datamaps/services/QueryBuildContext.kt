@@ -3,12 +3,10 @@ package com.datamaps.services
 import com.datamaps.general.throwNIS
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataProjection
-import com.datamaps.mappings.f
 import com.datamaps.maps.DataMap
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf
 import org.apache.commons.lang.text.StrLookup
-import org.apache.commons.lang.text.StrSubstitutor
 import java.sql.ResultSet
 import java.util.*
 import java.util.stream.Collectors
@@ -18,13 +16,13 @@ import java.util.stream.Collectors
  */
 class QueryBuildContext {
 
-    //карта ключ: {tableAlias.parentField}-->{уникальный алиас колонки в запросе}
+    //карта ключ: {алиасТаблицы.имяколонки}-->{уникальный алиас колонки в запросе}
     var columnAliases = linkedCaseInsMapOf<String>()
 
     //карта - таблица - выданное число алиасов
     var aliasTableCounters = mutableMapOf<String, Int>()
 
-    //карта - таблица - выданное число алиасов
+    //карта - алиасТаблицы - узел дерева, на котором он был сгенирован
     private val tableAliases = caseInsMapOf<QueryLevel>()
 
     //карта - колонка(без указания таблицы) - выданное число алиасов
@@ -84,7 +82,7 @@ class QueryBuildContext {
         return res
     }
 
-    fun addSelectFormula(formulaName: String, formula: String) {
+    fun addSelectFromFormula(formulaName: String, formula: String) {
         columnAliases[formulaName] = formulaName
         selectColumns.add(" (${formula}) AS  ${formulaName}")
     }
@@ -191,6 +189,9 @@ class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
     fun getSqlColumn(alias: String, name: String, useAlias: Boolean = true): String {
         if (dp.formulas.containsKey(name))
             return "(${dp.formulas[name]!!})"
+
+        if(dp.isLateral(alias))
+            return "${alias}.${name}"
 
         return if (useAlias)
             "${alias}.${dm.get(name).sqlcolumn!!}"
