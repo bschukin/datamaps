@@ -20,9 +20,9 @@ class QueryFilterBuilder {
         val projection = qr.root.dp
 
         qr.orderBy +=
-                projection.orders().map { m ->
+                projection.orders().joinToString(", ") { m ->
                     buildFieldOrder(qr, m)
-                }.joinToString(", ")
+                }
     }
 
     private fun buildFieldOrder(qr: QueryBuildContext, f: f): String {
@@ -61,8 +61,8 @@ class QueryFilterBuilder {
 
     private fun buildWhereByQOLString(qr: QueryBuildContext, it: String): String {
 
-        var resolver = QueryVariablesResolver(qr, qr.root)
-        var s = StrSubstitutor(resolver, "{{", "}}", '/')
+        val resolver = QueryVariablesResolver(qr, qr.root)
+        val s = StrSubstitutor(resolver, "{{", "}}", '/')
         return s.replace(it)
 
     }

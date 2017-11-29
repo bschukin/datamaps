@@ -194,7 +194,7 @@ class QueryBuilderTests : BaseSpringTests() {
                 .full()
                 .with {
                     slice("JiraTasks")
-                            .full()
+                            .scalars().withRefs()
                 }
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
@@ -217,7 +217,7 @@ class QueryBuilderTests : BaseSpringTests() {
                 .full()
                 .with {
                     slice("jiraTasks")
-                            .full()
+                            .scalars().withRefs()
                 }
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
@@ -242,7 +242,7 @@ class QueryBuilderTests : BaseSpringTests() {
                 .alias("JP")
                 .with {
                     slice("jiraTasks")
-                            .full()
+                            .scalars().withRefs()
                 }
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
@@ -268,7 +268,7 @@ class QueryBuilderTests : BaseSpringTests() {
                 .with {
                     slice("jiraTasks")
                             .alias("JT")
-                            .full()
+                            .scalars().withRefs()
                 }
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()

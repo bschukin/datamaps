@@ -29,3 +29,7 @@ INSERT INTO Jira_TASK (ID, name, jira_project_id) VALUES (2, 'SAUMI-002', 1);
 
 INSERT INTO Jira_TASK (ID, name, jira_project_id) VALUES (3, 'QDP-003', 2);
 INSERT INTO Jira_TASK (ID, name, jira_project_id) VALUES (4, 'QDP-004', 2);
+
+
+INSERT INTO JIRA_CHECKLIST (ID, name, jira_task_id) VALUES (1, 'foo check', 3);
+INSERT INTO JIRA_CHECKLIST (ID, name, jira_task_id) VALUES (2, 'bar check', 3);

@@ -144,7 +144,7 @@ class QueryExecutorTests : BaseSpringTests() {
                 .full()
                 .with {
                     slice("jiraTasks")
-                            .full()
+                            .scalars().withRefs()
                 }
         //1 тест на  структуру по которой построится запрос
         val q = queryBuilder.createQueryByDataProjection(dp)

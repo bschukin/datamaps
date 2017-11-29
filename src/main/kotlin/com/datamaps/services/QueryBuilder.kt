@@ -5,6 +5,7 @@ import com.datamaps.general.SNF
 import com.datamaps.general.throwNIS
 import com.datamaps.mappings.*
 import com.datamaps.maps.DataMap
+import com.datamaps.maps.addIfNotIn
 import com.datamaps.util.DataConverter
 import org.apache.commons.lang.text.StrSubstitutor
 import org.springframework.stereotype.Service
@@ -38,6 +39,11 @@ class QueryBuilder {
 
         slice.entity = maps[0].entity
 
+        //todo: сейчас есть лишний джойн на родительскую сущность
+        //на самом деле от него можно избавиться (если в слайсе только одна ссылка)
+        //slice {collcetion1,
+        // collection2} - в этом случае не избавиться от джойна на родительскую суть
+        //если же slice {collcetion1} то джойн на родителя не нужен
         slice.onlyId()
                 .filter(f("id") IN maps.map { dm -> dm.id })
 
@@ -190,7 +196,7 @@ class QueryBuilder {
             //при маппировании необходимо в текущую сущность положить ссыль на родителя
             //смаппируем это на ID текущей сущноси
             val idAlias = qr.getColumnAlias(currLevel.alias, currLevel.dm.idColumn)
-            qr.addMapper(idAlias, { mc, rs ->
+            qr.addMapper(idAlias, { mc, _ ->
                 val parentmapa = mc.curr[parent.alias]
                 val currentmapa = mc.curr[currLevel.alias]
                 parentmapa?.let {
@@ -245,12 +251,11 @@ class QueryBuilder {
         val ql = qr.stack.peek()
         qr.addMapper(columnAlias, { mc, rs ->
             val id = dataConverter.convert(rs.getObject(columnAlias), Long::class.java)
-            when {
-                id == null ->
+            when (id) {
+                null ->
                     mc.curr(ql.parent!!.alias)?.let {
                         mc.curr(ql.parent.alias)!!.nullf(ql.parentLinkField!!)
                     }
-
                 else -> {
                     val datamap = mc.create(entityAlias, dm.name, id)
 
@@ -258,13 +263,12 @@ class QueryBuilder {
                         val parentField = ql.parent!!.dm[ql.parentLinkField]
                         when {
                             parentField.isM1 -> mc.curr(ql.parent.alias)!![ql.parentLinkField] = datamap
-                            parentField.is1N -> mc.curr(ql.parent.alias)!!.list(ql.parentLinkField).add(datamap)
+                            parentField.is1N -> mc.curr(ql.parent.alias)!!.list(ql.parentLinkField).addIfNotIn(datamap)
                             else -> throwNIS()
                         }
                     }
 
                 }
-
             }
         })
     }
@@ -281,7 +285,7 @@ class QueryBuilder {
     }
 
     private fun buildFormula(qr: QueryBuildContext, ql: QueryLevel, formulaName: String, formula: String) {
-        var formulaSelect = applyColumnNamesInFormula(formula, qr, ql)
+        val formulaSelect = applyColumnNamesInFormula(formula, qr, ql)
         ql.dp.formula(formulaName, formulaSelect)
         qr.addSelectFromFormula(formulaName, formulaSelect)
         //добавляем простой маппер
@@ -297,7 +301,7 @@ class QueryBuilder {
         qr.addTableAlias(lateral.table, ql)
 
         var sql = applyColumnNamesInFormula(lateral.sql, qr, ql)
-        sql = "\r\nLEFT JOIN LATERAL ${sql} "
+        sql = "\r\nLEFT JOIN LATERAL $sql "
         qr.addJoin(sql)
 
         //для каждого замапленного латералем маппинга (алиас в латерале ->алиас в маппинге) надо сделать маппинг
@@ -343,8 +347,8 @@ class QueryBuilder {
 
 
     fun applyColumnNamesInFormula(formula: String, qr: QueryBuildContext, ql: QueryLevel): String {
-        var resolver = QueryVariablesResolver(qr, ql)
-        var s = StrSubstitutor(resolver, "{{", "}}", '/')
+        val resolver = QueryVariablesResolver(qr, ql)
+        val s = StrSubstitutor(resolver, "{{", "}}", '/')
         return s.replace(formula)
     }
 }

@@ -74,6 +74,14 @@ class DataMap {
         return backRefs.containsKey(name)
     }
 
+    fun nested(property: String):Any? {
+        return getNestedPropertiy(this, property)
+    }
+
+    fun nestedl(property: String):List<DataMap> {
+        return getNestedPropertiy(this, property) as List<DataMap>
+    }
+
     override fun toString(): String {
         return printDataMap(this)
     }
@@ -107,15 +115,15 @@ class DMSerializer : JsonSerializer<DataMap> {
         jsonObject.addProperty("id", obj.id)
         obj.map.forEach { t, u ->
 
-            when {
-                u is DataMap -> {
+            when (u) {
+                is DataMap -> {
                     if (obj.isBackRef(t))
                         jsonObject.add(t, context.serialize(
                                 DataMap(u.entity, u.id!!, mapOf("isBackRef" to true)))
                         )
                     else jsonObject.add(t, context.serialize(u))
                 }
-                u is Collection<*> -> {
+                is Collection<*> -> {
                     val arr = JsonArray()
                     u.forEach { e -> arr.add(context.serialize(e)) }
                     jsonObject.add(t, arr)
@@ -182,7 +190,7 @@ private fun mergeDataMaps(target: DataMap, provider: DataMap, map: MutableMap<Da
 private fun mergeDataMaps(target: List<DataMap>?, provider: List<DataMap>,
                           map: MutableMap<DataMap, DataMap>, canAddNewEntities: Boolean = true): List<DataMap> {
 
-    if(!canAddNewEntities)
+    if (!canAddNewEntities)
         checkNIS(target?.size == provider.size)
 
     if (target == null || target.isEmpty()) return ArrayList(provider)
@@ -204,4 +212,36 @@ private fun mergeDataMaps(target: List<DataMap>?, provider: List<DataMap>,
 
 fun List<DataMap>.findById(id: Long?): DataMap? {
     return this.find { dm -> dm.id == id }
+}
+
+fun MutableList<DataMap>.addIfNotIn(dataMap: DataMap) {
+    if (findById(dataMap.id) == null)
+        this.add(dataMap)
+}
+
+
+fun getNestedPropertiy(dm: DataMap, nested: String):Any? {
+    var curr = dm
+    var list = nested.split('.')
+
+    for (item: Int in IntRange(0, list.size - 2)) {
+        val prop = getIndexedProperty(list[item])
+        var obj = curr[prop.first]
+        if(obj is List<*> && prop.second>=0)
+            obj = obj[prop.second]
+
+        if(obj is DataMap)
+            curr = obj
+    }
+    return curr[list[list.size-1]]
+}
+
+private fun getIndexedProperty(prop:String):Pair<String, Int>
+{
+
+    var index = prop.indexOf('[')
+    val name = if(index>0) prop.substring(0, index) else prop
+    val ind = if(index>0) Integer.parseInt(prop.substring(index+1, prop.length-1)) else -1
+
+    return Pair(name, ind)
 }
