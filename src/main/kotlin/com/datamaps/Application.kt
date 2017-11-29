@@ -13,7 +13,7 @@ import javax.annotation.Resource
  *
  */
 
-@SpringBootApplication(scanBasePackages = arrayOf("com.datamaps"))
+@SpringBootApplication(scanBasePackages = ["com.datamaps"])
 //@ImportResource("classpath:app-context.xml")
 class KotlinDemoApplication {
 

@@ -1,11 +1,11 @@
 package com.datamaps.services
 
 import com.datamaps.general.NIY
+import com.datamaps.general.checkNIS
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
-import org.springframework.util.Assert
 import java.sql.JDBCType
 import java.util.stream.Collectors
 import javax.annotation.Resource
@@ -134,7 +134,7 @@ class GenericDbMetadataService : DbMetadataService {
             return tables[table]!!
 
         val dbtable = readDbMetadata(table)
-        tables[table] = dbtable;
+        tables[table] = dbtable
 
         return dbtable
     }
@@ -147,7 +147,7 @@ class GenericDbMetadataService : DbMetadataService {
         val rs = md.getTables(null, null, dbDialect.getDbIdentifier(table), null)
         rs.next()
         if (!(rs.isFirst && rs.isLast))
-            throw RuntimeException("Table '${table}' not found in db");
+            throw RuntimeException("Table '$table' not found in db")
 
         val pk = md.getPrimaryKeys(null, dbDialect.getCurrentScheme(), dbDialect.getDbIdentifier(table))
         var pkField: String? = null
@@ -187,7 +187,7 @@ class GenericDbMetadataService : DbMetadataService {
             fk.onDelete = ForeignKeyCascade.values()[crs.getInt("DELETE_RULE")]
             fk.onUpdate = ForeignKeyCascade.values()[crs.getInt("UPDATE_RULE")]
 
-            Assert.isTrue(fk.fkTable.equals(dt.name))
+            checkNIS(fk.fkTable==dt.name)
             dt[fk.fkColumn].importedKey = fk
         }
 

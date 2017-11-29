@@ -39,11 +39,11 @@ class HsqldbDialect : DbDialect
     override fun getLimitOffsetQueryInSelect(limit:Int?, offset:Int?): String {
         var res=""
         limit?.let {
-            res+= "LIMIT ${limit}"
+            res+= "LIMIT $limit"
         }
         offset?.let {
             validate(limit!=null)
-            res+= " ${offset}"
+            res+= " $offset"
         }
         return res+" "
     }
@@ -57,10 +57,10 @@ class PostgresqlDialect : DbDialect
     override fun getLimitOffsetQueryInWhere(limit:Int?, offset:Int?): String {
         var res=""
         limit?.let {
-            res+= " LIMIT ${limit}"
+            res+= " LIMIT $limit"
         }
         offset?.let {
-            res+= " OFFSET ${offset}"
+            res+= " OFFSET $offset"
         }
         return res+" "
     }

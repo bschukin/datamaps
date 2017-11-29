@@ -18,10 +18,10 @@ import java.sql.JDBCType
 class DataMapping(var name: String, var table: String) {
 
     @SerializedName("scan-fields-in-db")
-    var scanFieldsInDb = false;
+    var scanFieldsInDb = false
 
     @SerializedName("id-column")
-    var idColumn: String? = ID;
+    var idColumn: String? = ID
     var fields = linkedCaseInsMapOf<DataField>()
 
     var groups: MutableMap<String, DataGroup> = linkedCaseInsMapOf<DataGroup>()
@@ -46,12 +46,12 @@ class DataMapping(var name: String, var table: String) {
         get() = groups[LIST]!!
 
 
-    fun add(field: DataField) = fields.merge(field.name, field, { t, u -> throw NIS() })
+    fun add(field: DataField) = fields.merge(field.name, field, { _, _ -> throw NIS() })
 
 
     operator fun get(field: String): DataField {
         return fields.computeIfAbsent(field.toLowerCase(),
-                { t -> throw SNF("parentLinkField '${field}' of '${name}' entity not found") })
+                { _ -> throw SNF("parentLinkField '$field' of '$name' entity not found") })
     }
 
     override fun toString(): String {
@@ -65,7 +65,7 @@ const val ID: String = "ID"
 const val DEFAULT: String = "DEFAULT"
 const val REFS: String = "REFS"
 const val FULL: String = "FULL"
-const val LIST: String = "LIST";
+const val LIST: String = "LIST"
 
 
 class DataField(var name: String) {
@@ -74,13 +74,13 @@ class DataField(var name: String) {
     var sqlcolumn: String? = null
 
     @SerializedName("m-1")
-    var manyToOne: ManyToOne? = null;
+    var manyToOne: ManyToOne? = null
 
     @SerializedName("1-m")
-    var oneToMany: OneToMany? = null;
+    var oneToMany: OneToMany? = null
 
     @SerializedName("m-m")
-    var manyToMany: ManyToMany? = null;
+    var manyToMany: ManyToMany? = null
 
     val isSimple: Boolean
         get() = manyToOne == null && oneToMany == null && manyToMany == null
@@ -131,31 +131,16 @@ class DataGroup(var name: String) {
 }
 
 class ManyToOne(var to: String,
-                @SerializedName("join-column") var joinColumn: String) {
-
-}
+                @SerializedName("join-column") var joinColumn: String)
 
 class OneToMany(var to: String,
-                @SerializedName("their-join-column") var theirJoinColumn: String) {
-
-    //var lazy:Boolean=true;
-
-}
+                @SerializedName("their-join-column") var theirJoinColumn: String)
 
 class ManyToMany(var to: String,
                  @SerializedName("join-table") var joinTable: String,
                  @SerializedName("our-join-column") var thisJoinColumn: String,
-                 @SerializedName("their-join-column") var theirJoinColumn: String) {
+                 @SerializedName("their-join-column") var theirJoinColumn: String)
 
-}
-
-enum class FieldType {
-    long,
-    string,
-    list,
-    set,
-    map
-}
 
 //https://db.apache.org/ojb/docu/guides/jdbc-types.html
 fun getJavaTypeByJDBCType(jdbcType: JDBCType): Class<*> {

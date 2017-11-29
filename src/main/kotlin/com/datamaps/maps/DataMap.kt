@@ -16,7 +16,6 @@ class DataMap {
     var entity: String
 
     var id: Long? = null
-        get() = field
         set(value) {
             if (id != null)
                 throw RuntimeException("cannot change id")
@@ -222,7 +221,7 @@ fun MutableList<DataMap>.addIfNotIn(dataMap: DataMap) {
 
 fun getNestedPropertiy(dm: DataMap, nested: String):Any? {
     var curr = dm
-    var list = nested.split('.')
+    val list = nested.split('.')
 
     for (item: Int in IntRange(0, list.size - 2)) {
         val prop = getIndexedProperty(list[item])
@@ -239,7 +238,7 @@ fun getNestedPropertiy(dm: DataMap, nested: String):Any? {
 private fun getIndexedProperty(prop:String):Pair<String, Int>
 {
 
-    var index = prop.indexOf('[')
+    val index = prop.indexOf('[')
     val name = if(index>0) prop.substring(0, index) else prop
     val ind = if(index>0) Integer.parseInt(prop.substring(index+1, prop.length-1)) else -1
 

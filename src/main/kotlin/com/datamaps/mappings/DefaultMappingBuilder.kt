@@ -23,7 +23,7 @@ class DefaultMappingBuilder {
 
     fun buildDefault(table: String): DataMapping {
 
-        var dbtable = dbMetadataService.getTableInfo(table)
+        val dbtable = dbMetadataService.getTableInfo(table)
         return buildDefault(dbtable)
 
     }
@@ -106,7 +106,7 @@ class DefaultMappingBuilder {
 /*можно ли влюкчить поле в дефолтную группу*/
 fun defaultGroupCandidate(col: DbColumn): Boolean {
     if (!col.isSimple())
-        return false;
+        return false
 
     return when (col.jdbcType) {
         JDBCType.BINARY, JDBCType.VARBINARY, JDBCType.LONGVARBINARY,

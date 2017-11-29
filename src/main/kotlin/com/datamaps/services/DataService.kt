@@ -34,8 +34,8 @@ class DataServiceImpl : DataService
 
     override fun get(entityName: String, id: Long): DataMap? {
 
-        val q = queryBuilder.createQueryByEntityNameAndId(entityName, id);
-        return queryExecutor.executeSingle(q);
+        val q = queryBuilder.createQueryByEntityNameAndId(entityName, id)
+        return queryExecutor.executeSingle(q)
     }
 
     override fun findAll(dp: DataProjection):List<DataMap> {

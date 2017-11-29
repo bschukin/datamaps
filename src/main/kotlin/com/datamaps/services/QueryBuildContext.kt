@@ -20,13 +20,13 @@ class QueryBuildContext {
     var columnAliases = linkedCaseInsMapOf<String>()
 
     //карта - таблица - выданное число алиасов
-    var aliasTableCounters = mutableMapOf<String, Int>()
+    private var aliasTableCounters = mutableMapOf<String, Int>()
 
     //карта - алиасТаблицы - узел дерева, на котором он был сгенирован
     private val tableAliases = caseInsMapOf<QueryLevel>()
 
     //карта - колонка(без указания таблицы) - выданное число алиасов
-    var aliasColumnCounters = mutableMapOf<String, Int>()
+    private var aliasColumnCounters = mutableMapOf<String, Int>()
 
     //колонки для селекта в формате {алиасТаблицы.имяколонки AS алиасКолонки}
     var selectColumns = mutableSetOf<String>()
@@ -61,7 +61,7 @@ class QueryBuildContext {
 
     var params = mutableMapOf<String, Any?>()
 
-    var paramNameCounter = 0
+    private var paramNameCounter = 0
 
     var offset: Int? = null
     var limit: Int? = null
@@ -78,27 +78,27 @@ class QueryBuildContext {
 
     fun addSelect(tableAlias: String, column: String?): String {
         val res = getColumnAlias(tableAlias, column)
-        selectColumns.add(" ${tableAlias}.${column}  AS  ${res}")
+        selectColumns.add(" $tableAlias.$column  AS  $res")
         return res
     }
 
     fun addSelectFromFormula(formulaName: String, formula: String) {
         columnAliases[formulaName] = formulaName
-        selectColumns.add(" (${formula}) AS  ${formulaName}")
+        selectColumns.add(" ($formula) AS  $formulaName")
     }
 
     fun addTableAlias(alias: String, queryLevel: QueryLevel) {
         tableAliases[alias] = queryLevel
     }
 
-    fun isTableAlias(alias: String): Boolean = tableAliases.containsKey(alias)
+    private fun isTableAlias(alias: String): Boolean = tableAliases.containsKey(alias)
 
-    fun getAliasQueryLevel(alias: String): QueryLevel = tableAliases[alias]!!
+    private fun getAliasQueryLevel(alias: String): QueryLevel = tableAliases[alias]!!
 
 
     fun addParentPathAlias(parentAlias: String?, parentProp: String?, alias: String) {
         val key = SPair(parentAlias ?: "", parentProp ?: "")
-        parentPathes.merge(key, alias, { t, u -> throwNIS("${key} already exist") })
+        parentPathes.merge(key, alias, { _, _ -> throwNIS("$key already exist") })
     }
 
     fun getAliasByPathFromParent(parentAlias: String?, parentProp: String?): String? {
@@ -121,17 +121,17 @@ class QueryBuildContext {
 
     fun createTableAlias(table: String): String {
         aliasTableCounters.putIfAbsent(table, 0)
-        val counter = aliasTableCounters.computeIfPresent(table) { s, integer -> integer + 1 }!!
+        val counter = aliasTableCounters.computeIfPresent(table) { _, integer -> integer + 1 }!!
         return table + counter
     }
 
 
     fun getColumnAlias(tableAlias: String, identifier: String?): String {
         val fullName = tableAlias + "." + identifier
-        return columnAliases.computeIfAbsent(fullName, { o ->
+        return columnAliases.computeIfAbsent(fullName, { _ ->
             run {
                 aliasColumnCounters.putIfAbsent(identifier!!, 0)
-                val counter = aliasColumnCounters.computeIfPresent(identifier) { s, integer -> integer + 1 }!!
+                val counter = aliasColumnCounters.computeIfPresent(identifier) { _, integer -> integer + 1 }!!
                 identifier + counter
             }
         })
@@ -168,13 +168,13 @@ class QueryBuildContext {
 
         }
 
-        if (returnTableQualifiedName)
-            return currLevel.getSqlColumn(alias, list.last())
+        return if (returnTableQualifiedName)
+            currLevel.getSqlColumn(alias, list.last())
         else
-            return getColumnIdentiferForFilter(alias, currLevel.getSqlColumn(alias, list.last(), false))
+            getColumnIdentiferForFilter(alias, currLevel.getSqlColumn(alias, list.last(), false))
     }
 
-    fun getColumnIdentiferForFilter(tableAlias: String, identifier: String): String {
+    private fun getColumnIdentiferForFilter(tableAlias: String, identifier: String): String {
         val fullName = tableAlias + "." + identifier
         return columnAliases[fullName] ?: fullName
     }
@@ -191,27 +191,27 @@ class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
             return "(${dp.formulas[name]!!})"
 
         if(dp.isLateral(alias))
-            return "${alias}.${name}"
+            return "$alias.$name"
 
         return if (useAlias)
-            "${alias}.${dm.get(name).sqlcolumn!!}"
+            "$alias.${dm[name].sqlcolumn!!}"
         else
-            dm.get(name).sqlcolumn!!
+            dm[name].sqlcolumn!!
     }
 }
 
 
-class MappingContext(val q: SqlQueryContext) {
+class MappingContext(private val q: SqlQueryContext) {
 
     //карта карт: "Ентити" -> {карта {id of entity}->{DataMap}  }
-    var mapOfMaps = caseInsMapOf<MutableMap<Long, DataMap>>()
+    private var mapOfMaps = caseInsMapOf<MutableMap<Long, DataMap>>()
 
     //карта "текущих" сущностей в текущей строке RowResult
     //{alias таблицы}-->{DataMap}
     //используется при маппировании
     var curr = caseInsMapOf<DataMap>()
 
-    var resultMap = linkedMapOf<Long, DataMap>()
+    private var resultMap = linkedMapOf<Long, DataMap>()
 
     /**
      * getOrCreate
@@ -236,24 +236,16 @@ class MappingContext(val q: SqlQueryContext) {
 
 }
 
-//public interface RowMapper //: BiFunction<MappingContext, ResultSet, Boolean>
-//{}
 
 typealias RowMapper = (MappingContext, ResultSet) -> Unit
 
-class SqlQueryContext(val sql: String, val dataProjection: DataProjection,
-                      val params: Map<String, Any?>, var qr: QueryBuildContext) {
-}
+class SqlQueryContext(val sql: String, val params: Map<String, Any?>,
+                      var qr: QueryBuildContext)
 
-class SPair {
+class SPair(s1: String, s2: String) {
 
-    val s1: String
-    val s2: String
-
-    constructor(s1: String, s2: String) {
-        this.s1 = s1.toLowerCase()
-        this.s2 = s2.toLowerCase()
-    }
+    private val s1: String = s1.toLowerCase()
+    private val s2: String = s2.toLowerCase()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -277,7 +269,7 @@ class SPair {
 }
 
 
-class QueryVariablesResolver(val qr: QueryBuildContext, val ql: QueryLevel) : StrLookup() {
+class QueryVariablesResolver(private val qr: QueryBuildContext, private val ql: QueryLevel) : StrLookup() {
     override fun lookup(key: String?): String {
         return qr.getFieldNameInQuery(key!!, ql.alias, ql, true)
     }

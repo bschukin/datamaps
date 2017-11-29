@@ -30,7 +30,7 @@ open class DataProjection {
     //id объекта - возможно указание только для рутовых ОП
     var id: Long? = null
     //для вложенных проекций - родительское поле
-    var parentField: String? = null
+    private var parentField: String? = null
     //группы, которые включеные в проекцию
     var groups = mutableListOf<String>()
     //поля, включенные в проекцию - в вилей проекций
@@ -56,8 +56,7 @@ open class DataProjection {
     var limit: Int? = null
     var offset: Int? = null
 
-    constructor() {
-    }
+    constructor()
 
     constructor(entity: String) {
         this.entity = entity
@@ -65,7 +64,7 @@ open class DataProjection {
 
     constructor(entity: String, id: Long) {
         this.entity = entity
-        this.id = id;
+        this.id = id
     }
 
     constructor(entity: String?, field: String?) {
@@ -145,7 +144,7 @@ open class DataProjection {
 
     fun isLateral(alias:String):Boolean
     {
-        return laterals.filter { l->l.table==alias }.isNotEmpty()
+        return laterals.any { l->l.table==alias }
     }
 
     fun isRoot() = parentField == null
@@ -198,13 +197,9 @@ open class DataProjection {
 }
 
 data class Lateral(val table: String, val sql:String, val mappings: lcims)
-{
 
-}
+
 class slice(f:String):DataProjection(null, f)
-{
-
-}
 
 open class exp {
 
@@ -268,9 +263,8 @@ open class exp {
     }
 }
 
-data class binaryOP(var left: exp, var right: exp, var op: Operation) : exp() {
+data class binaryOP(var left: exp, var right: exp, var op: Operation) : exp()
 
-}
 
 
 
@@ -304,10 +298,9 @@ data class NOT(val right: exp) : exp() {
 
 }
 
-data class AND(val left: exp, val right: exp) : exp() {
-}
+data class AND(val left: exp, val right: exp) : exp()
 
-class NULL() : exp() {
+class NULL : exp() {
 
 }
 
@@ -336,19 +329,8 @@ fun not(exp: exp): exp {
 }
 
 
-fun withCollections(): DataProjection {
-    return projection().withCollections()
-}
-
-fun with(slice: () -> DataProjection): DataProjection {
-    val sl = slice()
-    return sl
-}
-
 typealias expLamda = (m: Unit) -> exp
 typealias projection = DataProjection
-
-//typealias slice = DataProjection
 
 enum class Operation(val value: String) {
     eq("="),

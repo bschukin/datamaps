@@ -243,7 +243,7 @@ class QueryBuilder {
                 dbDialect.getLimitOffsetQueryInWhere(qr.limit, qr.offset)
 
 
-        return SqlQueryContext(sql, dp, qr.params, qr)
+        return SqlQueryContext(sql, qr.params, qr)
     }
 
     private fun buildIDfield(qr: QueryBuildContext, dm: DataMapping, entityAlias: String, entityField: DataField) {

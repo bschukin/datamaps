@@ -3,7 +3,6 @@ package com.datamaps.mappings
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.io.File
-import java.io.IOException
 import java.nio.file.FileVisitResult
 import java.nio.file.Files
 import java.nio.file.Path
@@ -38,7 +37,7 @@ class DmFileStorage {
                     override fun visitFile(path: Path?, attrs: BasicFileAttributes?): FileVisitResult {
                         if(path!=null) {
                             val f = path.toFile()
-                            if (f.extension.equals("dm"))
+                            if (f.extension == "dm")
                                 mappingFiles.put(path.fileName.toString(), f)
                         }
                         return FileVisitResult.CONTINUE
@@ -50,8 +49,8 @@ class DmFileStorage {
 
     private fun preparePathes() {
         // /datamaps/target/classes/
-        var path = DmFileStorage::class.java.protectionDomain.codeSource.location.file;
-        var index = path.lastIndexOf("target/classes")
+        var path = DmFileStorage::class.java.protectionDomain.codeSource.location.file
+        val index = path.lastIndexOf("target/classes")
         if (index > 0) {
             path = path.substring(0, index) + "src"
         }

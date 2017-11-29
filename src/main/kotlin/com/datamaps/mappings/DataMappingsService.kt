@@ -50,7 +50,7 @@ class DataMappingsService {
 
         //создание дефолтного маппинга для сущности
         //на основе jdbc-метаданных БД
-        var tableName = nameMappingsStrategy.getDbTableName(name)
+        val tableName = nameMappingsStrategy.getDbTableName(name)
         return defaultMappingBuilder.buildDefault(tableName)
     }
 
