@@ -3,6 +3,7 @@ package com.datamaps.services
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.projection
 import com.datamaps.maps.DataMap
+import com.datamaps.maps.mergeDataMaps
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
 
@@ -52,7 +53,6 @@ class DataServiceImpl : DataService
         //исполняем запрос
         val sliceMaps  = queryExecutor.findAll(q)
 
-
-        TODO()
+        return mergeDataMaps(maps, sliceMaps)
     }
 }

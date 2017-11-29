@@ -336,6 +336,15 @@ fun not(exp: exp): exp {
 }
 
 
+fun withCollections(): DataProjection {
+    return projection().withCollections()
+}
+
+fun with(slice: () -> DataProjection): DataProjection {
+    val sl = slice()
+    return sl
+}
+
 typealias expLamda = (m: Unit) -> exp
 typealias projection = DataProjection
 

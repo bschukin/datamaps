@@ -136,16 +136,19 @@ fun printDataMap(dm: DataMap): String {
 }
 
 
-
-fun mergeDataMaps(target: DataMap, provider: DataMap):DataMap {
+fun mergeDataMaps(target: DataMap, provider: DataMap): DataMap {
     return mergeDataMaps(target, provider, mutableMapOf())
 }
 
-private fun mergeDataMaps(target: DataMap, provider: DataMap, map:MutableMap<DataMap,DataMap>):DataMap {
+fun mergeDataMaps(target: List<DataMap>, provider: List<DataMap>): List<DataMap> {
+    return mergeDataMaps(target, provider, mutableMapOf(), false)
+}
 
-    if(target===provider || map.containsKey(target))
+private fun mergeDataMaps(target: DataMap, provider: DataMap, map: MutableMap<DataMap, DataMap>): DataMap {
+
+    if (target === provider || map.containsKey(target))
         return target
-    map[target]=target
+    map[target] = target
 
     checkNIS(target.entity == provider.entity)
     checkNIS(target.id == provider.id)
@@ -157,8 +160,8 @@ private fun mergeDataMaps(target: DataMap, provider: DataMap, map:MutableMap<Dat
             u is DataMap && target[t] != null -> {
                 target[t] = mergeDataMaps(target(t), u, map)
             }
-            u is List<*>  -> {
-                    target[t] = mergeDataMaps(target.list(t), provider.list(t), map)
+            u is List<*> -> {
+                target[t] = mergeDataMaps(target.list(t), provider.list(t), map)
             }
             else -> target[t] = u
         }
@@ -176,23 +179,29 @@ private fun mergeDataMaps(target: DataMap, provider: DataMap, map:MutableMap<Dat
  * Карты которые есть в провайдере и которых нет в target  - не учитываюся
  *
  */
-private fun mergeDataMaps(target: List<DataMap>?, provider: List<DataMap>, map:MutableMap<DataMap,DataMap>): List<DataMap> {
+private fun mergeDataMaps(target: List<DataMap>?, provider: List<DataMap>,
+                          map: MutableMap<DataMap, DataMap>, canAddNewEntities: Boolean = true): List<DataMap> {
 
-    if(target==null || target.isEmpty()) return ArrayList(provider)
+    if(!canAddNewEntities)
+        checkNIS(target?.size == provider.size)
 
-    target.forEach {  t->
-       provider.findById(t.id)?.let {
+    if (target == null || target.isEmpty()) return ArrayList(provider)
+
+    target.forEach { t ->
+        provider.findById(t.id)?.let {
             mergeDataMaps(t, it, map)
         }
     }
-    provider.forEach {  t->
-        if (target.findById(t.id)==null)
-            (target as MutableList<DataMap>).add(t)
 
-    }
+    if (canAddNewEntities)
+        provider.forEach { t ->
+            if (target.findById(t.id) == null)
+                (target as MutableList<DataMap>).add(t)
+        }
+
     return target
 }
 
-fun List<DataMap>.findById(id: Long?):DataMap? {
-    return this.find { dm->dm.id==id }
+fun List<DataMap>.findById(id: Long?): DataMap? {
+    return this.find { dm -> dm.id == id }
 }
