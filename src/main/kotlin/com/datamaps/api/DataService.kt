@@ -1,9 +1,13 @@
-package com.datamaps.services
+package com.datamaps.api
 
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.projection
 import com.datamaps.maps.DataMap
 import com.datamaps.maps.mergeDataMaps
+import com.datamaps.services.DeltaMachine
+import com.datamaps.services.QueryBuilder
+import com.datamaps.services.QueryExecutor
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
 
@@ -17,6 +21,8 @@ interface DataService {
     fun findAll(dp: DataProjection):List<DataMap>
 
     fun upgrade(maps: List<DataMap>, slice: projection):List<DataMap>
+
+    fun flush()
 }
 
 
@@ -25,6 +31,8 @@ interface DataService {
 @Service
 class DataServiceImpl : DataService
 {
+    @Autowired
+    lateinit var deltaMachine: DeltaMachine
 
     @Resource
     lateinit var queryBuilder: QueryBuilder
@@ -54,5 +62,10 @@ class DataServiceImpl : DataService
         val sliceMaps  = queryExecutor.findAll(q)
 
         return mergeDataMaps(maps, sliceMaps)
+    }
+
+    override fun flush()
+    {
+        deltaMachine.flush()
     }
 }

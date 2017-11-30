@@ -2,18 +2,24 @@ package com.datamaps.services
 
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.maps.DataMap
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
+import org.springframework.util.LinkedCaseInsensitiveMap
 import javax.annotation.PostConstruct
 import javax.annotation.Resource
+import kotlin.streams.toList
 
 
 /*Сервис отвечающий за изменения дата мапсов*/
 @Service
 class DeltaMachine {
+
+    private val LOGGER = LoggerFactory.getLogger(this.javaClass)
+
     @Resource
     lateinit var dataMappingsService: DataMappingsService
 
@@ -27,30 +33,36 @@ class DeltaMachine {
 
     fun flush() {
         val buckets = DeltaStore.flushToBuckets()
-        executeUpdateStatements(buckets)
-    }
+        val statements =  createUpdateStatements(buckets)
 
-    private fun executeUpdateStatements(buckets: List<DeltaBucket>) {
-        buckets.forEach { b ->
-            when (b.isUpdate()) {
-                true -> executeUpdate(b)
-                false -> TODO()
-            }
+        statements.forEach {st->
+            LOGGER.info("Execute: ${st.first} \n\t\t with params ${st.second}" )
+            namedParameterJdbcTemplate.update(st.first, st.second)
         }
     }
 
-    private fun executeUpdate(db: DeltaBucket) {
+    internal fun createUpdateStatements(buckets: List<DeltaBucket>): List<Pair<String, Map<String, Any?>>> {
+        return buckets.stream().map { b ->
+            when (b.isUpdate()) {
+                true -> createUpdate(b)
+                false -> TODO()
+            }
+        }.toList()
+    }
+
+    private fun createUpdate(db: DeltaBucket): Pair<String, Map<String, Any?>> {
         val mapping = dataMappingsService.getDataMapping(db.dm.entity)
-        var sql = "UPDATE ${mapping.table} SET "
+        var sql = "UPDATE ${mapping.table} SET"
         val map = mutableMapOf<String, Any?>()
-        db.deltas.forEach { delta ->
-            sql += "  ${mapping[delta.property].sqlcolumn} = :_${delta.property}"
+        db.deltas.values.forEach { delta ->
+            sql += " ${mapping[delta.property].sqlcolumn} = :_${delta.property}"
             map["_${delta.property}"] = delta.newValue
         }
         sql += " \n WHERE ${mapping.idColumn} = :_ID"
         map["_ID"] = db.dm.id
 
-        namedParameterJdbcTemplate.update(sql, map)
+        return Pair(sql, map)
+        //namedParameterJdbcTemplate.update(sql, map)
     }
 
 
@@ -110,7 +122,7 @@ object DeltaStore {
                 lastDM = delta.dm
                 res.add(currBucket!!)
             }
-            currBucket!!.deltas.add(delta)
+            currBucket!!.deltas[delta.property] = delta
         }
         return res
     }
@@ -137,9 +149,9 @@ internal data class Delta(val dm: DataMap, val property: String, val oldValue: A
 
 //набор изменений по одному мапу
 //один букет - одна DML ооперация
-internal data class DeltaBucket(val dm: DataMap, val deltas: MutableList<Delta> = mutableListOf()) {
+internal data class DeltaBucket(val dm: DataMap, val deltas: LinkedCaseInsensitiveMap<Delta> = LinkedCaseInsensitiveMap()) {
 
-    fun isUpdate() = dm.id!=null
+    fun isUpdate() = dm.id != null
 
 }
 

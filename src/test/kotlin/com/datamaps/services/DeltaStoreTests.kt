@@ -22,9 +22,10 @@ class DeltaStoreTests : BaseSpringTests() {
         dm.silentSet("bar", "bar0")
         dm["foo"] = "foo1"
         dm["bar"] = "bar1"
+        dm["bar"] = "bar2"  //второе изменение не должно учитываться в бакете
 
         val context = DeltaStore.context.get()
-        Assert.assertTrue(context.deltas.size==2)
+        Assert.assertTrue(context.deltas.size==3)
 
 
         val dm2 = DataMap("XXX", 2L)
@@ -34,7 +35,7 @@ class DeltaStoreTests : BaseSpringTests() {
         dm2["bar"] = "bar2"
         dm2["qqq"] = "qqq2"
 
-        Assert.assertTrue(context.deltas.size==5)
+        Assert.assertTrue(context.deltas.size==6)
 
 
         val buckets = DeltaStore.collectBuckets()
