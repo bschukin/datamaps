@@ -1,6 +1,7 @@
 package com.datamaps.maps
 
 import com.datamaps.general.checkNIS
+import com.datamaps.services.DeltaStore
 import com.datamaps.util.caseInsMapOf
 import com.google.gson.*
 import com.google.gson.annotations.SerializedName
@@ -43,7 +44,13 @@ class DataMap {
     }
 
     operator fun set(field: String, value: Any) {
+        val old =map[field]
         map[field] = value
+        DeltaStore.delta(this, field, old, value)
+    }
+
+    fun silentSet(name: String, value: Any) {
+        map[name] = value
     }
 
     operator fun invoke(f: String): DataMap {
@@ -100,6 +107,8 @@ class DataMap {
         result = 31 * result + (id?.hashCode() ?: 0)
         return result
     }
+
+
 
 
 }

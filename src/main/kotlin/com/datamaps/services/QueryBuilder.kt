@@ -201,7 +201,7 @@ class QueryBuilder {
                 val currentmapa = mc.curr[currLevel.alias]
                 parentmapa?.let {
                     currentmapa?.let {
-                        currentmapa[entityField.name] = parentmapa
+                        currentmapa.silentSet(entityField.name, parentmapa)
                         currentmapa.addBackRef(entityField.name)
                     }
                 }
@@ -262,7 +262,7 @@ class QueryBuilder {
                     ql.parentLinkField?.let {
                         val parentField = ql.parent!!.dm[ql.parentLinkField]
                         when {
-                            parentField.isM1 -> mc.curr(ql.parent.alias)!![ql.parentLinkField] = datamap
+                            parentField.isM1 -> mc.curr(ql.parent.alias)!!.silentSet(ql.parentLinkField, datamap)
                             parentField.is1N -> mc.curr(ql.parent.alias)!!.list(ql.parentLinkField).addIfNotIn(datamap)
                             else -> throwNIS()
                         }
@@ -279,7 +279,7 @@ class QueryBuilder {
         //добавляем простой маппер
         qr.addMapper(columnAlias, { mc, rs ->
             if (mc.curr(entityAlias) != null)
-                mc.curr(entityAlias)!![entityField.name] = rs.getObject(columnAlias)
+                mc.curr(entityAlias)!!.silentSet(entityField.name, rs.getObject(columnAlias))
         })
 
     }
@@ -291,7 +291,7 @@ class QueryBuilder {
         //добавляем простой маппер
         qr.addMapper(formulaName, { mc, rs ->
             if (mc.curr(ql.alias) != null)
-                mc.curr(ql.alias)!![formulaName] = rs.getObject(formulaName)
+                mc.curr(ql.alias)!!.silentSet(formulaName, rs.getObject(formulaName))
         })
     }
 
@@ -312,7 +312,7 @@ class QueryBuilder {
                 //добавляем простой маппер
                 qr.addMapper(colAlias, { mc, rs ->
                     if (mc.curr(ql.alias) != null)
-                        mc.curr(ql.alias)!![v] = rs.getObject(colAlias)
+                        mc.curr(ql.alias)!!.silentSet(v, rs.getObject(colAlias))
                 })
             }
         }
