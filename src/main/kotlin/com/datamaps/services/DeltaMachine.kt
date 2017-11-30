@@ -33,10 +33,10 @@ class DeltaMachine {
 
     fun flush() {
         val buckets = DeltaStore.flushToBuckets()
-        val statements =  createUpdateStatements(buckets)
+        val statements = createUpdateStatements(buckets)
 
-        statements.forEach {st->
-            LOGGER.info("Execute: ${st.first} \n\t\t with params ${st.second}" )
+        statements.forEach { st ->
+            LOGGER.info("\r\ndml: ${st.first} \n\t with params ${st.second}")
             namedParameterJdbcTemplate.update(st.first, st.second)
         }
     }
@@ -55,14 +55,19 @@ class DeltaMachine {
         var sql = "UPDATE ${mapping.table} SET"
         val map = mutableMapOf<String, Any?>()
         db.deltas.values.forEach { delta ->
+
             sql += " ${mapping[delta.property].sqlcolumn} = :_${delta.property}"
-            map["_${delta.property}"] = delta.newValue
+
+            when (delta.newValue) {
+                is DataMap -> map["_${delta.property}"] = delta.newValue.id
+                else -> map["_${delta.property}"] = delta.newValue
+            }
+
         }
         sql += " \n WHERE ${mapping.idColumn} = :_ID"
         map["_ID"] = db.dm.id
 
         return Pair(sql, map)
-        //namedParameterJdbcTemplate.update(sql, map)
     }
 
 

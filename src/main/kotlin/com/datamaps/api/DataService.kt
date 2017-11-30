@@ -7,8 +7,10 @@ import com.datamaps.maps.mergeDataMaps
 import com.datamaps.services.DeltaMachine
 import com.datamaps.services.QueryBuilder
 import com.datamaps.services.QueryExecutor
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.lang.RuntimeException
 import javax.annotation.Resource
 
 /**
@@ -17,6 +19,8 @@ import javax.annotation.Resource
 interface DataService {
 
     operator fun get(entityName: String, id: Long): DataMap?
+
+    fun find(dp: DataProjection): DataMap?
 
     fun findAll(dp: DataProjection):List<DataMap>
 
@@ -31,6 +35,8 @@ interface DataService {
 @Service
 class DataServiceImpl : DataService
 {
+    private val LOGGER = LoggerFactory.getLogger(this.javaClass)
+
     @Autowired
     lateinit var deltaMachine: DeltaMachine
 
@@ -44,6 +50,18 @@ class DataServiceImpl : DataService
 
         val q = queryBuilder.createQueryByEntityNameAndId(entityName, id)
         return queryExecutor.executeSingle(q)
+    }
+
+    override fun find(dp: DataProjection): DataMap? {
+        val q = queryBuilder.createQueryByDataProjection(dp)
+
+        LOGGER.info("\r\nsql: ${q.sql} \n\t with params ${q.params}")
+
+        val res = queryExecutor.findAll(q)
+        if(res.size>1)
+            throw RuntimeException("more than one element found")
+
+        return res.firstOrNull()
     }
 
     override fun findAll(dp: DataProjection):List<DataMap> {
