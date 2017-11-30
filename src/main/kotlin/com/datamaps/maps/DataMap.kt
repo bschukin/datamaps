@@ -16,7 +16,7 @@ class DataMap {
     @SerializedName("entity")
     var entity: String
 
-    var id: Long? = null
+    var id: Any? = null
         set(value) {
             if (id != null)
                 throw RuntimeException("cannot change id")
@@ -28,12 +28,12 @@ class DataMap {
 
     private val backRefs = caseInsMapOf<String>()
 
-    constructor (name: String, id: Long) {
+    constructor (name: String, id: Any) {
         this.entity = name
         this.id = id
     }
 
-    constructor (name: String, id: Long, props: Map<String, Any>) {
+    constructor (name: String, id: Any, props: Map<String, Any>) {
         this.entity = name
         this.id = id
         props.forEach { t, u -> map[t] = u }
@@ -120,7 +120,12 @@ class DMSerializer : JsonSerializer<DataMap> {
         val jsonObject = JsonObject()
 
         jsonObject.addProperty("entity", obj.entity)
-        jsonObject.addProperty("id", obj.id)
+        when(obj.id)
+        {
+            null-> jsonObject.addProperty("id","null")
+            is Long->jsonObject.addProperty("id",obj.id as Long)
+            else->jsonObject.addProperty("id",obj.id as String)
+        }
         obj.map.forEach { t, u ->
 
             when (u) {
@@ -218,7 +223,7 @@ private fun mergeDataMaps(target: List<DataMap>?, provider: List<DataMap>,
     return target
 }
 
-fun List<DataMap>.findById(id: Long?): DataMap? {
+fun List<DataMap>.findById(id: Any?): DataMap? {
     return this.find { dm -> dm.id == id }
 }
 
