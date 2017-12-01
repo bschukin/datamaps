@@ -10,6 +10,33 @@ class DataMapTests {
 
 
     @Test
+    fun testEquality()
+    {
+        val dm01 = DataMap("A", 1L)
+        val dm011 = DataMap("A", 1L)
+
+        Assert.assertEquals(dm01, dm011)
+
+        val dm02 = DataMap("A", 2L)
+        Assert.assertNotEquals(dm01, dm02)
+
+        val dm03 = DataMap("B", 2L)
+        Assert.assertNotEquals(dm02, dm03)
+
+        //два новых
+        val dm04 = DataMap("C")
+        val dm041 = DataMap("C")
+        Assert.assertNotEquals(dm04, dm041)
+
+        //странный кейс, но должно работать так
+        val dm05 = DataMap("C", 1L)//типо из базы
+        val dm051 = DataMap("C", 1L, true)//типо новый и с присвоенным айдишником сразу от нас
+        Assert.assertNotEquals(dm05, dm051)
+
+
+    }
+
+    @Test
     fun testMerge() {
 
         val a = DataMap("A", 1L)

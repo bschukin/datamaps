@@ -3,6 +3,7 @@ package com.datamaps.mappings
 import com.datamaps.general.NIS
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
+import com.datamaps.general.checkNIS
 import com.datamaps.util.linkedCaseInsMapOf
 import com.google.gson.annotations.SerializedName
 import java.math.BigDecimal
@@ -52,6 +53,16 @@ class DataMapping(var name: String, var table: String) {
     operator fun get(field: String): DataField {
         return fields.computeIfAbsent(field.toLowerCase(),
                 { _ -> throw SNF("parentLinkField '$field' of '$name' entity not found") })
+    }
+
+    fun getBackReferenceFieldForThisList(parent:DataMapping, listProperty:String):DataField
+    {
+        val oneToMany = parent[listProperty]
+        checkNIS(oneToMany.is1N)
+
+        return fields.values.filter { it.isM1 }.find {
+            it.referencedOneToAnother(oneToMany)
+        }!!
     }
 
     override fun toString(): String {
@@ -111,6 +122,12 @@ class DataField(var name: String) {
                 is1N -> oneToMany!!.theirJoinColumn
                 else -> null
             }
+
+    fun referencedOneToAnother(anotherField:DataField):Boolean
+    {
+        return anotherField.thatSideJoinColumn() == this.thisSideJoinColumn()
+                && anotherField.thisSideJoinColumn() == this.thatSideJoinColumn()
+    }
 
 
     override fun toString(): String {

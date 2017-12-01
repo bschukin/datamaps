@@ -331,6 +331,11 @@ fun not(exp: exp): exp {
 fun on(name:String): DataProjection {
     return DataProjection(name)
 }
+
+fun onn(name:String): DataProjection {
+    return DataProjection(name)
+}
+
 typealias expLamda = (m: Unit) -> exp
 typealias projection = DataProjection
 

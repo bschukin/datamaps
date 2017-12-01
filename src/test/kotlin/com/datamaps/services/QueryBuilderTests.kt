@@ -3,6 +3,7 @@ package com.datamaps.services
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.DataProjection
+import com.datamaps.mappings.on
 import com.datamaps.mappings.projection
 import com.datamaps.mappings.slice
 import org.testng.Assert.assertEquals
@@ -17,7 +18,7 @@ class QueryBuilderTests : BaseSpringTests() {
     @Test
             //простейшие тесты на квери: на лысую таблицу (без вложенных сущностей)
     fun testBuildQuery01() {
-        val dp = DataProjection("JiraGender")
+        val dp = on("JiraGender")
         val q = queryBuilder.createQueryByDataProjection(dp)
 
         println(q.sql)
@@ -36,8 +37,9 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test(invocationCount = 1)//простейшие тесты на квери: на таблицу c вложенными сущностями M-1
     fun testBuildQuery02() {
-        var dp = DataProjection("JiraWorker")
+        var dp = on("JiraWorker")
                 .scalars().withRefs()
+                .field("name")
                 .with {
                     slice("gender")
                             .field("gender")

@@ -2,6 +2,7 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
+import com.datamaps.mappings.on
 import com.datamaps.mappings.projection
 import com.datamaps.mappings.slice
 import org.testng.Assert
@@ -49,13 +50,13 @@ class UpgradeTests : BaseSpringTests() {
 
         //1 грузим  проекты без коллекций
         val projects = dataService.findAll(
-                projection("JiraProject")
+                on("JiraProject")
                         .scalars()
                         .where("{{name}} = 'QDP'")
         )
 
-        Assert.assertTrue(projects.size==1)
-        Assert.assertTrue(projects[0]["jiraTasks"]==null)
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0]["jiraTasks"] == null)
 
         //2 догружаем коллекции
         dataService.upgrade(projects, projection()
@@ -66,15 +67,15 @@ class UpgradeTests : BaseSpringTests() {
 
         println(projects)
 
-        Assert.assertTrue(projects.size==1)
-        Assert.assertTrue(projects[0].list("jiraTasks").size==2)
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].list("jiraTasks").size == 2)
 
-        Assert.assertTrue(projects[0].nestedl("jiraTasks[0].jiraChecklists").size==2)
+        Assert.assertTrue(projects[0].nestedl("jiraTasks[0].jiraChecklists").size == 2)
 
-        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].name")=="foo check")
-        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[1].name")=="bar check")
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].name") == "foo check")
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[1].name") == "bar check")
 
-        Assert.assertTrue(projects[0].nested("jiraTasks[1].jiraChecklists")==null)
+        Assert.assertTrue(projects[0].nested("jiraTasks[1].jiraChecklists") == null)
 
 
     }

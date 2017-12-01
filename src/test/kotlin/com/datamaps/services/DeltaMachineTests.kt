@@ -3,6 +3,7 @@ package com.datamaps.services
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.on
+import com.datamaps.maps.DataMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import org.testng.Assert
@@ -54,6 +55,7 @@ class DeltaMachineTests : BaseSpringTests() {
     @Test
     fun testM1Updates() {
 
+
         val gender = dataService.find(
                 on("JiraGender")
                         .where("{{gender}}='woman'"))!!
@@ -75,7 +77,44 @@ class DeltaMachineTests : BaseSpringTests() {
         val worker2 = dataService.find(
                 on("JiraWorker").withRefs()
                         .where("{{name}} = 'Fillip Bedrosovich'"))!!
-        Assert.assertEquals(worker2("gender")["gender"] , "woman")
+        Assert.assertEquals(worker2("gender")["gender"], "woman")
+    }
+
+
+    @Test(invocationCount = 1)
+    fun test1MAddExisting() {
+
+        val task001 = dataService.find(
+                on("JiraTask")
+                        .full()
+                        .where("{{name}}='SAUMI-001'"))!!
+
+        Assert.assertTrue(task001.list("jiraChecklists").size==0)
+
+        val checl01 = dataService.find(
+                on("JiraChecklist")
+                        .where("{{id}}=1"))!!
+
+        Assert.assertNotNull(checl01)
+
+        Assert.assertNull(checl01["jiraTask"])
+
+        task001.list("jiraChecklists").add(checl01)
+
+
+        Assert.assertEquals(task001, checl01["jiraTask"])
+
+        dataService.flush()
+
+        val task0011 = dataService.find(
+                on("JiraTask")
+                        .full()
+                        .where("{{name}}='SAUMI-001'"))!!
+
+        println(task0011)
+        Assert.assertTrue(task0011.list("jiraChecklists").size==1)
+        Assert.assertEquals(task0011.list("jiraChecklists")[0], checl01)
+
     }
 
 

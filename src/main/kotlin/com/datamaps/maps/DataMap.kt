@@ -6,6 +6,7 @@ import com.datamaps.util.caseInsMapOf
 import com.google.gson.*
 import com.google.gson.annotations.SerializedName
 import java.lang.reflect.Type
+import java.util.*
 
 
 /**
@@ -14,7 +15,7 @@ import java.lang.reflect.Type
 class DataMap {
 
     @SerializedName("entity")
-    var entity: String
+    val entity: String
 
     var id: Any? = null
         set(value) {
@@ -26,31 +27,53 @@ class DataMap {
     @SerializedName("_")
     var map = caseInsMapOf<Any>()
 
+    //техническое поле: гуид нового объекта
+    //его наличие также говорит что объект новый
+    var newMapGuid: String? = null
+
+
+    //техническое поле: все зарегистрированные обратные ссылки на родителя
     private val backRefs = caseInsMapOf<String>()
 
-    constructor (name: String, id: Any) {
+    constructor (name: String) {
         this.entity = name
-        this.id = id
+        this.newMapGuid = UUID.randomUUID().toString()
     }
 
-    constructor (name: String, id: Any, props: Map<String, Any>) {
+    constructor (name: String, id: Any, isNew: Boolean = false) {
         this.entity = name
         this.id = id
+        if (isNew)
+            this.newMapGuid = UUID.randomUUID().toString()
+    }
+
+    constructor (name: String, id: Any, props: Map<String, Any>, isNew: Boolean  = false)
+            : this(name, id, isNew) {
         props.forEach { t, u -> map[t] = u }
     }
+
+    fun isNew(): Boolean = newMapGuid != null
+    fun persisted(){newMapGuid = null}
 
     operator fun get(field: String): Any? {
         return map[field]
     }
 
-    operator fun set(field: String, value: Any) {
-        val old =map[field]
-        map[field] = value
-        DeltaStore.delta(this, field, old, value)
+    operator fun set(field: String, silent: Boolean = false, value: Any) {
+        val old = map[field]
+        silentSet(field, value)
+
+        if(!silent)
+            DeltaStore.delta(this, field, old, value)
     }
 
-    fun silentSet(name: String, value: Any) {
-        map[name] = value
+    private fun silentSet(name: String, value: Any) {
+        //для коллекций  - подсовываем свою имплементацию листа
+        //для того чтобы мы могли кидать события об изменении списка
+        if (value is ArrayList<*> && !(value is DataList))
+            map[name] = DataList(value as ArrayList<DataMap>, this, name)
+        else
+            map[name] = value
     }
 
     operator fun invoke(f: String): DataMap {
@@ -66,8 +89,8 @@ class DataMap {
 
         var res = this[prop]
         if (res == null) {
-            res = mutableListOf<DataMap>()
-            this[prop] = res
+            res = DataList(ArrayList(), this, prop)
+            this[prop, true] = res
         }
         return res as MutableList<DataMap>;
     }
@@ -80,11 +103,11 @@ class DataMap {
         return backRefs.containsKey(name)
     }
 
-    fun nested(property: String):Any? {
+    fun nested(property: String): Any? {
         return getNestedPropertiy(this, property)
     }
 
-    fun nestedl(property: String):List<DataMap> {
+    fun nestedl(property: String): List<DataMap> {
         return getNestedPropertiy(this, property) as List<DataMap>
     }
 
@@ -98,6 +121,7 @@ class DataMap {
 
         if (!entity.equals(other.entity, true)) return false
         if (id != other.id) return false
+        if(newMapGuid!=other.newMapGuid) return false
 
         return true
     }
@@ -109,8 +133,6 @@ class DataMap {
     }
 
 
-
-
 }
 
 class DMSerializer : JsonSerializer<DataMap> {
@@ -120,11 +142,10 @@ class DMSerializer : JsonSerializer<DataMap> {
         val jsonObject = JsonObject()
 
         jsonObject.addProperty("entity", obj.entity)
-        when(obj.id)
-        {
-            null-> jsonObject.addProperty("id","null")
-            is Long->jsonObject.addProperty("id",obj.id as Long)
-            else->jsonObject.addProperty("id",obj.id as String)
+        when (obj.id) {
+            null -> jsonObject.addProperty("id", "null")
+            is Long -> jsonObject.addProperty("id", obj.id as Long)
+            else -> jsonObject.addProperty("id", obj.id as String)
         }
         obj.map.forEach { t, u ->
 
@@ -232,29 +253,33 @@ fun MutableList<DataMap>.addIfNotIn(dataMap: DataMap) {
         this.add(dataMap)
 }
 
+fun MutableList<DataMap>.addIfNotInSilent(dataMap: DataMap) {
+    if (findById(dataMap.id) == null)
+        (this as DataList).add(dataMap)
+}
 
-fun getNestedPropertiy(dm: DataMap, nested: String):Any? {
+
+fun getNestedPropertiy(dm: DataMap, nested: String): Any? {
     var curr = dm
     val list = nested.split('.')
 
     for (item: Int in IntRange(0, list.size - 2)) {
         val prop = getIndexedProperty(list[item])
         var obj = curr[prop.first]
-        if(obj is List<*> && prop.second>=0)
+        if (obj is List<*> && prop.second >= 0)
             obj = obj[prop.second]
 
-        if(obj is DataMap)
+        if (obj is DataMap)
             curr = obj
     }
-    return curr[list[list.size-1]]
+    return curr[list[list.size - 1]]
 }
 
-private fun getIndexedProperty(prop:String):Pair<String, Int>
-{
+private fun getIndexedProperty(prop: String): Pair<String, Int> {
 
     val index = prop.indexOf('[')
-    val name = if(index>0) prop.substring(0, index) else prop
-    val ind = if(index>0) Integer.parseInt(prop.substring(index+1, prop.length-1)) else -1
+    val name = if (index > 0) prop.substring(0, index) else prop
+    val ind = if (index > 0) Integer.parseInt(prop.substring(index + 1, prop.length - 1)) else -1
 
     return Pair(name, ind)
 }

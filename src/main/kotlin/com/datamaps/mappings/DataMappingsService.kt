@@ -42,6 +42,16 @@ class DataMappingsService {
     }
 
 
+    /**
+     * Получить поле обратной ссылки для маппинга и коллекции 1-N
+     */
+    fun getBackRefField(dm: DataMapping, listProperty: String): String {
+
+        val mapping = getRefDataMapping(dm, listProperty)
+        return mapping.getBackReferenceFieldForThisList(dm, listProperty).name
+    }
+
+
     private fun buildMapping(name: String): DataMapping {
 
         if (1 == 0) {

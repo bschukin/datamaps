@@ -6,8 +6,10 @@ import com.datamaps.general.throwNIS
 import com.datamaps.mappings.*
 import com.datamaps.maps.DataMap
 import com.datamaps.maps.addIfNotIn
+import com.datamaps.maps.addIfNotInSilent
 import com.datamaps.util.DataConverter
 import org.apache.commons.lang.text.StrSubstitutor
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
 
@@ -28,6 +30,9 @@ class QueryBuilder {
 
     @Resource
     lateinit var dataConverter: DataConverter
+
+    @Autowired
+    lateinit var dmUtilService: DmUtilService
 
     fun createQueryByEntityNameAndId(name: String, id: Long): SqlQueryContext {
 
@@ -189,10 +194,8 @@ class QueryBuilder {
 
         val parentField = parent.dm[currLevel.parentLinkField!!]
         if (parentField.referenceTo() == currLevel.dm.name
-                && parentField.thatSideJoinColumn() == entityField.thisSideJoinColumn()
-                && parentField.thisSideJoinColumn() == entityField.thatSideJoinColumn()) {
-            //todo: сделать здесь маппинг
-            //итак, это поле является обратной ссылкой на родителя (родитель->дочерняя коллекция->элемент->ссылка на родителя)
+                && parentField.referencedOneToAnother(entityField)) {
+            //1. итак, это поле является обратной ссылкой на родителя (родитель->дочерняя коллекция->элемент->ссылка на родителя)
             //при маппировании необходимо в текущую сущность положить ссыль на родителя
             //смаппируем это на ID текущей сущноси
             val idAlias = qr.getColumnAlias(currLevel.alias, currLevel.dm.idColumn)
@@ -201,7 +204,7 @@ class QueryBuilder {
                 val currentmapa = mc.curr[currLevel.alias]
                 parentmapa?.let {
                     currentmapa?.let {
-                        currentmapa.silentSet(entityField.name, parentmapa)
+                        currentmapa[entityField.name, true] = parentmapa
                         currentmapa.addBackRef(entityField.name)
                     }
                 }
@@ -262,8 +265,13 @@ class QueryBuilder {
                     ql.parentLinkField?.let {
                         val parentField = ql.parent!!.dm[ql.parentLinkField]
                         when {
-                            parentField.isM1 -> mc.curr(ql.parent.alias)!!.silentSet(ql.parentLinkField, datamap)
-                            parentField.is1N -> mc.curr(ql.parent.alias)!!.list(ql.parentLinkField).addIfNotIn(datamap)
+                            parentField.isM1 -> mc.curr(ql.parent.alias)!![ql.parentLinkField, true] = datamap
+                            parentField.is1N -> {
+                                mc.curr(ql.parent.alias)!!.list(ql.parentLinkField)
+                                        .addIfNotInSilent(datamap)
+                                dmUtilService.updateBackRef(mc.curr(ql.parent.alias)!!, datamap, ql.parentLinkField, true)
+
+                            }
                             else -> throwNIS()
                         }
                     }
@@ -279,7 +287,7 @@ class QueryBuilder {
         //добавляем простой маппер
         qr.addMapper(columnAlias, { mc, rs ->
             if (mc.curr(entityAlias) != null)
-                mc.curr(entityAlias)!!.silentSet(entityField.name, rs.getObject(columnAlias))
+                mc.curr(entityAlias)!![entityField.name, true] = rs.getObject(columnAlias)
         })
 
     }
@@ -291,7 +299,7 @@ class QueryBuilder {
         //добавляем простой маппер
         qr.addMapper(formulaName, { mc, rs ->
             if (mc.curr(ql.alias) != null)
-                mc.curr(ql.alias)!!.silentSet(formulaName, rs.getObject(formulaName))
+                mc.curr(ql.alias)!![formulaName, true] = rs.getObject(formulaName)
         })
     }
 
@@ -312,7 +320,7 @@ class QueryBuilder {
                 //добавляем простой маппер
                 qr.addMapper(colAlias, { mc, rs ->
                     if (mc.curr(ql.alias) != null)
-                        mc.curr(ql.alias)!!.silentSet(v, rs.getObject(colAlias))
+                        mc.curr(ql.alias)!![v, true] = rs.getObject(colAlias)
                 })
             }
         }

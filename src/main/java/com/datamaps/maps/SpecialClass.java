@@ -11,8 +11,7 @@ public class SpecialClass {
 
     void test ()
     {
-
-
+        int sss = 0;
     }
 
     class St<T extends Serializable>

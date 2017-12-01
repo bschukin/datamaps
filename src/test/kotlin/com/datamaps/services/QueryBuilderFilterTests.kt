@@ -199,7 +199,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     @Test(invocationCount = 1)//собираем инфо-п
     fun testQueryFilterWithAliases01() {
 
-        var dp = DataProjection("JiraStaffUnit")
+        val dp = DataProjection("JiraStaffUnit")
                 .alias("jsu")
                 .scalars().withRefs()
                 .field("name")
@@ -583,7 +583,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     @Test
     fun testQueryOrderBy() {
 
-        var dp = DataProjection("JiraStaffUnit")
+        var dp = on("JiraStaffUnit")
                 .alias("jsu")
                 .with {
                     slice("worker").alias("www")

@@ -2,11 +2,14 @@ package com.datamaps.services
 
 import com.datamaps.general.NIY
 import com.datamaps.general.checkNIS
+import com.datamaps.general.throwNIS
+import com.datamaps.util.DataConverter
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import java.sql.JDBCType
+import java.sql.ResultSet
 import java.util.stream.Collectors
 import javax.annotation.Resource
 import kotlin.streams.toList
@@ -68,10 +71,11 @@ class DbTable(val name: String, val primaryKeyField: String?, val comment: Strin
 
 class DbColumn(val name: String, val jdbcType: JDBCType) {
     var ordinalPosition: Int = -1
-    var size: Int = 0
+    var size = 0
     var comment: String? = ""
-    var isNullable: Boolean = false
+    var isNullable = false
     var importedKey: ForeignKey? = null
+    var isAutoIncrement = false
 
     fun isSimple(): Boolean {
         return importedKey == null
@@ -113,7 +117,10 @@ enum class ForeignKeyCascade(val value: Int) {
 class GenericDbMetadataService : DbMetadataService {
 
     @Resource
-    lateinit var  dbDialect: DbDialect
+    lateinit var dbDialect: DbDialect
+
+    @Resource
+    lateinit var dataConverter: DataConverter
 
     override fun getImportedKeys(table: String): List<ForeignKey> {
 
@@ -173,11 +180,12 @@ class GenericDbMetadataService : DbMetadataService {
             column.ordinalPosition = crs.getInt("ORDINAL_POSITION")
             column.isNullable = crs.getBoolean("NULLABLE")
             column.comment = crs.getString("REMARKS")
+            column.isAutoIncrement = getBoolean(crs)
             dt.addColumn(column)
         }
 
         //читаем внешние ключи, на которые мы ссылаемся
-        crs = md.getImportedKeys(null, dbDialect.getCurrentScheme(),  dbDialect.getDbIdentifier(table))
+        crs = md.getImportedKeys(null, dbDialect.getCurrentScheme(), dbDialect.getDbIdentifier(table))
         while (crs.next()) {
             val fk = ForeignKey()
             fk.pkTable = crs.getString("PKTABLE_NAME")
@@ -187,14 +195,14 @@ class GenericDbMetadataService : DbMetadataService {
             fk.onDelete = ForeignKeyCascade.values()[crs.getInt("DELETE_RULE")]
             fk.onUpdate = ForeignKeyCascade.values()[crs.getInt("UPDATE_RULE")]
 
-            checkNIS(fk.fkTable==dt.name)
+            checkNIS(fk.fkTable == dt.name)
             dt[fk.fkColumn].importedKey = fk
         }
 
         //читаем связи, которые  мы экспортировали в другие таблицы -
         //и решаем - является ли связь коллекцией
         //определеяем это по каскаду
-        crs = md.getExportedKeys(null, dbDialect.getCurrentScheme(),  dbDialect.getDbIdentifier(table))
+        crs = md.getExportedKeys(null, dbDialect.getCurrentScheme(), dbDialect.getDbIdentifier(table))
         while (crs.next()) {
             val fk = ForeignKey()
             fk.pkTable = crs.getString("PKTABLE_NAME")
@@ -208,6 +216,18 @@ class GenericDbMetadataService : DbMetadataService {
         }
 
         return dt
+    }
+
+    private fun getBoolean(crs: ResultSet): Boolean {
+        val obj = crs.getObject("IS_AUTOINCREMENT")
+        when(obj)
+        {
+            is String-> {
+                return "YES".equals(obj, true)
+            }
+            is Boolean-> return obj
+            else-> throwNIS()
+        }
     }
 
 }

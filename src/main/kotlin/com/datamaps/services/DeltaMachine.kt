@@ -26,6 +26,9 @@ class DeltaMachine {
     @Autowired
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
+    @Autowired
+    lateinit var dmUtilService: DmUtilService
+
     @PostConstruct
     fun init() {
         DeltaStore.deltaMachine = this
@@ -70,6 +73,10 @@ class DeltaMachine {
         return Pair(sql, map)
     }
 
+    fun updateBackRef(parent: DataMap, child: DataMap, property: String) {
+        dmUtilService.updateBackRef(parent, child, property, false)
+    }
+
 
 }
 
@@ -80,15 +87,34 @@ object DeltaStore {
     internal lateinit var deltaMachine: DeltaMachine
 
     fun delta(dm: DataMap, property: String, oldValue: Any?, newValue: Any?) {
+        if (!TransactionSynchronizationManager.isActualTransactionActive())
+            return
+
+        if (context.get() == null) {
+                context.set(startTransactionContext())
+        }
+        context.get().deltas.add(Delta(DeltaType.VALUE_CHANGE, dm, property, oldValue, newValue))
+
+    }
+
+    fun deltaAdd(parent: DataMap, child: DataMap, property: String) {
+
+        if (!TransactionSynchronizationManager.isActualTransactionActive())
+            return
+
         if (context.get() == null) {
             context.set(startTransactionContext())
         }
-        context.get().deltas.add(Delta(dm, property, oldValue, newValue))
+        //context.get().deltas.add(Delta(DeltaType.VALUE_CHANGE, parent, property, null, child))
+
+        deltaMachine.updateBackRef(parent, child, property)
     }
 
     private fun startTransactionContext(): TransactionContext {
 
+
         val tsa = TransactionSynchronizationAdapter()
+
         TransactionSynchronizationManager.registerSynchronization(tsa)
 
         return TransactionContext(mutableListOf(), tsa)
@@ -112,9 +138,6 @@ object DeltaStore {
         return buckets
     }
 
-    private fun createUpdateStatements(buckets: Any) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     internal fun collectBuckets(): List<DeltaBucket> {
         var lastDM: DataMap? = null
@@ -148,8 +171,15 @@ object DeltaStore {
 internal class TransactionContext(val deltas: MutableList<Delta>, val transSynch: TransactionSynchronization?)
 
 
+enum class DeltaType {
+    VALUE_CHANGE,
+    ADD_TO_LIST,
+    DELETE_FROM_LIST
+}
+
 //атомарное изменение
-internal data class Delta(val dm: DataMap, val property: String, val oldValue: Any?, val newValue: Any?)
+internal data class Delta(val type: DeltaType, val dm: DataMap, val property: String,
+                          val oldValue: Any?, val newValue: Any?)
 
 
 //набор изменений по одному мапу
