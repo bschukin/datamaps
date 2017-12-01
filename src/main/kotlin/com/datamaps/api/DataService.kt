@@ -49,6 +49,9 @@ class DataServiceImpl : DataService
     override fun get(entityName: String, id: Long): DataMap? {
 
         val q = queryBuilder.createQueryByEntityNameAndId(entityName, id)
+
+        LOGGER.info("\r\nsql: ${q.sql} \n\t with params ${q.params}")
+
         return queryExecutor.executeSingle(q)
     }
 

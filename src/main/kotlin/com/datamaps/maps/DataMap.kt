@@ -43,8 +43,10 @@ class DataMap {
     constructor (name: String, id: Any, isNew: Boolean = false) {
         this.entity = name
         this.id = id
-        if (isNew)
+        if (isNew) {
             this.newMapGuid = UUID.randomUUID().toString()
+            DeltaStore.delta(this, "id", null, id)
+        }
     }
 
     constructor (name: String, id: Any, props: Map<String, Any>, isNew: Boolean  = false)
@@ -59,7 +61,7 @@ class DataMap {
         return map[field]
     }
 
-    operator fun set(field: String, silent: Boolean = false, value: Any) {
+    operator fun set(field: String, silent: Boolean = false, value: Any?) {
         val old = map[field]
         silentSet(field, value)
 
@@ -67,7 +69,7 @@ class DataMap {
             DeltaStore.delta(this, field, old, value)
     }
 
-    private fun silentSet(name: String, value: Any) {
+    private fun silentSet(name: String, value: Any?) {
         //для коллекций  - подсовываем свою имплементацию листа
         //для того чтобы мы могли кидать события об изменении списка
         if (value is ArrayList<*> && !(value is DataList))

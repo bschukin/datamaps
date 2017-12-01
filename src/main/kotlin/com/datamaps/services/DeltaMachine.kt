@@ -42,13 +42,15 @@ class DeltaMachine {
             LOGGER.info("\r\ndml: ${st.first} \n\t with params ${st.second}")
             namedParameterJdbcTemplate.update(st.first, st.second)
         }
+
+        buckets.filter { it.dm.isNew() }.forEach { it.dm.persisted() }
     }
 
     internal fun createUpdateStatements(buckets: List<DeltaBucket>): List<Pair<String, Map<String, Any?>>> {
         return buckets.stream().map { b ->
             when (b.isUpdate()) {
                 true -> createUpdate(b)
-                false -> TODO()
+                false -> createInsert(b)
             }
         }.toList()
     }
@@ -73,6 +75,32 @@ class DeltaMachine {
         return Pair(sql, map)
     }
 
+    private fun createInsert(db: DeltaBucket): Pair<String, Map<String, Any?>> {
+        val mapping = dataMappingsService.getDataMapping(db.dm.entity)
+        var sql = "INSERT INTO ${mapping.table} ("
+        val map = mutableMapOf<String, Any?>()
+
+        //sql += if (db.dm.id == null) "" else "${mapping.idColumn}"
+
+        sql += db.deltas.values.joinToString { delta ->
+            "${mapping[delta.property].sqlcolumn}"
+        }
+        sql += ") VALUES (" /*+ (if (db.dm.id == null) "" else ":_ID")*/
+        sql += db.deltas.values.joinToString { delta ->
+            ":_${delta.property}" + ")"
+        }
+        db.deltas.values.forEach { delta ->
+            when (delta.newValue) {
+                is DataMap -> map["_${delta.property}"] = delta.newValue.id
+                else -> map["_${delta.property}"] = delta.newValue
+            }
+        }
+        //if (db.dm.id != null)
+            //map["_ID"] = db.dm.id
+
+        return Pair(sql, map)
+    }
+
     fun updateBackRef(parent: DataMap, child: DataMap, property: String) {
         dmUtilService.updateBackRef(parent, child, property, false)
     }
@@ -91,7 +119,7 @@ object DeltaStore {
             return
 
         if (context.get() == null) {
-                context.set(startTransactionContext())
+            context.set(startTransactionContext())
         }
         context.get().deltas.add(Delta(DeltaType.VALUE_CHANGE, dm, property, oldValue, newValue))
 
@@ -186,7 +214,7 @@ internal data class Delta(val type: DeltaType, val dm: DataMap, val property: St
 //один букет - одна DML ооперация
 internal data class DeltaBucket(val dm: DataMap, val deltas: LinkedCaseInsensitiveMap<Delta> = LinkedCaseInsensitiveMap()) {
 
-    fun isUpdate() = dm.id != null
+    fun isUpdate() = !dm.isNew()
 
 }
 

@@ -117,5 +117,21 @@ class DeltaMachineTests : BaseSpringTests() {
 
     }
 
+    @Test(invocationCount = 1)
+    fun testInsertSimpleNoIdentityId() {
+
+        val gender = DataMap("JiraGender", 100L, true)
+
+        Assert.assertTrue(gender.isNew())
+
+        dataService.flush()
+
+        Assert.assertFalse(gender.isNew())
+
+        val gender_ = dataService.get("JiraGender", 100L)
+        assertNotNull(gender_)
+    }
+
+
 
 }
