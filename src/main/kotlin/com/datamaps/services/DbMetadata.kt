@@ -6,6 +6,8 @@ import com.datamaps.general.throwNIS
 import com.datamaps.util.DataConverter
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.env.Environment
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 import java.sql.JDBCType
@@ -47,6 +49,8 @@ class DbTable(val name: String, val primaryKeyField: String?, val comment: Strin
 
     val oneToManyCollections: List<ForeignKey>
         get() = exportedKeys.stream().filter { t -> t.onDelete == ForeignKeyCascade.cascade }.toList()
+
+    var identitySequnceName: String? = null
 
     operator fun get(column: String): DbColumn {
         if (!columns.containsKey(column))
@@ -122,19 +126,19 @@ class GenericDbMetadataService : DbMetadataService {
     @Resource
     lateinit var dataConverter: DataConverter
 
-    override fun getImportedKeys(table: String): List<ForeignKey> {
-
-        return getTableInfo(table).columns
-                .values.stream()
-                .filter { c -> c.importedKey != null }
-                .map { c -> c.importedKey }
-                .collect(Collectors.toList<ForeignKey>())
-    }
+    @Autowired
+    lateinit var env: Environment
 
     @Resource
     lateinit var jdbcTemplate: JdbcTemplate
 
     val tables = caseInsMapOf<DbTable>()
+
+    fun isProstgress(): Boolean = env.activeProfiles.contains("postgresql")
+    fun isHsqlDb(): Boolean = env.activeProfiles.contains("hsqldb")
+
+
+
 
     override fun getTableInfo(table: String): DbTable {
         if (tables.contains(table))
@@ -144,6 +148,15 @@ class GenericDbMetadataService : DbMetadataService {
         tables[table] = dbtable
 
         return dbtable
+    }
+
+    override fun getImportedKeys(table: String): List<ForeignKey> {
+
+        return getTableInfo(table).columns
+                .values.stream()
+                .filter { c -> c.importedKey != null }
+                .map { c -> c.importedKey }
+                .collect(Collectors.toList<ForeignKey>())
     }
 
     private fun readDbMetadata(table: String): DbTable {
@@ -215,18 +228,24 @@ class GenericDbMetadataService : DbMetadataService {
             dt.addExprotedKey(fk)
         }
 
+        //читаем сиквенс первичного ключа
+        //он равен {$table_SEQ}. если есть - будем использовать сиквенс для генерации первичного ключа
+        val rs2 = md.getTables(c.getCatalog(), dbDialect.getCurrentScheme(),
+                dbDialect.getDbIdentifier(table + "_SEQ"), arrayOf("SEQUENCE"))
+        while (rs2.next())
+            dt.identitySequnceName = rs2.getString("TABLE_NAME")
+
         return dt
     }
 
     private fun getBoolean(crs: ResultSet): Boolean {
         val obj = crs.getObject("IS_AUTOINCREMENT")
-        when(obj)
-        {
-            is String-> {
+        when (obj) {
+            is String -> {
                 return "YES".equals(obj, true)
             }
-            is Boolean-> return obj
-            else-> throwNIS()
+            is Boolean -> return obj
+            else -> throwNIS()
         }
     }
 

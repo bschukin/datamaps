@@ -1,12 +1,9 @@
-package com.datamaps.api
+package com.datamaps.services
 
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.projection
 import com.datamaps.maps.DataMap
 import com.datamaps.maps.mergeDataMaps
-import com.datamaps.services.DeltaMachine
-import com.datamaps.services.QueryBuilder
-import com.datamaps.services.QueryExecutor
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -18,7 +15,9 @@ import javax.annotation.Resource
  */
 interface DataService {
 
-    operator fun get(entityName: String, id: Long): DataMap?
+    fun create(entityName: String): DataMap
+
+    fun get(entityName: String, id: Long): DataMap?
 
     fun find(dp: DataProjection): DataMap?
 
@@ -46,12 +45,24 @@ class DataServiceImpl : DataService
     @Resource
     lateinit var queryExecutor: QueryExecutor
 
+    @Resource
+    lateinit var sequenceIncrementor: SequenceIncrementor
+
+
+    override fun create(entityName: String): DataMap {
+        val dm = DataMap(entityName, isNew = true)
+
+        if(sequenceIncrementor.canGenerateId(entityName)) {
+            dm.id = sequenceIncrementor.getNextId(entityName)
+            DeltaStore.delta(dm, "id", null, dm.id)
+        }
+
+        return dm
+    }
+
     override fun get(entityName: String, id: Long): DataMap? {
 
         val q = queryBuilder.createQueryByEntityNameAndId(entityName, id)
-
-        LOGGER.info("\r\nsql: ${q.sql} \n\t with params ${q.params}")
-
         return queryExecutor.executeSingle(q)
     }
 

@@ -18,6 +18,13 @@ class DataMappingsService {
 
     var mappings = mutableMapOf<String, DataMapping>()
 
+    fun getTableNameByEntity( entity:String):String
+    {
+        //пока все очень просто
+        val tableName = nameMappingsStrategy.getDbTableName(entity)
+        return tableName
+    }
+
     fun getDataMapping(name: String): DataMapping {
         var dm = mappings[name]
         if (dm == null) {

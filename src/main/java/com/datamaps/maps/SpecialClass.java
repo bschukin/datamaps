@@ -1,6 +1,6 @@
 package com.datamaps.maps;
 
-import java.io.Serializable;
+import com.datamaps.services.DataService;
 
 /**
  * Created by Щукин on 03.11.2017.
@@ -14,9 +14,11 @@ public class SpecialClass {
         int sss = 0;
     }
 
-    class St<T extends Serializable>
-    {
+    DataService dataService2;
 
+    void ttt()
+    {
+        //dataService2.new("")
     }
 
 }

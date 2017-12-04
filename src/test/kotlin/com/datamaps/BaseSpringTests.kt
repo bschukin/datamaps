@@ -1,6 +1,6 @@
 package com.datamaps
 
-import com.datamaps.api.DataService
+import com.datamaps.services.DataService
 import com.datamaps.services.QueryBuilder
 import com.datamaps.services.QueryExecutor
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,6 +46,15 @@ class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
     fun assertNotNull(obj:Any?) {
         Assert.assertNotNull(obj)
     }
+
+    fun assertTrue(res:Boolean) {
+        Assert.assertTrue(res)
+    }
+
+    fun assertFalse(res:Boolean) {
+        Assert.assertFalse(res)
+    }
+
 
 }
 

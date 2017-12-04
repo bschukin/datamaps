@@ -133,5 +133,21 @@ class DeltaMachineTests : BaseSpringTests() {
     }
 
 
+    @Test(invocationCount = 1)
+    fun testInsertSimpleIdentityId() {
+
+        val worker = dataService.create("JiraWorker")
+
+        Assert.assertTrue(worker.isNew())
+
+        dataService.flush()
+
+        Assert.assertFalse(worker.isNew())
+
+        val worker_ = dataService.get("JiraWorker", worker.id as Long)
+        assertNotNull(worker_)
+    }
+
+
 
 }

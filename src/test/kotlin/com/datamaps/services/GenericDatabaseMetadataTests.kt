@@ -4,7 +4,6 @@ import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.assertEqIgnoreCase
 import org.testng.Assert
-import org.testng.Assert.assertNotNull
 import org.testng.annotations.Test
 import java.sql.JDBCType
 import javax.annotation.Resource

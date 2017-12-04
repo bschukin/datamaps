@@ -40,7 +40,7 @@ class DataMap {
         this.newMapGuid = UUID.randomUUID().toString()
     }
 
-    constructor (name: String, id: Any, isNew: Boolean = false) {
+    constructor (name: String, id: Any?  = null, isNew: Boolean = false) {
         this.entity = name
         this.id = id
         if (isNew) {
