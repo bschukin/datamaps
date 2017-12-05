@@ -17,7 +17,6 @@ class DataMarp : BaseSpringTests() {
         gender["gender"] = "men"
         dataService.flush()
 
-
         //более сложный пример
         val worker = dataService.find(
                 on("JiraWorker")
@@ -204,8 +203,82 @@ class DataMarp : BaseSpringTests() {
                 })
 
 
+
         //use complex indexator
         Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].name") == "foo check")
+    }
+
+
+    @Test(invocationCount = 1)//Коллеция 1-N
+    fun testPrintToJson() {
+        var list = dataService.findAll(on("JiraProject")
+                .full()
+                .with {
+                    slice("jiraTasks")
+                            .scalars().withRefs()
+                })
+
+        //1 тест на  структуру по которой построится запрос
+        val res = StringBuilder()
+        list.forEach { e -> res.append(e.toString()) }
+        list.forEach { e -> println(e) }
+
+        assertBodyEquals("""
+            {
+  "entity": "JiraProject",
+  "id": 1,
+  "name": "SAUMI",
+  "jiraTasks": [
+    {
+      "entity": "JiraTask",
+      "id": 1,
+      "jiraProject": {
+        "entity": "JiraProject",
+        "id": 1,
+        "isBackRef": "true"
+      },
+      "name": "SAUMI-001"
+    },
+    {
+      "entity": "JiraTask",
+      "id": 2,
+      "jiraProject": {
+        "entity": "JiraProject",
+        "id": 1,
+        "isBackRef": "true"
+      },
+      "name": "SAUMI-002"
+    }
+  ]
+}
+{
+  "entity": "JiraProject",
+  "id": 2,
+  "name": "QDP",
+  "jiraTasks": [
+    {
+      "entity": "JiraTask",
+      "id": 3,
+      "jiraProject": {
+        "entity": "JiraProject",
+        "id": 2,
+        "isBackRef": "true"
+      },
+      "name": "QDP-003"
+    },
+    {
+      "entity": "JiraTask",
+      "id": 4,
+      "jiraProject": {
+        "entity": "JiraProject",
+        "id": 2,
+        "isBackRef": "true"
+      },
+      "name": "QDP-004"
+    }
+  ]
+}
+        """.trimIndent(), res.toString())
     }
 
 

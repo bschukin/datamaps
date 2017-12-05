@@ -134,7 +134,7 @@ class DeltaMachineTests : BaseSpringTests() {
 
 
     @Test(invocationCount = 1)
-    fun testInsertSimpleIdentityId() {
+    fun testInsertSimpleSequenceIdgenerarion() {
 
         val worker = dataService.create("JiraWorker")
 

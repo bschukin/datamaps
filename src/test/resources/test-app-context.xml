@@ -17,7 +17,6 @@
   <beans profile="postgresql">
     <jdbc:initialize-database>
       <jdbc:script location="classpath:db/start-db-postgresql.sql"/>
-      <jdbc:script location="classpath:db/create-db.sql"/>
       <jdbc:script location="classpath:db/insert-data.sql"/>
     </jdbc:initialize-database>
   </beans>

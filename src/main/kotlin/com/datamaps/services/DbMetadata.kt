@@ -193,7 +193,7 @@ class GenericDbMetadataService : DbMetadataService {
             column.ordinalPosition = crs.getInt("ORDINAL_POSITION")
             column.isNullable = crs.getBoolean("NULLABLE")
             column.comment = crs.getString("REMARKS")
-            column.isAutoIncrement = getBoolean(crs)
+            column.isAutoIncrement = getIsAutoIncrement(crs)
             dt.addColumn(column)
         }
 
@@ -238,7 +238,7 @@ class GenericDbMetadataService : DbMetadataService {
         return dt
     }
 
-    private fun getBoolean(crs: ResultSet): Boolean {
+    private fun getIsAutoIncrement(crs: ResultSet): Boolean {
         val obj = crs.getObject("IS_AUTOINCREMENT")
         when (obj) {
             is String -> {

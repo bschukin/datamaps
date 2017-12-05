@@ -3,10 +3,14 @@ package com.datamaps.services
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.assertEqIgnoreCase
+import org.springframework.jdbc.core.PreparedStatementCreator
+import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.testng.Assert
 import org.testng.annotations.Test
-import java.sql.JDBCType
+import java.sql.*
 import javax.annotation.Resource
+
+
 
 
 /**
@@ -117,6 +121,25 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
         assertEqIgnoreCase(fk.fkTable, "Jira_Task")
         assertEqIgnoreCase(fk.fkColumn, "jira_Project_Id")
 
+    }
+
+    @Test(invocationCount = 0)
+    fun testJdbcReturingn()
+    {
+        val sql = "INSERT INTO JIRA_GENDER (GENDER) VALUES('100') RETURNING ID"
+        val holder = GeneratedKeyHolder()
+
+        jdbcTemplate.update(object : PreparedStatementCreator {
+
+            @Throws(SQLException::class)
+            override fun createPreparedStatement(connection: Connection): PreparedStatement {
+                val ps = connection.prepareStatement(sql,
+                        Statement.RETURN_GENERATED_KEYS)
+                return ps
+            }
+        }, holder)
+
+        println(holder.key)
     }
 
 }
