@@ -35,10 +35,7 @@ class DataMap {
     //техническое поле: все зарегистрированные обратные ссылки на родителя
     private val backRefs = caseInsMapOf<String>()
 
-    constructor (name: String) {
-        this.entity = name
-        this.newMapGuid = UUID.randomUUID().toString()
-    }
+    constructor (name: String):this(name, null, true)
 
     constructor (name: String, id: Any?  = null, isNew: Boolean = false) {
         this.entity = name

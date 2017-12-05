@@ -23,6 +23,10 @@ class DataMapping(var name: String, var table: String) {
 
     @SerializedName("id-column")
     var idColumn: String? = ID
+
+    var idGenerationType = IdGenerationType.NONE
+
+    //поля
     var fields = linkedCaseInsMapOf<DataField>()
 
     var groups: MutableMap<String, DataGroup> = linkedCaseInsMapOf<DataGroup>()
@@ -70,6 +74,12 @@ class DataMapping(var name: String, var table: String) {
     }
 
 
+}
+
+enum class IdGenerationType {
+    NONE, //самостоятельно, епт
+    IDENTITY, //identity-колонка
+    SEQUENCE //из сиквенса с именем таблицы + _SEQ
 }
 
 const val ID: String = "ID"

@@ -15,8 +15,6 @@ import javax.annotation.Resource
  */
 interface DataService {
 
-    fun create(entityName: String): DataMap
-
     fun get(entityName: String, id: Long): DataMap?
 
     fun find(dp: DataProjection): DataMap?
@@ -45,20 +43,6 @@ class DataServiceImpl : DataService
     @Resource
     lateinit var queryExecutor: QueryExecutor
 
-    @Resource
-    lateinit var sequenceIncrementor: SequenceIncrementor
-
-
-    override fun create(entityName: String): DataMap {
-        val dm = DataMap(entityName, isNew = true)
-
-        if(sequenceIncrementor.canGenerateId(entityName)) {
-            dm.id = sequenceIncrementor.getNextId(entityName)
-            DeltaStore.delta(dm, "id", null, dm.id)
-        }
-
-        return dm
-    }
 
     override fun get(entityName: String, id: Long): DataMap? {
 

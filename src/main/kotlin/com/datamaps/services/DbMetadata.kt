@@ -31,7 +31,7 @@ interface DbMetadataService {
     fun getImportedKeys(table: String): List<ForeignKey>
 }
 
-class DbTable(val name: String, val primaryKeyField: String?, val comment: String?) {
+class DbTable(val name: String, val primaryKeyField: String, val comment: String?) {
 
     //колонки которые реально присуствуют в таблице
     var columns = linkedCaseInsMapOf<DbColumn>()
@@ -178,7 +178,7 @@ class GenericDbMetadataService : DbMetadataService {
         }
 
         //читаем таблицу
-        val dt = DbTable(rs.getString("TABLE_NAME"), pkField,
+        val dt = DbTable(rs.getString("TABLE_NAME"), pkField!!,
                 rs.getString("remarks"))
 
 

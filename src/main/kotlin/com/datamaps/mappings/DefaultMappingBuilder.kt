@@ -1,9 +1,6 @@
 package com.datamaps.mappings
 
-import com.datamaps.services.DbColumn
-import com.datamaps.services.DbMetadataService
-import com.datamaps.services.DbTable
-import com.datamaps.services.ForeignKey
+import com.datamaps.services.*
 import org.springframework.stereotype.Service
 import java.sql.JDBCType
 import javax.annotation.Resource
@@ -21,6 +18,9 @@ class DefaultMappingBuilder {
     @Resource
     lateinit var nameMappingsStrategy: NameMappingsStrategy
 
+    @Resource
+    lateinit var sequenceIncrementor: SequenceIncrementor
+
     fun buildDefault(table: String): DataMapping {
 
         val dbtable = dbMetadataService.getTableInfo(table)
@@ -32,6 +32,15 @@ class DefaultMappingBuilder {
         val dm = DataMapping(getDefaultEntityName(table.name), table.name)
         dm.idColumn = table.primaryKeyField
         dm.scanFieldsInDb = true
+
+        //тип генерации ID
+        dm.idGenerationType =
+                when {
+                    table[table.primaryKeyField].isAutoIncrement -> IdGenerationType.IDENTITY
+                    sequenceIncrementor.canGenerateIdFromSequence(table.name) -> IdGenerationType.SEQUENCE
+                    else -> IdGenerationType.NONE
+                }
+
 
         //обратываем простые колонки, с ними то просто
         table.simpleColumns.forEach { col ->

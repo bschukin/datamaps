@@ -12,14 +12,14 @@ class SequenceIncrementorTests : BaseSpringTests() {
     @Test
     fun testGetNextSeqId()
     {
-        assertTrue(sequenceIncrementor.canGenerateId("JiraWorker"))
+        assertTrue(sequenceIncrementor.canGenerateIdFromSequence ("Jira_Worker"))
 
         val l = sequenceIncrementor.getNextId("JiraWorker")
 
         assertTrue(l > 999)
         println(l)
 
-        assertFalse(sequenceIncrementor.canGenerateId("JiraGender"))
+        assertFalse(sequenceIncrementor.canGenerateIdFromSequence("Jira_Gender"))
 
     }
 

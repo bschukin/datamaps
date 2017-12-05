@@ -1,6 +1,7 @@
 package com.datamaps.services
 
 import com.datamaps.mappings.DataMappingsService
+import com.datamaps.mappings.IdGenerationType
 import com.datamaps.maps.DataMap
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,6 +29,9 @@ class DeltaMachine {
 
     @Autowired
     lateinit var dmUtilService: DmUtilService
+
+    @Resource
+    lateinit var sequenceIncrementor: SequenceIncrementor
 
     @PostConstruct
     fun init() {
@@ -80,12 +84,17 @@ class DeltaMachine {
         var sql = "INSERT INTO ${mapping.table} ("
         val map = mutableMapOf<String, Any?>()
 
-        //sql += if (db.dm.id == null) "" else "${mapping.idColumn}"
+        if (mapping.idGenerationType == IdGenerationType.SEQUENCE) {
+            db.dm.id = sequenceIncrementor.getNextId(mapping.name)
+            db.deltas["id"] = Delta(DeltaType.VALUE_CHANGE, db.dm, "id", null,  db.dm.id)
+        }
+
+
 
         sql += db.deltas.values.joinToString { delta ->
             "${mapping[delta.property].sqlcolumn}"
         }
-        sql += ") VALUES (" /*+ (if (db.dm.id == null) "" else ":_ID")*/
+        sql += ") VALUES ("
         sql += db.deltas.values.joinToString { delta ->
             ":_${delta.property}" + ")"
         }
@@ -95,8 +104,7 @@ class DeltaMachine {
                 else -> map["_${delta.property}"] = delta.newValue
             }
         }
-        //if (db.dm.id != null)
-            //map["_ID"] = db.dm.id
+
 
         return Pair(sql, map)
     }
@@ -151,8 +159,8 @@ object DeltaStore {
     private fun clearTransactionContext() {
 
         if (context.get() != null) {
+            context.get().deltas.clear()
         }
-        context.get().deltas.clear()
     }
 
     //отправляет все накопленные изменения в базу
@@ -168,6 +176,9 @@ object DeltaStore {
 
 
     internal fun collectBuckets(): List<DeltaBucket> {
+        if (context.get() == null)
+            return emptyList()
+
         var lastDM: DataMap? = null
         var currBucket: DeltaBucket? = null
         val res = mutableListOf<DeltaBucket>()

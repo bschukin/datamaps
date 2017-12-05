@@ -136,7 +136,7 @@ class DeltaMachineTests : BaseSpringTests() {
     @Test(invocationCount = 1)
     fun testInsertSimpleSequenceIdgenerarion() {
 
-        val worker = dataService.create("JiraWorker")
+        val worker = DataMap("JiraWorker")
 
         Assert.assertTrue(worker.isNew())
 

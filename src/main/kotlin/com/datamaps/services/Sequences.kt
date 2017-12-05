@@ -1,6 +1,5 @@
 package com.datamaps.services
 
-import com.datamaps.general.checkNIS
 import com.datamaps.mappings.DataMappingsService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.support.incrementer.DataFieldMaxValueIncrementer
@@ -11,7 +10,7 @@ import javax.sql.DataSource
 
 
 interface SequenceIncrementor {
-    fun canGenerateId(entity: String): Boolean
+    fun canGenerateIdFromSequence(table: String): Boolean
     fun getNextId(entity: String): Long
 }
 
@@ -30,27 +29,25 @@ class SequenceIncrementorImpl : SequenceIncrementor {
     val map = mutableMapOf<String, DataFieldMaxValueIncrementer?>()
 
 
-    override fun canGenerateId(entity: String): Boolean {
-        val inc = getIncrementor(entity)
+    override fun canGenerateIdFromSequence(table: String): Boolean {
+        val inc = getIncrementor(table)
         return inc!=null
     }
 
 
     override fun getNextId(entity: String): Long {
-
-        checkNIS(canGenerateId(entity))
-
-        return getIncrementor(entity)!!.nextLongValue()
-    }
-
-    fun getIncrementor(entity: String): DataFieldMaxValueIncrementer? {
-
         val table = dataMappingsService.getTableNameByEntity(entity)
 
-        if (!map.containsKey(entity)) {
-            map[entity] = sequenceIncrementorFactory.getIncrementor(table)
+        return getIncrementor(table)!!.nextLongValue()
+    }
+
+    fun getIncrementor(table: String): DataFieldMaxValueIncrementer? {
+
+
+        if (!map.containsKey(table)) {
+            map[table] = sequenceIncrementorFactory.getIncrementor(table)
         }
-        return map[entity]
+        return map[table]
     }
 }
 
