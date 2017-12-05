@@ -32,8 +32,12 @@ CREATE TABLE JIRA_STAFF_UNIT (
 
 DROP TABLE  IF EXISTS Jira_Department CASCADE;
 
+DROP SEQUENCE  IF EXISTS Jira_Department_id_seq;
+
+CREATE SEQUENCE Jira_Department_id_seq START WITH 1000;
+
 CREATE TABLE Jira_Department (
-  id         INTEGER PRIMARY KEY,
+  id INT NOT NULL DEFAULT NEXTVAL('Jira_Department_id_seq') PRIMARY KEY,
   name VARCHAR(30),
   parent_Id  INTEGER,
   FOREIGN KEY (parent_Id) REFERENCES Jira_Department(id)

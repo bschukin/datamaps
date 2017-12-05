@@ -42,7 +42,10 @@ class DataMap {
         this.id = id
         if (isNew) {
             this.newMapGuid = UUID.randomUUID().toString()
-            DeltaStore.delta(this, "id", null, id)
+            DeltaStore.create(this)
+            id?.let {
+                DeltaStore.delta(this, "id", null, id)
+            }
         }
     }
 

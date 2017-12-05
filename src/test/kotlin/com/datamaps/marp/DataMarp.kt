@@ -1,5 +1,7 @@
-package com.datamaps
+package com.datamaps.marp
 
+import com.datamaps.BaseSpringTests
+import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.*
 import org.testng.Assert
 import org.testng.annotations.Test

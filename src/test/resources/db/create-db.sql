@@ -31,7 +31,7 @@ CREATE TABLE JIRA_STAFF_UNIT (
 DROP TABLE  IF EXISTS Jira_Department CASCADE;
 
 CREATE TABLE Jira_Department (
-  id         INTEGER PRIMARY KEY,
+  id         IDENTITY PRIMARY KEY,
   name VARCHAR(30),
   parent_Id  INTEGER,
   FOREIGN KEY (parent_Id) REFERENCES Jira_Department(id)

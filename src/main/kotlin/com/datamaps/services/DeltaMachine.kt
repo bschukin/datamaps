@@ -3,13 +3,20 @@ package com.datamaps.services
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.mappings.IdGenerationType
 import com.datamaps.maps.DataMap
+import com.datamaps.util.DataConverter
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.PreparedStatementCreator
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
+import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.util.LinkedCaseInsensitiveMap
+import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.SQLException
+import java.sql.Statement
 import javax.annotation.PostConstruct
 import javax.annotation.Resource
 import kotlin.streams.toList
@@ -33,6 +40,9 @@ class DeltaMachine {
     @Resource
     lateinit var sequenceIncrementor: SequenceIncrementor
 
+    @Resource
+    lateinit var dataConverter: DataConverter
+
     @PostConstruct
     fun init() {
         DeltaStore.deltaMachine = this
@@ -40,17 +50,13 @@ class DeltaMachine {
 
     fun flush() {
         val buckets = DeltaStore.flushToBuckets()
-        val statements = createUpdateStatements(buckets)
 
-        statements.forEach { st ->
-            LOGGER.info("\r\ndml: ${st.first} \n\t with params ${st.second}")
-            namedParameterJdbcTemplate.update(st.first, st.second)
-        }
+        createAndExeUpdateStatements(buckets)
 
         buckets.filter { it.dm.isNew() }.forEach { it.dm.persisted() }
     }
 
-    internal fun createUpdateStatements(buckets: List<DeltaBucket>): List<Pair<String, Map<String, Any?>>> {
+    internal fun createAndExeUpdateStatements(buckets: List<DeltaBucket>): List<Pair<String, Map<String, Any?>>> {
         return buckets.stream().map { b ->
             when (b.isUpdate()) {
                 true -> createUpdate(b)
@@ -60,6 +66,8 @@ class DeltaMachine {
     }
 
     private fun createUpdate(db: DeltaBucket): Pair<String, Map<String, Any?>> {
+
+
         val mapping = dataMappingsService.getDataMapping(db.dm.entity)
         var sql = "UPDATE ${mapping.table} SET"
         val map = mutableMapOf<String, Any?>()
@@ -76,28 +84,31 @@ class DeltaMachine {
         sql += " \n WHERE ${mapping.idColumn} = :_ID"
         map["_ID"] = db.dm.id
 
+        LOGGER.info("\r\ndml: ${sql} \n\t with params ${map}")
+
+        namedParameterJdbcTemplate.update(sql, map)
+
         return Pair(sql, map)
     }
 
     private fun createInsert(db: DeltaBucket): Pair<String, Map<String, Any?>> {
         val mapping = dataMappingsService.getDataMapping(db.dm.entity)
         var sql = "INSERT INTO ${mapping.table} ("
-        val map = mutableMapOf<String, Any?>()
+        val map = LinkedHashMap<String, Any?>()
 
         if (mapping.idGenerationType == IdGenerationType.SEQUENCE) {
             db.dm.id = sequenceIncrementor.getNextId(mapping.name)
-            db.deltas["id"] = Delta(DeltaType.VALUE_CHANGE, db.dm, "id", null,  db.dm.id)
+            db.deltas["id"] = Delta(DeltaType.VALUE_CHANGE, db.dm, "id", null, db.dm.id)
         }
-
 
 
         sql += db.deltas.values.joinToString { delta ->
             "${mapping[delta.property].sqlcolumn}"
         }
         sql += ") VALUES ("
-        sql += db.deltas.values.joinToString { delta ->
-            ":_${delta.property}" + ")"
-        }
+        sql += db.deltas.values.joinToString { _ -> "?" }
+        sql += ")"
+
         db.deltas.values.forEach { delta ->
             when (delta.newValue) {
                 is DataMap -> map["_${delta.property}"] = delta.newValue.id
@@ -105,6 +116,23 @@ class DeltaMachine {
             }
         }
 
+        LOGGER.info("\r\ndml: ${sql} \n\t with params ${map}")
+
+        val holder = GeneratedKeyHolder()
+        namedParameterJdbcTemplate.jdbcOperations.update(object : PreparedStatementCreator {
+
+            @Throws(SQLException::class)
+            override fun createPreparedStatement(connection: Connection): PreparedStatement {
+                val ps = connection.prepareStatement(sql,
+                        Statement.RETURN_GENERATED_KEYS)
+                var i = 1
+                map.forEach { t, u -> ps.setObject(i++, u) }
+                return ps
+            }
+        }, holder)
+
+        if (db.dm.id == null)
+            db.dm.id = dataConverter.convert(holder.keys["id"], Long::class.java)
 
         return Pair(sql, map)
     }
@@ -123,27 +151,30 @@ object DeltaStore {
     internal lateinit var deltaMachine: DeltaMachine
 
     fun delta(dm: DataMap, property: String, oldValue: Any?, newValue: Any?) {
-        if (!TransactionSynchronizationManager.isActualTransactionActive())
-            return
-
-        if (context.get() == null) {
-            context.set(startTransactionContext())
-        }
+        if (notInTransaction()) return
         context.get().deltas.add(Delta(DeltaType.VALUE_CHANGE, dm, property, oldValue, newValue))
 
     }
 
-    fun deltaAdd(parent: DataMap, child: DataMap, property: String) {
+    fun create(dm: DataMap) {
+        if (notInTransaction()) return
+        context.get().deltas.add(Delta(DeltaType.CREATE, dm))
 
+    }
+
+    fun deltaAdd(parent: DataMap, child: DataMap, property: String) {
+        if (notInTransaction()) return
+        deltaMachine.updateBackRef(parent, child, property)
+    }
+
+    private fun notInTransaction(): Boolean {
         if (!TransactionSynchronizationManager.isActualTransactionActive())
-            return
+            return true
 
         if (context.get() == null) {
             context.set(startTransactionContext())
         }
-        //context.get().deltas.add(Delta(DeltaType.VALUE_CHANGE, parent, property, null, child))
-
-        deltaMachine.updateBackRef(parent, child, property)
+        return false
     }
 
     private fun startTransactionContext(): TransactionContext {
@@ -189,7 +220,8 @@ object DeltaStore {
                 lastDM = delta.dm
                 res.add(currBucket!!)
             }
-            currBucket!!.deltas[delta.property] = delta
+            if (delta.type != DeltaType.CREATE)
+                currBucket!!.deltas[delta.property] = delta
         }
         return res
     }
@@ -211,14 +243,15 @@ internal class TransactionContext(val deltas: MutableList<Delta>, val transSynch
 
 
 enum class DeltaType {
+    CREATE,
     VALUE_CHANGE,
     ADD_TO_LIST,
     DELETE_FROM_LIST
 }
 
 //атомарное изменение
-internal data class Delta(val type: DeltaType, val dm: DataMap, val property: String,
-                          val oldValue: Any?, val newValue: Any?)
+internal data class Delta(val type: DeltaType, val dm: DataMap, val property: String = "",
+                          val oldValue: Any? = null, val newValue: Any? = null)
 
 
 //набор изменений по одному мапу

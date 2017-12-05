@@ -42,7 +42,9 @@ class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
 
     fun isProstgress(): Boolean = env.activeProfiles.contains("postgresql")
 
-
+    fun assertNull(res:Any?) {
+        Assert.assertNull(res)
+    }
     fun assertNotNull(obj:Any?) {
         Assert.assertNotNull(obj)
     }
@@ -54,6 +56,7 @@ class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
     fun assertFalse(res:Boolean) {
         Assert.assertFalse(res)
     }
+
 
 
 }
@@ -77,8 +80,8 @@ fun assertEqIgnoreCase(list1: List<*>, list2: List<*>) {
     if (list1.size != list2.size)
         Assert.fail("lists have different size: ${list1.size} vs ${list2.size}")
     for (item: Int in list2.indices) {
-        var i1 = list1[item].toString()
-        var i2 = list2[item].toString()
+        val i1 = list1[item].toString()
+        val i2 = list2[item].toString()
 
         Assert.assertTrue(i1.equals(i2, true), "items №${item} of " +
                 "lists are different:  ${i1} vs ${i2} ")

@@ -27,7 +27,7 @@ class DeltaMachineTests : BaseSpringTests() {
         gender["gender"] = "men"
         gender["gender"] = "men2"
 
-        val list = deltaMachine.createUpdateStatements(DeltaStore.collectBuckets())
+        val list = deltaMachine.createAndExeUpdateStatements(DeltaStore.collectBuckets())
 
         list.forEach {
             println(it.first)
@@ -138,16 +138,34 @@ class DeltaMachineTests : BaseSpringTests() {
 
         val worker = DataMap("JiraWorker")
 
-        Assert.assertTrue(worker.isNew())
+        assertTrue(worker.isNew())
+        assertNull(worker.id)
 
         dataService.flush()
 
-        Assert.assertFalse(worker.isNew())
+        assertFalse(worker.isNew())
+        assertNotNull(worker.id)
 
         val worker_ = dataService.get("JiraWorker", worker.id as Long)
         assertNotNull(worker_)
     }
 
+    @Test
+    fun testInsertSimpleIdentity() {
 
+        val department = DataMap("JiraDepartment")
+        department["name"] = "hello w"
+
+        assertTrue(department.isNew())
+        assertNull(department.id)
+
+        dataService.flush()
+
+        assertFalse(department.isNew())
+        assertNotNull(department.id)
+
+        val department_ = dataService.get("JiraDepartment", department.id as Long)
+        assertNotNull(department_)
+    }
 
 }
