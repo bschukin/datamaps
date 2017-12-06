@@ -58,11 +58,24 @@ class DeltaMachine {
 
     internal fun createAndExeUpdateStatements(buckets: List<DeltaBucket>): List<Pair<String, Map<String, Any?>>> {
         return buckets.stream().map { b ->
-            when (b.isUpdate()) {
-                true -> createUpdate(b)
-                false -> createInsert(b)
+            when  {
+                b.isDelete()-> createDelete(b)
+                b.isUpdate() -> createUpdate(b)
+                else -> createInsert(b)
             }
         }.toList()
+    }
+
+    private fun createDelete(db: DeltaBucket): Pair<String, Map<String, Any?>> {
+        val mapping = dataMappingsService.getDataMapping(db.dm.entity)
+        val sql = "DELETE FROM ${mapping.table} WHERE ${mapping.idColumn} = :_id"
+        val map = mapOf("_id" to db.dm.id)
+
+        LOGGER.info("\r\ndml: ${sql} \n\t with params ${map}")
+
+        namedParameterJdbcTemplate.update(sql, map)
+
+        return Pair(sql, map)
     }
 
     private fun createUpdate(db: DeltaBucket): Pair<String, Map<String, Any?>> {
@@ -162,9 +175,14 @@ object DeltaStore {
 
     }
 
-    fun deltaAdd(parent: DataMap, child: DataMap, property: String) {
+    fun listAdd(parent: DataMap, child: DataMap, property: String) {
         if (notInTransaction()) return
         deltaMachine.updateBackRef(parent, child, property)
+    }
+
+    fun listRemove(parent: DataMap, child: DataMap, property: String) {
+        if (notInTransaction()) return
+        context.get().deltas.add(Delta(DeltaType.DELETE, child))
     }
 
     private fun notInTransaction(): Boolean {
@@ -215,6 +233,11 @@ object DeltaStore {
         val res = mutableListOf<DeltaBucket>()
 
         context.get().deltas.forEach { delta ->
+            if(delta.type==DeltaType.CREATE)
+            {
+                lastDM= null
+                currBucket = DeltaBucket(delta.dm)
+            }
             if (lastDM != delta.dm) {
                 currBucket = DeltaBucket(delta.dm)
                 lastDM = delta.dm
@@ -229,8 +252,10 @@ object DeltaStore {
     class TransactionSynchronizationAdapter : TransactionSynchronization {
 
         override fun beforeCompletion() {
-
+            clearTransactionContext()
         }
+
+
 
         override fun beforeCommit(readOnly: Boolean) {
             deltaMachine.flush()
@@ -244,6 +269,7 @@ internal class TransactionContext(val deltas: MutableList<Delta>, val transSynch
 
 enum class DeltaType {
     CREATE,
+    DELETE,
     VALUE_CHANGE,
     ADD_TO_LIST,
     DELETE_FROM_LIST
@@ -259,6 +285,7 @@ internal data class Delta(val type: DeltaType, val dm: DataMap, val property: St
 internal data class DeltaBucket(val dm: DataMap, val deltas: LinkedCaseInsensitiveMap<Delta> = LinkedCaseInsensitiveMap()) {
 
     fun isUpdate() = !dm.isNew()
+    fun isDelete() = !deltas.values.isEmpty() &&  deltas.values.first().type == DeltaType.DELETE
 
 }
 

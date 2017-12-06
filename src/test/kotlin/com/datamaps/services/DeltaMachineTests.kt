@@ -2,12 +2,14 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
+import com.datamaps.mappings.f
 import com.datamaps.mappings.on
 import com.datamaps.maps.DataMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import org.testng.Assert
 import org.testng.annotations.Test
+import kotlin.test.assertEquals
 
 
 /**
@@ -89,7 +91,7 @@ class DeltaMachineTests : BaseSpringTests() {
                         .full()
                         .where("{{name}}='SAUMI-001'"))!!
 
-        Assert.assertTrue(task001.list("jiraChecklists").size==0)
+        Assert.assertTrue(task001.list("jiraChecklists").size == 0)
 
         val checl01 = dataService.find(
                 on("JiraChecklist")
@@ -112,7 +114,7 @@ class DeltaMachineTests : BaseSpringTests() {
                         .where("{{name}}='SAUMI-001'"))!!
 
         println(task0011)
-        Assert.assertTrue(task0011.list("jiraChecklists").size==1)
+        Assert.assertTrue(task0011.list("jiraChecklists").size == 1)
         Assert.assertEquals(task0011.list("jiraChecklists")[0], checl01)
 
     }
@@ -167,5 +169,110 @@ class DeltaMachineTests : BaseSpringTests() {
         val department_ = dataService.get("JiraDepartment", department.id as Long)
         assertNotNull(department_)
     }
+
+
+    @Test(invocationCount = 1)
+    fun test1nAddNewSlave() {
+
+        val task001 = dataService.find(
+                on("JiraTask")
+                        .full()
+                        .where("{{name}}='SAUMI-001'"))!!
+
+        Assert.assertTrue(task001.list("jiraChecklists").size == 0)
+
+        val ch01 = DataMap("JiraChecklist")
+        ch01["name"] = "mytask"
+        task001.list("jiraChecklists").add(ch01)
+
+        dataService.flush()
+
+        val task0011 = dataService.find(
+                on("JiraTask")
+                        .full()
+                        .where("{{name}}='SAUMI-001'"))!!
+
+        println(task0011)
+        Assert.assertTrue(task0011.list("jiraChecklists").size == 1)
+        Assert.assertEquals(task0011.list("jiraChecklists")[0], ch01)
+
+
+    }
+
+
+    @Test(invocationCount = 1)
+    fun test1nAddNewMasterAndSlaves() {
+
+        val task001 = DataMap("JiraTask")
+        task001["name"] = "SAUMI-6666"
+
+        val ch01 = DataMap("JiraChecklist")
+        ch01["name"] = "mytask"
+        task001.list("jiraChecklists").add(ch01)
+
+        dataService.flush()
+
+        val task0011 = dataService.find(
+                on("JiraTask")
+                        .full()
+                        .where("{{name}}='SAUMI-6666'"))!!
+
+        println(task0011)
+        assertEquals(task001["name"], task0011["name"])
+        Assert.assertTrue(task0011.list("jiraChecklists").size == 1)
+        Assert.assertEquals(task0011.list("jiraChecklists")[0], ch01)
+
+        //добавим ищо
+        val ch02 = DataMap("JiraChecklist")
+        ch02["name"] = "mytask2"
+        task001.list("jiraChecklists").add(ch02)
+
+        dataService.flush()
+
+        val task0012 = dataService.find(
+                on("JiraTask")
+                        .full()
+                        .where("{{name}}='SAUMI-6666'")
+                        .order(f("jiraChecklists.id"))
+            )!!
+
+        Assert.assertTrue(task0012.list("jiraChecklists").size == 2)
+        Assert.assertEquals(task0012.list("jiraChecklists")[1], ch02)
+    }
+
+    @Test(invocationCount = 1)
+    fun test1nRemoveSlaves() {
+
+        val task001 = DataMap("JiraTask")
+        task001["name"] = "SAUMI-6666"
+
+        val ch01 = DataMap("JiraChecklist")
+        ch01["name"] = "mytask"
+        task001.list("jiraChecklists").add(ch01)
+
+        dataService.flush()
+
+        val task0011 = dataService.find(
+                on("JiraTask")
+                        .full()
+                        .where("{{name}}='SAUMI-6666'"))!!
+
+        //хочу и удаляю
+        task0011.list("jiraChecklists").remove(DataMap("JiraChecklist", ch01.id))
+
+        assertTrue(task0011.list("jiraChecklists").size == 0)
+
+        dataService.flush()
+
+
+        val task0012 = dataService.find(
+                on("JiraTask")
+                        .full()
+                        .where("{{name}}='SAUMI-6666'"))!!
+
+        assertTrue(task0012.list("jiraChecklists").size == 0)
+
+    }
+
 
 }

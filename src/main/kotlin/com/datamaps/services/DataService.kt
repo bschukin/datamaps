@@ -23,6 +23,8 @@ interface DataService {
 
     fun upgrade(maps: List<DataMap>, slice: projection):List<DataMap>
 
+    fun delete (datamap: DataMap)
+
     fun flush()
 }
 
@@ -32,6 +34,8 @@ interface DataService {
 @Service
 class DataServiceImpl : DataService
 {
+
+
     private val LOGGER = LoggerFactory.getLogger(this.javaClass)
 
     @Autowired
@@ -78,6 +82,10 @@ class DataServiceImpl : DataService
         val sliceMaps  = queryExecutor.findAll(q)
 
         return mergeDataMaps(maps, sliceMaps)
+    }
+
+    override fun delete(datamap: DataMap) {
+            TODO()
     }
 
     override fun flush()

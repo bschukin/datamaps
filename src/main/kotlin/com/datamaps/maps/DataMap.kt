@@ -257,7 +257,7 @@ fun MutableList<DataMap>.addIfNotIn(dataMap: DataMap) {
 
 fun MutableList<DataMap>.addIfNotInSilent(dataMap: DataMap) {
     if (findById(dataMap.id) == null)
-        (this as DataList).add(dataMap)
+        (this as DataList).addSilent(dataMap)
 }
 
 

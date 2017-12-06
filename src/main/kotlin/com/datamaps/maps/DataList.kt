@@ -9,8 +9,13 @@ internal class DataList(val list: ArrayList<DataMap>,
                         val parent: DataMap, val property: String) : MutableList<DataMap> by list {
 
     override fun add(element: DataMap): Boolean {
-        DeltaStore.deltaAdd(parent, element, property)
+        DeltaStore.listAdd(parent, element, property)
         return list.add(element)
+    }
+
+    override fun remove(element: DataMap): Boolean {
+        DeltaStore.listRemove(parent, element, property)
+        return list.remove(element)
     }
 
     fun addSilent(element: DataMap): Boolean {
