@@ -29,8 +29,7 @@ open class DataProjection {
     var queryAlias: String? = null
 
     //id объекта - возможно указание только для рутовых ОП
-    //todo: убрать Long
-    var id: Long? = null
+    var id: Any? = null
     //для вложенных проекций - родительское поле
     private var parentField: String? = null
     //группы, которые включеные в проекцию
@@ -64,7 +63,7 @@ open class DataProjection {
         this.entity = entity
     }
 
-    constructor(entity: String, id: Long) {
+    constructor(entity: String, id: Any?) {
         this.entity = entity
         this.id = id
     }
@@ -123,7 +122,7 @@ open class DataProjection {
     }
 
 
-    fun id(id: Long): DataProjection {
+    fun id(id: Any): DataProjection {
         validate(isRoot())
         this.id = id
         return this

@@ -5,7 +5,6 @@ import com.datamaps.general.SNF
 import com.datamaps.general.throwNIS
 import com.datamaps.mappings.*
 import com.datamaps.maps.DataMap
-import com.datamaps.maps.addIfNotIn
 import com.datamaps.maps.addIfNotInSilent
 import com.datamaps.util.DataConverter
 import org.apache.commons.lang.text.StrSubstitutor
@@ -84,7 +83,7 @@ class QueryBuilder {
 
         //если мы на руте - берем рутовую проекцию, иначе берем проекцию с поля
         val currProjection = if (isRoot) parentProjection else
-            parentProjection.fields.getOrDefault(field!!, DataProjection(dm.name, field))
+            parentProjection.fields.getOrDefault(field!!, DataProjection(dm.name, field = field))
 
         //генерим алиас
         val alias = currProjection.queryAlias ?: qr.createTableAlias(dm.table)
