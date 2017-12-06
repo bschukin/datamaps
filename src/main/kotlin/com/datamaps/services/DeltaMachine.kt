@@ -175,6 +175,12 @@ object DeltaStore {
 
     }
 
+    fun delete(dm: DataMap) {
+        if (notInTransaction()) return
+        context.get().deltas.add(Delta(DeltaType.DELETE, dm))
+
+    }
+
     fun listAdd(parent: DataMap, child: DataMap, property: String) {
         if (notInTransaction()) return
         deltaMachine.updateBackRef(parent, child, property)

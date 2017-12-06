@@ -85,7 +85,7 @@ class DataServiceImpl : DataService
     }
 
     override fun delete(datamap: DataMap) {
-            TODO()
+            DeltaStore.delete(datamap)
     }
 
     override fun flush()

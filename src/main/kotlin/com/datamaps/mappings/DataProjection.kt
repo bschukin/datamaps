@@ -27,7 +27,9 @@ open class DataProjection {
     var entity: String? = null
     //алиас, использованный для данной сущности в запросе (например для использования в фильтрах)
     var queryAlias: String? = null
+
     //id объекта - возможно указание только для рутовых ОП
+    //todo: убрать Long
     var id: Long? = null
     //для вложенных проекций - родительское поле
     private var parentField: String? = null

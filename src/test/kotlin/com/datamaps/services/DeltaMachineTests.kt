@@ -274,5 +274,37 @@ class DeltaMachineTests : BaseSpringTests() {
 
     }
 
+    @Test(invocationCount = 1)
+    fun test1nRemoveCascade() {
 
+        val task001 = DataMap("JiraTask")
+        task001["name"] = "SAUMI-6666"
+
+        val ch01 = DataMap("JiraChecklist")
+        ch01["name"] = "mytask"
+        task001.list("jiraChecklists").add(ch01)
+
+        dataService.flush()
+
+        println(ch01.id)
+        assertFalse(ch01.isNew())
+
+        dataService.delete(task001)
+        dataService.flush()
+
+
+        val task001_ = dataService.find(
+                on("JiraTask")
+                        .id(task001.id as Long))
+
+        val ch01_ = dataService.find(
+                on("JiraChecklist")
+                        .id(ch01.id as Long))
+
+        assertNull(task001_)
+        assertNull(ch01_)
+
+
+
+    }
 }
