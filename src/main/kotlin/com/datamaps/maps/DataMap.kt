@@ -1,6 +1,8 @@
 package com.datamaps.maps
 
 import com.datamaps.general.checkNIS
+import com.datamaps.mappings.Field
+import com.datamaps.mappings.getEntityNameFromClass
 import com.datamaps.services.DeltaStore
 import com.datamaps.util.caseInsMapOf
 import com.google.gson.*
@@ -12,7 +14,14 @@ import java.util.*
 /**
  * Created by Щукин on 27.10.2017.
  */
-class DataMap {
+open class DataMap {
+    companion object {
+        private val empty:DataMap = DataMap()
+        private val emptyList:MutableList<DataMap> = mutableListOf()
+
+        fun empty():DataMap  = empty
+        fun emptyList():MutableList<DataMap>  = emptyList
+    }
 
     @SerializedName("entity")
     val entity: String
@@ -34,6 +43,10 @@ class DataMap {
 
     //техническое поле: все зарегистрированные обратные ссылки на родителя
     private val backRefs = caseInsMapOf<String>()
+
+    constructor ():this("", null, false)
+    {
+    }
 
     constructor (name: String):this(name, null, true)
 
@@ -57,8 +70,18 @@ class DataMap {
     fun isNew(): Boolean = newMapGuid != null
     fun persisted(){newMapGuid = null}
 
+    operator  fun <L> get(field: Field<*, L>):L {
+        if(field.t2 is List<*>)
+            return list(field.n) as L
+        return map[field.n] as L
+    }
+
     operator fun get(field: String): Any? {
         return map[field]
+    }
+
+    operator fun set(field: Field<*,*>, silent: Boolean = false, value: Any?) {
+        set(field.n, silent, value)
     }
 
     operator fun set(field: String, silent: Boolean = false, value: Any?) {
@@ -86,6 +109,9 @@ class DataMap {
         map[field] = null
     }
 
+    fun list(field: Field<*,*>): MutableList<DataMap> {
+        return list(field.n)
+    }
 
     fun list(prop: String): MutableList<DataMap> {
 
@@ -134,7 +160,13 @@ class DataMap {
         return result
     }
 
+}
 
+fun <T:Any> datamap (t:T, id: Any?  = null, isNew: Boolean = false): DataMap
+{
+    val ent = getEntityNameFromClass(t)
+    val res =  DataMap(ent, id, isNew)
+    return res
 }
 
 class DMSerializer : JsonSerializer<DataMap> {

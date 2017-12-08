@@ -25,6 +25,8 @@ import javax.annotation.Resource
 @ContextConfiguration("classpath:test-app-context.xml")
 class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
 
+
+
     @Autowired
     lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
 
@@ -86,5 +88,7 @@ fun assertEqIgnoreCase(list1: List<*>, list2: List<*>) {
         Assert.assertTrue(i1.equals(i2, true), "items №${item} of " +
                 "lists are different:  ${i1} vs ${i2} ")
     }
+
 }
+
 

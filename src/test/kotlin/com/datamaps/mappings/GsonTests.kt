@@ -46,13 +46,13 @@ class GsonTests {
 
         var json = """
         {
-            name : "name1",
+            n : "name1",
              map: {
                 "key1":{
-                    "name":"xxx"
+                    "n":"xxx"
                 },
                 "key2":{
-                    "name":"xxx"
+                    "n":"xxx"
                 }
 
             }
@@ -82,7 +82,7 @@ class GsonTests {
     class Bar {
         var name: String = "";
         override fun toString(): String {
-            return "Bar(name='$name')"
+            return "Bar(n='$name')"
         }
 
 

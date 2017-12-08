@@ -13,23 +13,23 @@ class DataMappingReadTests {
 
         var mapping = """
        {
-            "name" : "AAA",
+            "n" : "AAA",
             "table" :   AAA_,
-            "id-column": "name";
+            "id-column": "n";
             "fields":[
                 {
-                    "name": "caption",
+                    "n": "caption",
                     group: "scalars",
                     type:"string"
                 },
                 {
-                    "name": "description",
+                    "n": "description",
                     sqlcolumn: "desc_",
                     type:"string"
                 }
                 ,
                 {
-                    name: "bbb",
+                    n: "bbb",
                     m-1:{to:"BBB", join-column:"bbbId"},
                     1-m:{to:"CCCC", their-join-column:"aaaID"},
                     m-m:{to:"ZZZZ", join-table:"AAA_ZZZ", our-join-column:"AAA_ID", their-join-column:"aaaID"}
@@ -37,11 +37,11 @@ class DataMappingReadTests {
             ],
             groups:
             [   {
-                    name:"specific",
+                    n:"specific",
                     fields:
                     [
                         {
-                        name: "ccc"
+                        n: "ccc"
                         }
                     ]
                 }

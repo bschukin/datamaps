@@ -6,7 +6,6 @@ import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.slice
 import com.datamaps.maps.DataMap
 import org.testng.Assert
-import org.testng.Assert.assertTrue
 import org.testng.annotations.Test
 
 /**

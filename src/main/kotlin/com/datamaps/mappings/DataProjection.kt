@@ -1,8 +1,12 @@
 package com.datamaps.mappings
 
 import com.datamaps.general.validate
+import com.datamaps.maps.DataMap
 import com.datamaps.util.lcims
 import com.datamaps.util.linkedCaseInsMapOf
+import kotlin.concurrent.getOrSet
+import kotlin.reflect.KCallable
+import kotlin.reflect.KClass
 
 /**
  * Created by Щукин on 07.11.2017.
@@ -19,6 +23,11 @@ import com.datamaps.util.linkedCaseInsMapOf
  * }
  *
  */
+open class DM {
+
+        val id = Field.id()
+
+}
 
 open class DataProjection {
 
@@ -59,6 +68,11 @@ open class DataProjection {
 
     constructor()
 
+    constructor(entity: KClass<*>) {
+        this.entity = entity.simpleName
+    }
+
+
     constructor(entity: String) {
         this.entity = entity
     }
@@ -91,6 +105,7 @@ open class DataProjection {
     fun onlyId(): DataProjection {
         return field("id")
     }
+
     fun full(): DataProjection {
         return group(FULL)
     }
@@ -114,6 +129,23 @@ open class DataProjection {
         return this
     }
 
+    fun field(f: KCallable<*>): DataProjection {
+        fields[f.name] = slice(f.name)
+        return this
+    }
+
+    fun field(f: Field<*,*>): DataProjection {
+        fields[f.n] = slice(f.n)
+        return this
+    }
+
+    fun fields(vararg fields: Field<*,*>): DataProjection {
+        fields.forEach {
+            field(it)
+        }
+        return this
+    }
+
 
     fun with(slice: () -> DataProjection): DataProjection {
         val sl = slice()
@@ -133,19 +165,17 @@ open class DataProjection {
         return this
     }
 
-    fun lateral(table:String, sql: String, vararg pairs: Pair<String, String>): DataProjection
-    {
+    fun lateral(table: String, sql: String, vararg pairs: Pair<String, String>): DataProjection {
         val lmap = linkedCaseInsMapOf<String>()
-        pairs.forEach { pair->
+        pairs.forEach { pair ->
             lmap[pair.second] = pair.first
         }
         laterals.add(Lateral(table, sql, linkedCaseInsMapOf(*pairs)))
         return this
     }
 
-    fun isLateral(alias:String):Boolean
-    {
-        return laterals.any { l->l.table==alias }
+    fun isLateral(alias: String): Boolean {
+        return laterals.any { l -> l.table == alias }
     }
 
     fun isRoot() = parentField == null
@@ -154,7 +184,7 @@ open class DataProjection {
         return this.oql
     }
 
-    fun where(oql:String): DataProjection {
+    fun where(oql: String): DataProjection {
         this.oql = oql
         return this
     }
@@ -164,17 +194,17 @@ open class DataProjection {
     }
 
     fun filter(exp: exp): DataProjection {
-        filter = if (filter == null)  exp else (filter!! and exp)
+        filter = if (filter == null) exp else (filter!! and exp)
         return this
     }
 
     fun filter(aaa: (m: Unit) -> exp): DataProjection {
         val exp = aaa(Unit)
-        filter = if (filter == null)  exp else (filter!! and exp)
+        filter = if (filter == null) exp else (filter!! and exp)
         return this
     }
 
-    fun order(vararg fields:f): DataProjection {
+    fun order(vararg fields: f): DataProjection {
         orders.addAll(fields)
         return this
     }
@@ -197,10 +227,14 @@ open class DataProjection {
     }
 }
 
-data class Lateral(val table: String, val sql:String, val mappings: lcims)
+data class Lateral(val table: String, val sql: String, val mappings: lcims)
 
 
-class slice(f:String):DataProjection(null, f)
+class slice(f: String) : DataProjection(null, f) {
+    constructor(f: KCallable<*>) : this(f.name)
+
+    constructor(f: Field<*,*>) : this(f.n)
+}
 
 open class exp {
 
@@ -262,15 +296,88 @@ open class exp {
         val exp2 = if (exp1 !is exp) value(exp1) else exp1
         return binaryOP(this, exp2, op)
     }
+
+
 }
 
-data class binaryOP(var left: exp, var right: exp, var op: Operation) : exp()
+fun extractField(exp:exp):exp{
+    if(exp is Field<*,*>)
+        return f(exp.n)
+    return exp
+}
+
+class binaryOP(left: exp, right: exp, var op: Operation) : exp()
+{
+    var left: exp
+    var right: exp
+
+    init {
+        this.left = extractField(left)
+        this.right = extractField(right)
+    }
+
+}
 
 
 
+open class Field<T, L>(private var _name: String, val t: T, val t2:L) {
+
+    companion object {
+
+        fun id():Field<Long, Long>
+        {
+            return long("id")
+        }
+
+        fun long(aname:String):Field<Long, Long>
+        {
+            return Field(aname, 350L, 350L)
+        }
+
+        fun string(aname:String):Field<String, String>
+        {
+            return Field(aname, "", "")
+        }
+
+        fun <T> reference(aname:String, t:T ):Field<T, DataMap>
+        {
+            return Field(aname, t, DataMap.empty())
+        }
+
+        fun <T> list(aname:String, t:T ):Field<T, List<DataMap>>
+        {
+            return Field(aname, t, DataMap.emptyList())
+        }
+
+        internal var context = ThreadLocal<MutableList<String>>()
+    }
+
+
+    private fun name() {
+        context.getOrSet { mutableListOf() }.add(_name)
+    }
+
+    val n: String
+        get() {
+           if(context.get()==null)
+               return _name
+            name()
+            val res = context.get().joinToString(".")
+            context.remove()
+            return res
+        }
+
+    operator fun invoke(): T {
+        name()
+        return t
+    }
+
+}
 
 
 data class f(val name: String) : exp() {
+
+    constructor(d: Field<*,*>) : this(d.n)
 
     var asc = true
 
@@ -278,6 +385,7 @@ data class f(val name: String) : exp() {
         asc = true
         return this
     }
+
     fun desc(): f {
         asc = false
         return this
@@ -291,15 +399,30 @@ data class value(val v: Any) : exp() {
 }
 
 
-data class OR(val left: exp, val right: exp) : exp() {
+class OR( left: exp, right: exp) : exp() {
+    var left: exp
+    var right: exp
 
+    init {
+        this.left = extractField(left)
+        this.right = extractField(right)
+    }
 }
 
 data class NOT(val right: exp) : exp() {
 
 }
 
-data class AND(val left: exp, val right: exp) : exp()
+class AND(left: exp, right: exp) : exp()
+{
+    var left: exp
+    var right: exp
+
+    init {
+        this.left = extractField(left)
+        this.right = extractField(right)
+    }
+}
 
 class NULL : exp() {
 
@@ -329,13 +452,29 @@ fun not(exp: exp): exp {
     return NOT(exp)
 }
 
-fun on(name:String): DataProjection {
+fun on(name: String): DataProjection {
     return DataProjection(name)
 }
 
-fun onn(name:String): DataProjection {
-    return DataProjection(name)
+fun on(entity: KClass<*>): DataProjection {
+    return DataProjection(entity)
 }
+
+fun <T:Any> on (t:T):DataProjection
+{
+    val ent = getEntityNameFromClass(t)
+    val res =  DataProjection(ent)
+    return res
+}
+
+public fun <T : Any> getEntityNameFromClass(t: T):String {
+    val cl = t::class
+    val ent = cl.members.find { it.name.equals("entity", true) }
+    return ent!!.call(t) as String
+}
+
+
+
 
 typealias expLamda = (m: Unit) -> exp
 typealias projection = DataProjection

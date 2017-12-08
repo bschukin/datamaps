@@ -67,7 +67,7 @@ class DbTable(val name: String, val primaryKeyField: String, val comment: String
     }
 
     override fun toString(): String {
-        return "DbTable(name='$name', primaryKeyField=$primaryKeyField, columns=$columns)"
+        return "DbTable(n='$name', primaryKeyField=$primaryKeyField, columns=$columns)"
     }
 
 
@@ -91,7 +91,7 @@ class DbColumn(val name: String, val jdbcType: JDBCType) {
 
 
     override fun toString(): String {
-        return "DbColumn(name='$name', jdbcType=$jdbcType, comment=$comment, importedKey=$importedKey)"
+        return "DbColumn(n='$name', jdbcType=$jdbcType, comment=$comment, importedKey=$importedKey)"
     }
 }
 

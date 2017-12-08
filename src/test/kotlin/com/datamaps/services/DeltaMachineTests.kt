@@ -1,7 +1,6 @@
 package com.datamaps.services
 
-import com.datamaps.BaseSpringTests
-import com.datamaps.assertBodyEquals
+import com.datamaps.*
 import com.datamaps.mappings.f
 import com.datamaps.mappings.on
 import com.datamaps.maps.DataMap
@@ -23,11 +22,11 @@ class DeltaMachineTests : BaseSpringTests() {
 
     @Test
     fun testSimpleUpdateQueryies() {
-        val gender = dataService.get("JiraGender", 2L)!!
+        val gender = dataService.get(Gender.entity, 2L)!!
         println(gender)
 
-        gender["gender"] = "men"
-        gender["gender"] = "men2"
+        gender[GDR.gender] = "men"
+        gender[GDR.gender] = "men2"
 
         val list = deltaMachine.createAndExeUpdateStatements(DeltaStore.collectBuckets())
 
@@ -41,45 +40,49 @@ class DeltaMachineTests : BaseSpringTests() {
 
     @Test
     fun testSimpleUpdates() {
-        val gender = dataService.get("JiraGender", 2L)!!
-        println(gender)
+        val agender = dataService.get(Gender.entity, 2L)!!
+        println(agender)
 
-        gender["gender"] = "men"
-        gender["gender"] = "men2"
-
+        with(Gender) {
+            agender[gender] = "men"
+            agender[gender] = "men2"
+        }
         dataService.flush()
 
-        val gender2 = dataService.get("JiraGender", 2L)!!
+        val gender2 = dataService.get(Gender.entity, 2L)!!
         println(gender2)
-        Assert.assertTrue(gender["gender"] == "men2")
+        Assert.assertTrue(agender["gender"] == "men2")
     }
 
     @Test
     fun testM1Updates() {
 
 
-        val gender = dataService.find(
-                on("JiraGender")
-                        .where("{{gender}}='woman'"))!!
+        val gender = dataService.find(on(Gender)
+                .where("{{gender}}='woman'"))!!
 
         Assert.assertNotNull(gender)
 
         val worker = dataService.find(
-                on("JiraWorker").withRefs()
+                on(Worker).withRefs()
                         .where("{{name}} = 'Fillip Bedrosovich'"))!!
 
         println(worker)
         Assert.assertNotNull(worker)
 
         //получай филлипп бедросыч
-        worker["gender"] = gender
+        worker[Worker.gender] = gender
 
         dataService.flush()
 
+
         val worker2 = dataService.find(
-                on("JiraWorker").withRefs()
+                on(Worker).withRefs()
                         .where("{{name}} = 'Fillip Bedrosovich'"))!!
-        Assert.assertEquals(worker2("gender")["gender"], "woman")
+
+
+        Assert.assertEquals(worker2[WRKR.gender][GDR.gender], "woman")
+
     }
 
 
@@ -218,7 +221,7 @@ class DeltaMachineTests : BaseSpringTests() {
                         .where("{{name}}='SAUMI-6666'"))!!
 
         println(task0011)
-        assertEquals(task001["name"], task0011["name"])
+        assertEquals(task001["n"], task0011["n"])
         Assert.assertTrue(task0011.list("jiraChecklists").size == 1)
         Assert.assertEquals(task0011.list("jiraChecklists")[0], ch01)
 
@@ -234,7 +237,7 @@ class DeltaMachineTests : BaseSpringTests() {
                         .full()
                         .where("{{name}}='SAUMI-6666'")
                         .order(f("jiraChecklists.id"))
-            )!!
+        )!!
 
         Assert.assertTrue(task0012.list("jiraChecklists").size == 2)
         Assert.assertEquals(task0012.list("jiraChecklists")[1], ch02)
@@ -303,7 +306,6 @@ class DeltaMachineTests : BaseSpringTests() {
 
         assertNull(task001_)
         assertNull(ch01_)
-
 
 
     }

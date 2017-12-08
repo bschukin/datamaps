@@ -25,15 +25,15 @@ class DataProjectionAPITests : BaseSpringTests() {
                 .scalars().withRefs().withCollections()
                 .with {
                     slice("parent")
-                            .field("name")
-                            .field("fullName")
+                            .field("n")
+                            .field("n")
                 }
                 .with {
                     slice("childs")
-                            .field("name")
+                            .field("n")
                             .with {
                                 slice("parent")
-                                        .field("name")
+                                        .field("n")
                             }
                 }
 

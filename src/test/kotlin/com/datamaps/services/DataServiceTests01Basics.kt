@@ -22,7 +22,7 @@ class DataServiceTests01Basics : BaseSpringTests()
     {
         var res = dataService.findAll(
                 projection("JiraWorker")
-                        .field("name")
+                        .field("n")
         )
         res.forEach {r->
             println(r)

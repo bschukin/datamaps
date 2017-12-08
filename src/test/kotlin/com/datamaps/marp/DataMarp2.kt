@@ -3,10 +3,26 @@ package com.datamaps.marp
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
 import com.datamaps.mappings.*
+import com.datamaps.maps.DataMap
 import org.testng.Assert
 import org.testng.annotations.Test
 
-class DataMarp : BaseSpringTests() {
+class DataMarp2 : BaseSpringTests() {
+
+    class Gender(var gender: String) : DataMap()
+
+    class Worker(var name: String, var gender: Gender) : DataMap()
+
+    class Department(var name: String, var fullName: String,
+                     var parent: Department, var childs: MutableList<Department>): DataMap()
+
+    class StaffUnit(var name: String, var worker: Worker,
+                    var gender: Gender): DataMap()
+
+    class Project(var name: String,  var tasks: MutableList<Task>): DataMap()
+
+    class Task(var name: String)  : DataMap()
+
 
 
     @Test
@@ -14,40 +30,43 @@ class DataMarp : BaseSpringTests() {
 
         //простой пример
         val gender = dataService.find(
-                on("JiraGender")
-                        .id(2L))!!
-        gender["gender"] = "men"
+                on(Gender::class)
+                        .id(2L)) as Gender
+        gender.gender = "men"
+
         dataService.flush()
 
         //более сложный пример
         val worker = dataService.find(
-                on("JiraWorker")
+                on(Worker::class)
                         .id(1L)
-                        .field("n")
                         .with {
-                            slice("gender")
-                                    .field("gender")
+                            slice(Worker::gender)
+                                    .field(Gender::gender)
                         }
-        )!!
+        ) as Worker
 
+
+        if (worker.gender.gender != gender.gender)
+            worker.gender = gender
+
+        //но и так будет работать
         if (worker("gender")["gender"] != gender["gender"])
             worker["gender"] = gender
-        //не флашим, дожидаемся окончания транзакции
-
 
         //пример с деревом
-        val dp2 = on("JiraDepartment")
+        val dp2 = on(Department::class)
                 .with {
-                    slice("parent")
-                            .field("n")
-                            .field("n")
+                    slice(Department::parent)
+                            .field(Department::name)
+                            .field(Department::fullName)
                 }
                 .with {
-                    slice("childs")
-                            .field("n")
+                    slice(Department::childs)
+                            .field(Department::name)
                             .with {
-                                slice("parent")
-                                        .field("n")
+                                slice(Department::parent)
+                                        .field(Department::name)
                             }
                 }
     }
@@ -56,29 +75,29 @@ class DataMarp : BaseSpringTests() {
     @Test
     fun basicProjectionSlices01() {
 
-        var dp = on("JiraStaffUnit")
+        var dp = on(StaffUnit::class)
                 .withRefs()
-                .field("n")
+                .field(StaffUnit::name)
                 .with {
-                    slice("worker")
+                    slice(StaffUnit::worker)
                             .scalars().withRefs()
                 }
-                .field("gender")
+                .field(StaffUnit::gender)
 
         //коллекции
-        dp = on("JiraProject")
+        dp = on(Project::class)
                 .withCollections()
                 .with {
-                    slice("JiraTasks")
+                    slice(Project::tasks)
                             .scalars().withRefs()
                 }
 
         //алиасы
-        dp = on("JiraProject")
+        dp = on(Project::class)
                 .full()
                 .alias("JP")
                 .with {
-                    slice("jiraTasks")
+                    slice(Project::tasks)
                             .alias("JT")
                             .scalars().withRefs()
                 }
@@ -87,14 +106,14 @@ class DataMarp : BaseSpringTests() {
     @Test
     fun basicFiltersApiMethod() {
 
-        val dp = on("JiraStaffUnit")
+        val dp = on(StaffUnit::class)
                 .withRefs()
-                .field("n")
+                .field(StaffUnit::name)
                 .with {
-                    slice("worker").alias("W")
+                    slice(StaffUnit::worker).alias("W")
                             .scalars().withRefs()
                 }
-                .field("gender")
+                .field(StaffUnit::gender)
                 .filter({
                     {
                         {
@@ -114,14 +133,14 @@ class DataMarp : BaseSpringTests() {
     fun basicFiltersBindingMethod() {
 
         //без алиасов
-        var dp = on("JiraStaffUnit")
+        var dp = on(StaffUnit::class)
                 .withRefs()
-                .field("n")
+                .field(StaffUnit::name)
                 .with {
-                    slice("worker")
+                    slice(StaffUnit::worker)
                             .scalars().withRefs()
                 }
-                .field("gender")
+                .field(StaffUnit::gender)
                 .where("""
                     (
                          {{worker.gender.id}} = {{gender.id}}
@@ -138,14 +157,14 @@ class DataMarp : BaseSpringTests() {
 
 
         //с алиасом
-        dp = on("JiraStaffUnit")
+        dp =  on(StaffUnit::class)
                 .withRefs()
-                .field("n")
+                .field(StaffUnit::name)
                 .with {
-                    slice("worker").alias("W")
+                    slice(StaffUnit::worker).alias("W")
                             .scalars().withRefs()
                 }
-                .field("gender")
+                .field(StaffUnit::gender)
                 .where("""
                     (
                          {{W.gender.id}} = {{gender.id}}
@@ -164,7 +183,7 @@ class DataMarp : BaseSpringTests() {
     fun basicFormulas() {
 
         //формула
-        val gender = dataService.find(on("JiraGender")
+        val gender = dataService.find(on(Gender::class)
                 .formula("caption", """
                     case when {{id}}=1 then 'Ж'
                          when {{id}}=2 then 'М'
@@ -175,7 +194,7 @@ class DataMarp : BaseSpringTests() {
         println(gender["caption"])
 
         //lateral
-        val dp = on("JiraProject")
+        val dp = on(Project::class)
                 .lateral("tasks", """
                     (select string_agg(t.n, ';') as tasks1, count(*) as qty1
                             from jira_task t
@@ -192,7 +211,7 @@ class DataMarp : BaseSpringTests() {
 
         //1 грузим  проекты без коллекций
         val projects = dataService.findAll(
-                on("JiraProject")
+                on(Project::class)
                         .scalars()
                         .where("{{n}} = 'QDP'")
         )
@@ -200,10 +219,9 @@ class DataMarp : BaseSpringTests() {
         //2 догружаем коллекции
         dataService.upgrade(projects, projection()
                 .with {
-                    slice("jiraTasks") //загружаем коллекуию тасков
+                    slice(Project::tasks) //загружаем коллекуию тасков
                             .full() //все поля - следвателоьно и вложенная коллекция чеклистов полетит
                 })
-
 
 
         //use complex indexator
@@ -213,10 +231,10 @@ class DataMarp : BaseSpringTests() {
 
     @Test(invocationCount = 1)//Коллеция 1-N
     fun testPrintToJson() {
-        var list = dataService.findAll(on("JiraProject")
+        var list = dataService.findAll(on(Project::class)
                 .full()
                 .with {
-                    slice("jiraTasks")
+                    slice(Project::tasks)
                             .scalars().withRefs()
                 })
 

@@ -3,7 +3,6 @@ package com.datamaps.mappings
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertEqIgnoreCase
 import org.testng.Assert
-import org.testng.Assert.assertNotNull
 import org.testng.annotations.Test
 import javax.annotation.Resource
 import kotlin.streams.toList
