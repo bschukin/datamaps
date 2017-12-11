@@ -344,7 +344,7 @@ open class Field<T, L>(private var _name: String, val t: T, val t2:L) {
             return Field(aname, t, DataMap.empty())
         }
 
-        fun <T> list(aname:String, t:T ):Field<T, List<DataMap>>
+        fun <T> list(aname:String, t:T ):Field<T, MutableList<DataMap>>
         {
             return Field(aname, t, DataMap.emptyList())
         }

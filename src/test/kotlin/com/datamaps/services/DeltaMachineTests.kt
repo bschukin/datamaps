@@ -90,24 +90,24 @@ class DeltaMachineTests : BaseSpringTests() {
     fun test1MAddExisting() {
 
         val task001 = dataService.find(
-                on("JiraTask")
+                on(Task)
                         .full()
                         .where("{{name}}='SAUMI-001'"))!!
 
-        Assert.assertTrue(task001.list("jiraChecklists").size == 0)
+        Assert.assertTrue(task001[Task.checks].size == 0)
 
         val checl01 = dataService.find(
-                on("JiraChecklist")
+                on(Check)
                         .where("{{id}}=1"))!!
 
         Assert.assertNotNull(checl01)
 
-        Assert.assertNull(checl01["jiraTask"])
+        Assert.assertNull(checl01[Check.task])
 
-        task001.list("jiraChecklists").add(checl01)
+        task001[Task.checks].add(checl01)
 
 
-        Assert.assertEquals(task001, checl01["jiraTask"])
+        Assert.assertEquals(task001, checl01[Check.task])
 
         dataService.flush()
 

@@ -63,5 +63,6 @@ class Check : DM() {
         val entity = "JiraChecklist"
         val id = Field.id()
         val name = Field.string("name")
+        val task = Field.reference("jiraTask", Task)
     }
 }
