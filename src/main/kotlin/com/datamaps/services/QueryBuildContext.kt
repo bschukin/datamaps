@@ -78,7 +78,7 @@ class QueryBuildContext {
 
     fun addSelect(tableAlias: String, column: String?): String {
         val res = getColumnAlias(tableAlias, column)
-        selectColumns.add(" $tableAlias.$column  AS  $res")
+        selectColumns.add(" $tableAlias.\"$column\"  AS  $res")
         return res
     }
 
@@ -182,7 +182,7 @@ class QueryBuildContext {
 }
 
 class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
-                 val parentLinkField: String?, val parent: QueryLevel?) {
+                 val parentLinkField: String?, val parent: QueryLevel?, val dbDialect: DbDialect) {
 
     var childProps = caseInsMapOf<QueryLevel>()
 
@@ -194,10 +194,13 @@ class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
             return "$alias.$name"
 
         return if (useAlias)
-            "$alias.${dm[name].sqlcolumn!!}"
+            "$alias.${getEscapedColumn(dm[name].sqlcolumn!!)}"
         else
-            dm[name].sqlcolumn!!
+            getEscapedColumn(dm[name].sqlcolumn!!)
     }
+
+    fun getEscapedColumn(name:String) = dbDialect.getQuotedDbIdentifier(name)
+
 }
 
 

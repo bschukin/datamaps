@@ -1,6 +1,8 @@
 package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
+import com.datamaps.Gender
+import com.datamaps.mappings.on
 import com.datamaps.mappings.projection
 import org.testng.annotations.Test
 
@@ -16,6 +18,16 @@ class DataServiceTests01Basics : BaseSpringTests()
         var dm = dataService.get("JiraDepartment", 555L)
     }
 
+    @Test
+    fun testFind1ethod()
+    {
+        var res = dataService.find(
+                on(Gender).full()
+                        .where("{{id}} = 1")
+        )!!
+        println(res)
+        println(res[Gender.isClassic])
+    }
 
     @Test
     fun testFindAllMethod()

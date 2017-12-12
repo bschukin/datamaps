@@ -16,6 +16,8 @@ interface DbDialect
 
     fun getLimitOffsetQueryInSelect(limit:Int?, offset:Int?):String = ""
     fun getLimitOffsetQueryInWhere(limit:Int?, offset:Int?):String = ""
+
+    fun getQuotedDbIdentifier(id:String?):String =  "\"$id\""
 }
 
 

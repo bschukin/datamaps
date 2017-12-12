@@ -26,6 +26,7 @@ class DefaultMappingBuilderTests : BaseSpringTests() {
         assertEqIgnoreCase(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("id", "gender", "isClassic"))
 
         assertEqIgnoreCase(dt.defaultGroup.fields.stream().toList(), listOf("id", "gender", "isClassic"))
+        println(dt.fields)
     }
 
 

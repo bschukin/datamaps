@@ -334,6 +334,11 @@ open class Field<T, L>(private var _name: String, val t: T, val t2:L) {
             return Field(aname, 350L, 350L)
         }
 
+        fun boolean(aname:String):Field<Boolean, Boolean>
+        {
+            return Field(aname, false, false)
+        }
+
         fun string(aname:String):Field<String, String>
         {
             return Field(aname, "", "")
@@ -350,6 +355,7 @@ open class Field<T, L>(private var _name: String, val t: T, val t2:L) {
         }
 
         internal var context = ThreadLocal<MutableList<String>>()
+
     }
 
 

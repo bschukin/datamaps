@@ -141,7 +141,7 @@ class DataField(var name: String) {
 
 
     override fun toString(): String {
-        return "DataField(entity='$name')"
+        return "DataField(name='$name', javaType='$javaType')"
     }
 
 

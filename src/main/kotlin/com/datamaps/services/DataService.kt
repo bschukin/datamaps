@@ -1,5 +1,7 @@
 package com.datamaps.services
 
+import com.datamaps.mappings.DataMapping
+import com.datamaps.mappings.DataMappingsService
 import com.datamaps.mappings.DataProjection
 import com.datamaps.mappings.projection
 import com.datamaps.maps.DataMap
@@ -26,6 +28,8 @@ interface DataService {
     fun delete (datamap: DataMap)
 
     fun flush()
+
+    fun getDataMapping(name: String): DataMapping
 }
 
 
@@ -34,6 +38,7 @@ interface DataService {
 @Service
 class DataServiceImpl : DataService
 {
+
 
 
     private val LOGGER = LoggerFactory.getLogger(this.javaClass)
@@ -46,6 +51,10 @@ class DataServiceImpl : DataService
 
     @Resource
     lateinit var queryExecutor: QueryExecutor
+
+    @Resource
+    lateinit var dataMappingsService: DataMappingsService
+
 
 
     override fun get(entityName: String, id: Long): DataMap? {
@@ -91,5 +100,9 @@ class DataServiceImpl : DataService
     override fun flush()
     {
         deltaMachine.flush()
+    }
+
+    override fun getDataMapping(name: String): DataMapping {
+       return dataMappingsService.getDataMapping(name)
     }
 }

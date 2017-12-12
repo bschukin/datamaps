@@ -3,10 +3,10 @@ package com.datamaps.services
 import com.datamaps.general.NIY
 import com.datamaps.general.checkNIS
 import com.datamaps.general.throwNIS
-import com.datamaps.util.DataConverter
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.convert.ConversionService
 import org.springframework.core.env.Environment
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
@@ -122,9 +122,6 @@ class GenericDbMetadataService : DbMetadataService {
 
     @Resource
     lateinit var dbDialect: DbDialect
-
-    @Resource
-    lateinit var dataConverter: DataConverter
 
     @Autowired
     lateinit var env: Environment

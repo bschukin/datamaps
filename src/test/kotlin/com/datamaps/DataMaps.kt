@@ -8,9 +8,10 @@ class Gender : DM() {
         val entity = "JiraGender"
         val id = Field.id()
         val gender = Field.string("gender")
+        val isClassic = Field.boolean("isClassic")
     }
 }
-typealias GDR = Worker
+typealias GDR = Gender
 
 class Worker : DM() {
     companion object {

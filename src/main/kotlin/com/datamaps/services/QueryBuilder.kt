@@ -6,9 +6,9 @@ import com.datamaps.general.throwNIS
 import com.datamaps.mappings.*
 import com.datamaps.maps.DataMap
 import com.datamaps.maps.addIfNotInSilent
-import com.datamaps.util.DataConverter
 import org.apache.commons.lang.text.StrSubstitutor
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.convert.ConversionService
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
 
@@ -28,7 +28,9 @@ class QueryBuilder {
     lateinit var dbDialect: DbDialect
 
     @Resource
-    lateinit var dataConverter: DataConverter
+    lateinit var conversionService: ConversionService
+
+
 
     @Autowired
     lateinit var dmUtilService: DmUtilService
@@ -96,7 +98,7 @@ class QueryBuilder {
         if (!isRoot)
             qr.addParentPathAlias(qr.stack.peek().alias, field, alias)
 
-        val ql = QueryLevel(dm, currProjection, alias, field, if (isRoot) null else qr.stack.peek())
+        val ql = QueryLevel(dm, currProjection, alias, field, if (isRoot) null else qr.stack.peek(), dbDialect)
 
         if (isRoot)
             qr.root = ql
@@ -252,7 +254,7 @@ class QueryBuilder {
         val columnAlias = qr.addSelect(entityAlias, entityField.sqlcolumn)
         val ql = qr.stack.peek()
         qr.addMapper(columnAlias, { mc, rs ->
-            val id = dataConverter.convert(rs.getObject(columnAlias), Long::class.java)
+            val id = conversionService.convert(rs.getObject(columnAlias), Long::class.java)
             when (id) {
                 null ->
                     mc.curr(ql.parent!!.alias)?.let {

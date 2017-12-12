@@ -17,7 +17,6 @@ import javax.annotation.Resource
 
 
 
-@Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class CliService
 {
@@ -59,9 +58,7 @@ class DMBannerProvider : BannerProvider {
         val sb = StringBuilder()
         sb.append(FileUtils.readBanner(DMBannerProvider::class.java, "banner.txt"))
         sb.append(OsUtils.LINE_SEPARATOR)
-        sb.append(OsUtils.LINE_SEPARATOR)
-        sb.append(this.version).append(OsUtils.LINE_SEPARATOR)
-        sb.append(OsUtils.LINE_SEPARATOR)
+        sb.append(":: datamaps ::\t(0.1)").append(OsUtils.LINE_SEPARATOR)
         return sb.toString()
     }
 
@@ -70,7 +67,7 @@ class DMBannerProvider : BannerProvider {
     }
 
     override fun getWelcomeMessage(): String {
-        return "Welcome to " + this.providerName + "\r\n"
+        return ""
     }
 
     override fun getProviderName(): String {

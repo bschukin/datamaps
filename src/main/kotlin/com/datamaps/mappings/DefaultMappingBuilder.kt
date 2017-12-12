@@ -19,6 +19,9 @@ class DefaultMappingBuilder {
     lateinit var nameMappingsStrategy: NameMappingsStrategy
 
     @Resource
+    lateinit var dbDialect: DbDialect
+
+    @Resource
     lateinit var sequenceIncrementor: SequenceIncrementor
 
     fun buildDefault(table: String): DataMapping {

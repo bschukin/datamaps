@@ -80,7 +80,7 @@ open class DataMap {
         return map[field]
     }
 
-    operator fun set(field: Field<*,*>, silent: Boolean = false, value: Any?) {
+    operator  fun <L> set(field: Field<*,L>, silent: Boolean = false, value: L?) {
         set(field.n, silent, value)
     }
 

@@ -3,9 +3,9 @@ package com.datamaps.services
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.mappings.IdGenerationType
 import com.datamaps.maps.DataMap
-import com.datamaps.util.DataConverter
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.convert.ConversionService
 import org.springframework.jdbc.core.PreparedStatementCreator
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.support.GeneratedKeyHolder
@@ -41,7 +41,10 @@ class DeltaMachine {
     lateinit var sequenceIncrementor: SequenceIncrementor
 
     @Resource
-    lateinit var dataConverter: DataConverter
+    lateinit var conversionService: ConversionService
+
+    @Resource
+    lateinit var dbDialect: DbDialect
 
     @PostConstruct
     fun init() {
@@ -86,7 +89,7 @@ class DeltaMachine {
         val map = mutableMapOf<String, Any?>()
         db.deltas.values.forEach { delta ->
 
-            sql += " ${mapping[delta.property].sqlcolumn} = :_${delta.property}"
+            sql += " ${dbDialect.getQuotedDbIdentifier(mapping[delta.property].sqlcolumn)} = :_${delta.property}"
 
             when (delta.newValue) {
                 is DataMap -> map["_${delta.property}"] = delta.newValue.id
@@ -116,7 +119,7 @@ class DeltaMachine {
 
 
         sql += db.deltas.values.joinToString { delta ->
-            "${mapping[delta.property].sqlcolumn}"
+            "${dbDialect.getQuotedDbIdentifier(mapping[delta.property].sqlcolumn)}"
         }
         sql += ") VALUES ("
         sql += db.deltas.values.joinToString { _ -> "?" }
@@ -145,7 +148,7 @@ class DeltaMachine {
         }, holder)
 
         if (db.dm.id == null)
-            db.dm.id = dataConverter.convert(holder.keys["id"], Long::class.java)
+            db.dm.id = conversionService.convert(holder.keys["id"], Long::class.java)
 
         return Pair(sql, map)
     }

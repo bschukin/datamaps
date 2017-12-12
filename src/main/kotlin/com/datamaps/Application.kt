@@ -46,7 +46,12 @@ class KotlinDemoApplication {
 
 fun main(args: Array<String>) {
 
-    SpringApplication.run(KotlinDemoApplication::class.java, *args)
+    val ctx = SpringApplication.run(KotlinDemoApplication::class.java, *args)
+
+    val cli = CliService()
+    ctx.autowireCapableBeanFactory.autowireBean(cli)
+    cli.init()
+
 
 }
 

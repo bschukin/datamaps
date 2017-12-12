@@ -24,7 +24,7 @@ class QueryBuilderLateralTests : BaseSpringTests() {
         var dp = projection("JiraProject")
                 .full()
                 .lateral("tasks", """
-                    (select string_agg(t.n, ';') as tasks1, count(*) as qty1
+                    (select string_agg(t.name, ';') as tasks1, count(*) as qty1
                             from jira_task t
                             where t.jira_project_id= {{id}}
                             ) tasks on true
