@@ -35,3 +35,22 @@ ALTER TABLE Organisation ADD COLUMN IF NOT EXISTS "email" character varying(100)
 COMMENT ON COLUMN Organisation."email" IS 'Электронный ящик';
 
 ALTER TABLE Organisation ADD COLUMN IF NOT EXISTS "isActual" BOOLEAN;
+COMMENT ON COLUMN Organisation."isActual" IS 'Актуален';
+
+ALTER TABLE Organisation ADD COLUMN IF NOT EXISTS "VIP" BOOLEAN;
+COMMENT ON COLUMN Organisation."VIP" IS 'VIP';
+
+ALTER TABLE Organisation ADD COLUMN IF NOT EXISTS "workTimeStart" Integer;
+COMMENT ON COLUMN Organisation."workTimeStart" IS 'Работа с';
+
+ALTER TABLE Organisation ADD COLUMN IF NOT EXISTS "workTimeEnd" Integer;
+COMMENT ON COLUMN Organisation."workTimeEnd" IS 'Работа по';
+
+ALTER TABLE Organisation ADD COLUMN IF NOT EXISTS "dinnerTimeStart" Integer;
+COMMENT ON COLUMN Organisation."dinnerTimeStart" IS 'Обед с';
+
+ALTER TABLE Organisation ADD COLUMN IF NOT EXISTS "dinnerTimeEnd" Integer;
+COMMENT ON COLUMN Organisation."dinnerTimeEnd" IS 'Обед по';
+
+
+

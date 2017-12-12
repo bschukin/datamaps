@@ -61,8 +61,8 @@ class DeltaMachine {
 
     internal fun createAndExeUpdateStatements(buckets: List<DeltaBucket>): List<Pair<String, Map<String, Any?>>> {
         return buckets.stream().map { b ->
-            when  {
-                b.isDelete()-> createDelete(b)
+            when {
+                b.isDelete() -> createDelete(b)
                 b.isUpdate() -> createUpdate(b)
                 else -> createInsert(b)
             }
@@ -87,16 +87,20 @@ class DeltaMachine {
         val mapping = dataMappingsService.getDataMapping(db.dm.entity)
         var sql = "UPDATE ${mapping.table} SET"
         val map = mutableMapOf<String, Any?>()
-        db.deltas.values.forEach { delta ->
 
-            sql += " ${dbDialect.getQuotedDbIdentifier(mapping[delta.property].sqlcolumn)} = :_${delta.property}"
+        sql +=
+                db.deltas.values.joinToString { delta ->
+                    //кладеим в мапу параметр
+                    when (delta.newValue) {
+                        is DataMap -> map["_${delta.property}"] = delta.newValue.id
+                        else -> map["_${delta.property}"] = delta.newValue
+                    }
 
-            when (delta.newValue) {
-                is DataMap -> map["_${delta.property}"] = delta.newValue.id
-                else -> map["_${delta.property}"] = delta.newValue
-            }
+                    //возваращаем текущий клауз SET
+                    " ${dbDialect.getQuotedDbIdentifier(mapping[delta.property].sqlcolumn)} = :_${delta.property}"
 
-        }
+                }
+
         sql += " \n WHERE ${mapping.idColumn} = :_ID"
         map["_ID"] = db.dm.id
 
@@ -242,9 +246,8 @@ object DeltaStore {
         val res = mutableListOf<DeltaBucket>()
 
         context.get().deltas.forEach { delta ->
-            if(delta.type==DeltaType.CREATE)
-            {
-                lastDM= null
+            if (delta.type == DeltaType.CREATE) {
+                lastDM = null
                 currBucket = DeltaBucket(delta.dm)
             }
             if (lastDM != delta.dm) {
@@ -263,7 +266,6 @@ object DeltaStore {
         override fun beforeCompletion() {
             clearTransactionContext()
         }
-
 
 
         override fun beforeCommit(readOnly: Boolean) {
@@ -294,7 +296,7 @@ internal data class Delta(val type: DeltaType, val dm: DataMap, val property: St
 internal data class DeltaBucket(val dm: DataMap, val deltas: LinkedCaseInsensitiveMap<Delta> = LinkedCaseInsensitiveMap()) {
 
     fun isUpdate() = !dm.isNew()
-    fun isDelete() = !deltas.values.isEmpty() &&  deltas.values.first().type == DeltaType.DELETE
+    fun isDelete() = !deltas.values.isEmpty() && deltas.values.first().type == DeltaType.DELETE
 
 }
 

@@ -67,7 +67,7 @@ class DMBannerProvider : BannerProvider {
     }
 
     override fun getWelcomeMessage(): String {
-        return ""
+        return "Welcome to Datamaps"
     }
 
     override fun getProviderName(): String {

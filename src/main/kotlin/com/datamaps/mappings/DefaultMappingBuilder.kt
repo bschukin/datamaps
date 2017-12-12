@@ -50,6 +50,7 @@ class DefaultMappingBuilder {
             val df = DataField(getDefaultFieldName(col))
             df.sqlcolumn = col.name
             df.javaType = getJavaTypeByJDBCType(col.jdbcType)
+            df.description = col.comment.orEmpty()
 
             dm.add(df)
 
@@ -66,6 +67,8 @@ class DefaultMappingBuilder {
             val df = DataField(getDefaultFieldName(col))
             df.sqlcolumn = col.name
             df.javaType = getJavaTypeByJDBCType(col.jdbcType)
+            df.description = col.comment.orEmpty()
+
             df.manyToOne = ManyToOne(
                     nameMappingsStrategy.getJavaEntityName(col.importedKey!!.pkTable),
                     col.importedKey!!.pkColumn)

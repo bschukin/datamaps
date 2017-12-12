@@ -1,4 +1,4 @@
-package com.datamaps.servicedesck
+package com.datamaps.servicedesk
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.KotlinDemoApplication
@@ -15,13 +15,13 @@ import org.testng.annotations.Test
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration("classpath:servicedesk-app-context.xml", inheritLocations = false)
 @ActiveProfiles("postgresql")
-class ServiceDeskDb : BaseSpringTests() {
+class ServiceDeskDbTests : BaseSpringTests() {
 
     @Test
-    fun testDbInfo() {
+    fun testOrgInfo() {
+
         val dm =dataService.getDataMapping("Organisation")
-        println(dm)
-        dm.fields.forEach { t, u -> println(u) }
+        dm.print()
 
         val org = DataMap("Organisation")
         org["fullName"] = "ЗАО БИС"
@@ -29,11 +29,11 @@ class ServiceDeskDb : BaseSpringTests() {
 
         dataService.flush()
 
-
         val org2 = dataService.find(on("Organisation")
                 .full().filter { f("inn") eq "123456789101" })!!
 
         org2["legalAddress"]  = "Москва, Лефортово, все дела"
+        org2["workTimeStart"]  = 12
         dataService.flush()
 
         val org3 = dataService.find(on("Organisation")
@@ -41,6 +41,8 @@ class ServiceDeskDb : BaseSpringTests() {
 
         println(org3)
     }
+
+
 
 }
 

@@ -73,7 +73,10 @@ class DataMapping(var name: String, var table: String) {
         return "DataMapping(entity='$name', table='$table')"
     }
 
-
+    fun print(){
+        println(toString())
+        fields.values.forEach{ println(it) }
+    }
 }
 
 enum class IdGenerationType {
@@ -91,6 +94,7 @@ const val LIST: String = "LIST"
 
 class DataField(var name: String) {
 
+    var description = ""
     var javaType: Class<*>? = null
     var sqlcolumn: String? = null
 
@@ -141,7 +145,7 @@ class DataField(var name: String) {
 
 
     override fun toString(): String {
-        return "DataField(name='$name', javaType='$javaType')"
+        return "DataField(name='$name', javaType='$javaType' desc='$description')"
     }
 
 
