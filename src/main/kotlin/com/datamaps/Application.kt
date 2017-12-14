@@ -1,5 +1,8 @@
 package com.datamaps
 
+import com.datamaps.mappings.AsIsNameMappingsStrategy
+import com.datamaps.mappings.CamelUnderscoreNameMappingsStrategy
+import com.datamaps.mappings.NameMappingsStrategy
 import com.datamaps.services.DbDialect
 import com.datamaps.services.getDbDialectByConnection
 import org.springframework.boot.SpringApplication
@@ -26,6 +29,11 @@ class KotlinDemoApplication {
 
     @Resource
     lateinit var jdbcTemplate: JdbcTemplate
+
+    @Bean
+    fun nameMappingsStrategy(): NameMappingsStrategy {
+        return CamelUnderscoreNameMappingsStrategy()
+    }
 
     @Bean
     fun jLineShellComponent(): JLineShellComponent {

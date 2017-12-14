@@ -1,6 +1,7 @@
 package com.datamaps.mappings
 
 import com.google.common.base.CaseFormat
+import javax.annotation.PostConstruct
 
 /**
  * Created by b.schukin on 16.11.2017.
@@ -13,6 +14,12 @@ interface NameMappingsStrategy {
 }
 
 class AsIsNameMappingsStrategy : NameMappingsStrategy {
+
+    @PostConstruct
+    fun init(){
+        println()
+    }
+
     override fun getJavaPropertyName(dbName: String): String = dbName
 
     override fun getJavaEntityName(dbName: String): String = dbName
@@ -22,6 +29,11 @@ class AsIsNameMappingsStrategy : NameMappingsStrategy {
 
 
 class CamelUnderscoreNameMappingsStrategy : NameMappingsStrategy {
+
+    @PostConstruct
+    fun init(){
+        println()
+    }
 
     override fun getJavaPropertyName(dbName: String): String = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, dbName)
 

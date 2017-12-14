@@ -1,21 +1,59 @@
 package com.datamaps.servicedesk
 
-import com.datamaps.BaseSpringTests
-import com.datamaps.KotlinDemoApplication
+import com.datamaps.mappings.AsIsNameMappingsStrategy
+import com.datamaps.mappings.NameMappingsStrategy
 import com.datamaps.mappings.f
 import com.datamaps.mappings.on
 import com.datamaps.maps.DataMap
+import com.datamaps.services.DataService
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration
+import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests
 import org.testng.annotations.Test
 
 @SpringBootTest(
-        classes = arrayOf(KotlinDemoApplication::class),
+        classes = arrayOf(ServiceDeskDbTests.TestConfig::class),
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ContextConfiguration("classpath:servicedesk-app-context.xml", inheritLocations = false)
 @ActiveProfiles("postgresql")
-class ServiceDeskDbTests : BaseSpringTests() {
+@Profile("postgresql")
+@EnableAutoConfiguration
+class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
+
+    @Autowired
+    lateinit var dataService: DataService
+
+    @Configuration
+    @EnableAutoConfiguration
+    @SpringBootApplication(scanBasePackages = ["com.datamaps"])
+    class TestConfig {
+        @Bean
+        fun nameMappingsStrategy(): NameMappingsStrategy {
+            return AsIsNameMappingsStrategy()
+        }
+    }
+
+    @Test(invocationCount = 1)
+    fun workTimeZone() {
+
+        val dm =dataService.getDataMapping("TimeZone")
+        dm.print()
+
+        val tz = DataMap("TimeZone")
+        tz["name"] = "Moscow"
+
+        dataService.flush()
+        println(tz.id)
+    }
+
 
     @Test
     fun testOrgInfo() {
@@ -24,6 +62,7 @@ class ServiceDeskDbTests : BaseSpringTests() {
         dm.print()
 
         val org = DataMap("Organisation")
+        org["name"] = "БИС"
         org["fullName"] = "ЗАО БИС"
         org["inn"] = "123456789101"
 

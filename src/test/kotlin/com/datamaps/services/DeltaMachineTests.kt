@@ -5,6 +5,7 @@ import com.datamaps.mappings.f
 import com.datamaps.mappings.on
 import com.datamaps.maps.DataMap
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.transaction.annotation.Transactional
 import org.testng.Assert
 import org.testng.annotations.Test
@@ -15,6 +16,7 @@ import kotlin.test.assertEquals
  * Created by Щукин on 03.11.2017.
  */
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class DeltaMachineTests : BaseSpringTests() {
 
     @Autowired
