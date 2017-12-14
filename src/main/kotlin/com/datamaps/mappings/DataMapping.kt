@@ -52,7 +52,7 @@ class DataMapping(var name: String, var table: String) {
         get() = groups[LIST]!!
 
 
-    fun add(field: DataField) = fields.merge(field.name, field, { _, _ -> throw NIS() })
+    fun add(field: DataField) = fields.put(field.name, field)
 
 
     operator fun get(field: String): DataField {
@@ -189,12 +189,12 @@ fun getJavaTypeByJDBCType(jdbcType: JDBCType): Class<*> {
         JDBCType.FLOAT -> Double::class.java
         JDBCType.DOUBLE -> Double::class.java
         JDBCType.BINARY, JDBCType.VARBINARY, JDBCType.LONGVARBINARY -> throw NIY()
-        JDBCType.DATE -> java.sql.Date::javaClass
-        JDBCType.TIME -> java.sql.Time::javaClass
-        JDBCType.TIMESTAMP -> java.sql.Timestamp::javaClass
+        JDBCType.DATE -> java.util.Date::class.java
+        JDBCType.TIME -> java.sql.Time::class.java
+        JDBCType.TIMESTAMP -> java.sql.Timestamp::class.java
         JDBCType.CLOB, JDBCType.BLOB -> throw NIY()
         JDBCType.ARRAY, JDBCType.DISTINCT, JDBCType.DATALINK, JDBCType.STRUCT, JDBCType.REF -> throw NIY()
         else -> throw NIY()
-    } as Class<*>
+    }
 
 }

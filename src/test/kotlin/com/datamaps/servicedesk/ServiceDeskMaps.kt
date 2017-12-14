@@ -13,6 +13,24 @@ class TimeZone : DM() {
     }
 }
 
+class OrgUser : DM() {
+    companion object {
+        val entity = "OrgUser"
+        val table = "OrgUser"
+
+        val id = Field.long("id")
+        val name = Field.string("name")
+        val mobile = Field.string("mobile")
+        val workPhone = Field.string("workPhone")
+        val skype = Field.string("skype")
+        val icq = Field.string("icq")
+        val position = Field.string("position")
+        val organisation = Field.reference("organisation", Organisation)
+
+    }
+}
+
+
 class Subdivision : DM() {
     companion object {
         val entity = "Subdivision"
@@ -52,4 +70,5 @@ class Organisation : DM() {
 
     }
 }
+
 typealias ORG = Organisation

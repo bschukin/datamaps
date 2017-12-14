@@ -21,6 +21,8 @@ interface DataService {
 
     fun find(dp: DataProjection): DataMap?
 
+    fun find_(dp: DataProjection): DataMap?
+
     fun findAll(dp: DataProjection):List<DataMap>
 
     fun upgrade(maps: List<DataMap>, slice: projection):List<DataMap>
@@ -73,6 +75,10 @@ class DataServiceImpl : DataService
             throw RuntimeException("more than one element found")
 
         return res.firstOrNull()
+    }
+
+    override fun find_(dp: DataProjection): DataMap {
+        return find(dp)!!
     }
 
     override fun findAll(dp: DataProjection):List<DataMap> {

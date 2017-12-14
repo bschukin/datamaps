@@ -1,6 +1,7 @@
 package com.datamaps.mappings
 
 import com.datamaps.general.NIS
+import com.datamaps.services.CacheClearable
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
 
@@ -8,7 +9,7 @@ import javax.annotation.Resource
  * Created by Щукин on 03.11.2017.
  */
 @Service
-class DataMappingsService {
+class DataMappingsService : CacheClearable {
 
     @Resource
     lateinit var defaultMappingBuilder: DefaultMappingBuilder
@@ -18,7 +19,7 @@ class DataMappingsService {
 
     var mappings = mutableMapOf<String, DataMapping>()
 
-    fun clear()
+    override fun clearCache()
     {
         mappings.clear()
     }

@@ -18,6 +18,16 @@ CREATE TABLE IF NOT EXISTS "subdivision"
   name character varying(100) NOT NULL
 );
 
+--//////////////////Тип контракта ///////////////////////////////////////
+--////////////////////////////////////////////////////////////////////
+
+CREATE SEQUENCE IF NOT EXISTS contractType_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "contracttype"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('contractType_id_seq'),
+  name character varying(100) NOT NULL
+);
+
 
 --//////////////////ОРГАНИЗАЦИЯ///////////////////////////////////////
 --////////////////////////////////////////////////////////////////////
@@ -83,4 +93,100 @@ COMMENT ON COLUMN organisation."description" IS 'Примечание';
 
 ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "subdivisionId" Integer;
 COMMENT ON COLUMN organisation."subdivisionId" IS 'Id подразделения ДЭ';
-ALTER TABLE organisation ADD FOREIGN KEY ("subdivisionId") REFERENCES subdivision(id)
+ALTER TABLE organisation ADD FOREIGN KEY ("subdivisionId") REFERENCES subdivision(id);
+
+--//////////////////Дочерняя организация//////////////////////////////
+--////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS organisationtree_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "organisationtree"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('organisationtree_id_seq')
+);
+
+ALTER TABLE organisationtree ADD COLUMN IF NOT EXISTS "parentId" bigint;
+COMMENT ON COLUMN organisationtree."parentId" IS 'Головная организация';
+ALTER TABLE organisationtree ADD FOREIGN KEY ("parentId") REFERENCES organisation(id) on delete cascade;
+
+ALTER TABLE organisationtree ADD COLUMN IF NOT EXISTS "childId" bigint;
+COMMENT ON COLUMN organisationtree."childId" IS 'Дочерняя организация';
+ALTER TABLE organisationtree ADD FOREIGN KEY ("childId") REFERENCES organisation(id)  on delete cascade;
+
+
+--//////////////////USER///////////////////////////////////////
+--////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS orguser_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "orguser"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('orguser_id_seq')
+);
+
+
+ALTER TABLE orguser ADD COLUMN IF NOT EXISTS "name" character varying(256);
+COMMENT ON COLUMN orguser."name" IS 'Имя пользователя';
+
+ALTER TABLE orguser ADD COLUMN IF NOT EXISTS "mobile" character varying(20);
+COMMENT ON COLUMN orguser."mobile" IS 'Мобильный телефон';
+
+ALTER TABLE orguser ADD COLUMN IF NOT EXISTS "workPhone" character varying(20);
+COMMENT ON COLUMN orguser."workPhone" IS 'Рабочий телефон';
+
+ALTER TABLE orguser ADD COLUMN IF NOT EXISTS "skype" character varying(20);
+COMMENT ON COLUMN orguser."skype" IS 'Скайп';
+
+ALTER TABLE orguser ADD COLUMN IF NOT EXISTS "icq" character varying(20);
+COMMENT ON COLUMN orguser."icq" IS 'ICQ';
+
+ALTER TABLE orguser ADD COLUMN IF NOT EXISTS "position" character varying(100);
+COMMENT ON COLUMN orguser."position" IS 'Должность';
+
+ALTER TABLE orguser ADD COLUMN IF NOT EXISTS "organisationId" Integer;
+COMMENT ON COLUMN orguser."organisationId" IS 'Организация';
+ALTER TABLE orguser ADD FOREIGN KEY ("organisationId") REFERENCES organisation(id);
+
+--//////////////////Контракт///////////////////////////////////////
+--////////////////////////////////////////////////////////////////////
+
+
+CREATE SEQUENCE IF NOT EXISTS contract_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "contract"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('contract_id_seq')
+);
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "organisationId" Integer;
+COMMENT ON COLUMN contract."organisationId" IS 'Заказчик';
+ALTER TABLE contract ADD FOREIGN KEY ("organisationId") REFERENCES organisation(id);
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "number" character varying(20);
+COMMENT ON COLUMN contract."number" IS 'Номер контракта';
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "conclusionDate" date;
+COMMENT ON COLUMN contract."conclusionDate" IS 'Дата заключения';
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "contractTypeId" Integer;
+COMMENT ON COLUMN contract."contractTypeId" IS 'Тип контракта';
+ALTER TABLE contract ADD FOREIGN KEY ("contractTypeId") REFERENCES contracttype(id);
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "numberPU" character varying(20);
+COMMENT ON COLUMN contract."numberPU" IS 'Номер контракта в ПУ';
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "state" character varying(30);
+COMMENT ON COLUMN contract."state" IS 'Статус';
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "projectPU" character varying(20);
+COMMENT ON COLUMN contract."projectPU" IS 'Проект в ПУ';
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "subdivisionId" Integer;
+COMMENT ON COLUMN contract."subdivisionId" IS 'Ответственное подразделение';
+ALTER TABLE contract ADD FOREIGN KEY ("subdivisionId") REFERENCES subdivision(id);
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "startDate" date;
+COMMENT ON COLUMN contract."startDate" IS 'Действует с';
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "finishDate" date;
+COMMENT ON COLUMN contract."finishDate" IS 'Действует по';
+
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "active" boolean;
+COMMENT ON COLUMN contract."active" IS 'Действующий';
+
+

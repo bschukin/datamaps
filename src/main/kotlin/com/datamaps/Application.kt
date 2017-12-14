@@ -18,10 +18,6 @@ import javax.annotation.Resource
 
 
 
-/**
- *
- *
- */
 @EnableAutoConfiguration
 @SpringBootApplication(scanBasePackages = ["com.datamaps", "org.springframework.shell"])
 @ImportResource("app-context.xml")
@@ -52,9 +48,22 @@ class KotlinDemoApplication {
 
 }
 
+@EnableAutoConfiguration
+@SpringBootApplication(scanBasePackages = ["com.datamaps", "org.springframework.shell"])
+@ImportResource("app-context.xml")
+class ServiceDeskApplication:KotlinDemoApplication() {
+
+    @Bean
+    override fun nameMappingsStrategy(): NameMappingsStrategy {
+        return AsIsNameMappingsStrategy()
+    }
+
+}
+
+
 fun main(args: Array<String>) {
 
-    val ctx = SpringApplication.run(KotlinDemoApplication::class.java, *args)
+    val ctx = SpringApplication.run(ServiceDeskApplication::class.java, *args)
 
     val cli = CliService()
     ctx.autowireCapableBeanFactory.autowireBean(cli)

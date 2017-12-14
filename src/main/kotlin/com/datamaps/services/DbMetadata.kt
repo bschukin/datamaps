@@ -118,7 +118,7 @@ enum class ForeignKeyCascade(val value: Int) {
 
 
 @Service
-class GenericDbMetadataService : DbMetadataService {
+class GenericDbMetadataService : DbMetadataService, CacheClearable {
 
     @Resource
     lateinit var dbDialect: DbDialect
@@ -135,7 +135,9 @@ class GenericDbMetadataService : DbMetadataService {
     fun isHsqlDb(): Boolean = env.activeProfiles.contains("hsqldb")
 
 
-
+    override fun clearCache() {
+        tables.clear()
+    }
 
     override fun getTableInfo(table: String): DbTable {
         if (tables.contains(table))

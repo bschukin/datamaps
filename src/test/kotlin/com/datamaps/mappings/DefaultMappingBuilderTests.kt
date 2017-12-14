@@ -70,4 +70,14 @@ class DefaultMappingBuilderTests : BaseSpringTests() {
         assertEqIgnoreCase(dt.defaultGroup.fields.stream().toList(), listOf("id", "name"))
     }
 
+    @Test
+            //тест на маппинг таблицы в которой есть один ко многоим
+    fun testDefaultMappingForSimpleTable04() {
+        val dt = defaultMappingBuilder.buildDefault("JIRA_PROJECT")
+        assertNotNull(dt)
+        dt.print()
+
+
+    }
+
 }

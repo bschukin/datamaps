@@ -1,6 +1,7 @@
 package com.datamaps
 
 import com.datamaps.mappings.DataMappingsService
+import com.datamaps.services.DmUtilService
 import com.datamaps.tools.FieldSetGenerator
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -84,7 +85,8 @@ class DataMapsCommands : CommandMarker {
     lateinit var fieldSetGenerator: FieldSetGenerator
 
     @Resource
-    lateinit var dataMappingsService: DataMappingsService
+    lateinit var dmUtilService: DmUtilService
+
 
     @CliCommand(value = ["helloworld", "hw"], help = "say hello world")
     fun helloworld() {
@@ -102,7 +104,7 @@ class DataMapsCommands : CommandMarker {
 
     @CliCommand(value = ["clearCache", "cc"])
     fun clearCaches() {
-        dataMappingsService.clear()
+        dmUtilService.clearCaches()
         println("caches are clear!")
     }
 }

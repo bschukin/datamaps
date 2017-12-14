@@ -64,8 +64,36 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         dataService.flush()
     }
 
+    fun insertOrgs()
+    {
+        val tz = DataMap(ORG.entity)
+        tz[ORG.name] = "ЗАО БИС"
+
+        dataService.flush()
+    }
+
 
     @Test
+    fun testOrgUser() {
+
+        val dm =dataService.getDataMapping("OrgUser")
+        dm.print()
+
+        with(OrgUser)
+        {
+            val user = DataMap(entity)
+            user[name] = "Boris"
+            user[organisation] = dataService.find(on(ORG).where("{{name}} = 'ЗАО БИС'"))
+
+            dataService.flush()
+
+            val user2 = dataService.find_(on(OrgUser).filter { f(name) eq "Boris" })
+            println(user2)
+        }
+
+    }
+
+    @Test(invocationCount = 0)
     fun testOrgInfo() {
 
         insertTimeZones()
@@ -92,6 +120,23 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
                 .full().filter { f("inn") eq "123456789101" })!!
 
         println(org3)
+    }
+
+    @Test
+    fun testContract() {
+
+        val dm =dataService.getDataMapping("Contract")
+        dm.print()
+
+    }
+
+    @Test
+    fun testOrgTree() {
+
+
+        val dm2 =dataService.getDataMapping("Organisation")
+        dm2.print()
+
     }
 
 
