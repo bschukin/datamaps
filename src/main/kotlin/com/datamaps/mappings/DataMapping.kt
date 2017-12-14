@@ -4,6 +4,7 @@ import com.datamaps.general.NIS
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
 import com.datamaps.general.checkNIS
+import com.datamaps.maps.DataMap
 import com.datamaps.util.linkedCaseInsMapOf
 import com.google.gson.annotations.SerializedName
 import java.math.BigDecimal
@@ -100,6 +101,7 @@ class DataField(var name: String) {
 
     @SerializedName("m-1")
     var manyToOne: ManyToOne? = null
+    set(value) {field=  value; javaType = DataMap::class.java}
 
     @SerializedName("1-m")
     var oneToMany: OneToMany? = null

@@ -223,10 +223,10 @@ class QueryBuilder {
 
         return when {
             ref.isM1 -> "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
-                    "${parent.alias}.${ref.sqlcolumn}=${me.alias}.${ref.manyToOne!!.joinColumn}"
+                    "${parent.alias}.\"${ref.sqlcolumn}\"=${me.alias}.${ref.manyToOne!!.joinColumn}"
 
             ref.is1N -> "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
-                    "${parent.alias}.${parent.dm.idColumn}=${me.alias}.${ref.oneToMany!!.theirJoinColumn}"
+                    "${parent.alias}.\"${parent.dm.idColumn}\"=${me.alias}.${ref.oneToMany!!.theirJoinColumn}"
 
             else -> throwNIS()
         }

@@ -1,10 +1,13 @@
 package com.datamaps
 
+import com.datamaps.mappings.DataMappingsService
+import com.datamaps.tools.FieldSetGenerator
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
 import org.springframework.shell.core.CommandMarker
 import org.springframework.shell.core.JLineShellComponent
 import org.springframework.shell.core.annotation.CliCommand
+import org.springframework.shell.core.annotation.CliOption
 import org.springframework.shell.plugin.BannerProvider
 import org.springframework.shell.plugin.HistoryFileNameProvider
 import org.springframework.shell.plugin.support.DefaultPromptProvider
@@ -12,20 +15,18 @@ import org.springframework.shell.support.util.FileUtils
 import org.springframework.shell.support.util.OsUtils
 import org.springframework.shell.support.util.VersionUtils
 import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 import javax.annotation.Resource
 
 
-
 @Order(Ordered.HIGHEST_PRECEDENCE)
-class CliService
-{
+class CliService {
     @Resource
     lateinit var jLineShellComponent: JLineShellComponent
 
     @PostConstruct
-    fun init()
-    {
+    fun init() {
         jLineShellComponent.start()
     }
 
@@ -33,8 +34,7 @@ class CliService
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
-class PromptProvider : HistoryFileNameProvider, DefaultPromptProvider()
-{
+class PromptProvider : HistoryFileNameProvider, DefaultPromptProvider() {
 
     override fun getHistoryFileName(): String {
         return "datamaps-cli.log"
@@ -80,8 +80,29 @@ class DMBannerProvider : BannerProvider {
 @Component
 class DataMapsCommands : CommandMarker {
 
-    @CliCommand(value = "hw", help = "say hello world")
-    fun insert() {
-        println("hello wolrd, from datamaps")
+    @Resource
+    lateinit var fieldSetGenerator: FieldSetGenerator
+
+    @Resource
+    lateinit var dataMappingsService: DataMappingsService
+
+    @CliCommand(value = ["helloworld", "hw"], help = "say hello world")
+    fun helloworld() {
+        println("hello wolrd from datamaps")
+    }
+
+    @CliCommand(value = ["generate", "gene", "g"])
+    fun generateFieldSet(
+            @CliOption(key = ["table", "t"])
+            table: String
+    ) {
+        println(fieldSetGenerator.generateFieldSet(table))
+        println("gene --t $table")//чтобы руками не
+    }
+
+    @CliCommand(value = ["clearCache", "cc"])
+    fun clearCaches() {
+        dataMappingsService.clear()
+        println("caches are clear!")
     }
 }

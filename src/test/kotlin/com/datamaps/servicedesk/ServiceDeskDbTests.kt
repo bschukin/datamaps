@@ -53,25 +53,39 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         println(tz.id)
     }
 
+    fun insertTimeZones()
+    {
+        val tz = DataMap(TimeZone.entity)
+        tz[TimeZone.name] = "Moscow"
+
+        val tz2 = DataMap(TimeZone.entity)
+        tz2[TimeZone.name] = "NY"
+
+        dataService.flush()
+    }
+
 
     @Test
     fun testOrgInfo() {
 
+        insertTimeZones()
+
         val dm =dataService.getDataMapping("Organisation")
         dm.print()
 
-        val org = DataMap("Organisation")
-        org["name"] = "БИС"
-        org["fullName"] = "ЗАО БИС"
-        org["inn"] = "123456789101"
+        val org = DataMap(ORG.entity)
+        org[ORG.name] = "БИС"
+        org[ORG.fullName] = "ЗАО БИС"
+        org[ORG.INN] = "123456789101"
 
         dataService.flush()
 
-        val org2 = dataService.find(on("Organisation")
+        val org2 = dataService.find(on(ORG)
                 .full().filter { f("inn") eq "123456789101" })!!
 
         org2["legalAddress"]  = "Москва, Лефортово, все дела"
         org2["workTimeStart"]  = 12
+        org2[ORG.timeZone] = dataService.find(on(TimeZone).where("{{name}}='NY'"))
         dataService.flush()
 
         val org3 = dataService.find(on("Organisation")

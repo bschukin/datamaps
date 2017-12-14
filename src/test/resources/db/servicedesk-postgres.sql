@@ -8,6 +8,16 @@ CREATE TABLE IF NOT EXISTS "timezone"
   name character varying(100) NOT NULL
 );
 
+--//////////////////Подразделение ПУ///////////////////////////////////////
+--////////////////////////////////////////////////////////////////////
+
+CREATE SEQUENCE IF NOT EXISTS subdivision_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "subdivision"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('subdivision_id_seq'),
+  name character varying(100) NOT NULL
+);
+
 
 --//////////////////ОРГАНИЗАЦИЯ///////////////////////////////////////
 --////////////////////////////////////////////////////////////////////
@@ -61,5 +71,16 @@ COMMENT ON COLUMN organisation."dinnerTimeStart" IS 'Обед с';
 ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "dinnerTimeEnd" Integer;
 COMMENT ON COLUMN organisation."dinnerTimeEnd" IS 'Обед по';
 
+ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "timeZoneId" Integer;
+COMMENT ON COLUMN organisation."timeZoneId" IS 'Часовой пояс';
+ALTER TABLE organisation ADD FOREIGN KEY ("timeZoneId") REFERENCES timezone(id);
 
+ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "loadedFromPU" BOOLEAN;
+COMMENT ON COLUMN organisation."loadedFromPU" IS 'Загружено из ПУ';
 
+ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "description" boolean;
+COMMENT ON COLUMN organisation."description" IS 'Примечание';
+
+ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "subdivisionId" Integer;
+COMMENT ON COLUMN organisation."subdivisionId" IS 'Id подразделения ДЭ';
+ALTER TABLE organisation ADD FOREIGN KEY ("subdivisionId") REFERENCES subdivision(id)
