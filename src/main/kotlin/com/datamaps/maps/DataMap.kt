@@ -1,8 +1,6 @@
 package com.datamaps.maps
 
 import com.datamaps.general.checkNIS
-import com.datamaps.mappings.Field
-import com.datamaps.mappings.getEntityNameFromClass
 import com.datamaps.services.DeltaStore
 import com.datamaps.util.caseInsMapOf
 import com.google.gson.*
@@ -80,7 +78,7 @@ open class DataMap {
         return map[field]
     }
 
-    operator  fun <L> set(field: Field<*,L>, silent: Boolean = false, value: L?) {
+    operator  fun <L> set(field: Field<*, L>, silent: Boolean = false, value: L?) {
         set(field.n, silent, value)
     }
 
@@ -109,7 +107,7 @@ open class DataMap {
         map[field] = null
     }
 
-    fun list(field: Field<*,*>): MutableList<DataMap> {
+    fun list(field: Field<*, *>): MutableList<DataMap> {
         return list(field.n)
     }
 

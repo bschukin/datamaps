@@ -1,6 +1,8 @@
 package com.datamaps.mappings
 
 import com.datamaps.BaseSpringTests
+import com.datamaps.maps.projection
+import com.datamaps.maps.slice
 import org.testng.Assert
 import org.testng.annotations.Test
 

@@ -1,7 +1,7 @@
 package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
-import com.datamaps.mappings.projection
+import com.datamaps.maps.projection
 import org.springframework.context.annotation.Profile
 import org.testng.annotations.Test
 

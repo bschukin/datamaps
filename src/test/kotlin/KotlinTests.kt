@@ -1,6 +1,6 @@
 
-import com.datamaps.mappings.DataProjection
-import com.datamaps.mappings.f
+import com.datamaps.maps.DataProjection
+import com.datamaps.maps.f
 import org.apache.commons.lang.text.StrSubstitutor
 import org.testng.annotations.Test
 import kotlin.reflect.KCallable

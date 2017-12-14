@@ -2,7 +2,7 @@ package com.datamaps.services
 
 import com.datamaps.general.throwNIS
 import com.datamaps.mappings.DataMapping
-import com.datamaps.mappings.DataProjection
+import com.datamaps.maps.DataProjection
 import com.datamaps.maps.DataMap
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf

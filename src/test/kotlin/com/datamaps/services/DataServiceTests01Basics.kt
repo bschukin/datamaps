@@ -2,8 +2,8 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.Gender
-import com.datamaps.mappings.on
-import com.datamaps.mappings.projection
+import com.datamaps.maps.on
+import com.datamaps.maps.projection
 import org.testng.annotations.Test
 
 /**

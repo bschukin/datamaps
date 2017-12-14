@@ -2,10 +2,10 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertEqIgnoreCase
-import com.datamaps.mappings.DataProjection
-import com.datamaps.mappings.f
-import com.datamaps.mappings.projection
-import com.datamaps.mappings.slice
+import com.datamaps.maps.DataProjection
+import com.datamaps.maps.f
+import com.datamaps.maps.projection
+import com.datamaps.maps.slice
 import org.testng.Assert
 import org.testng.Assert.assertEquals
 import org.testng.Assert.assertNotEquals

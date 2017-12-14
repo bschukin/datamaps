@@ -1,7 +1,7 @@
 package com.datamaps.services
 
 import com.datamaps.*
-import com.datamaps.mappings.*
+import com.datamaps.maps.*
 import org.testng.annotations.Test
 
 /**

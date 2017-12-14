@@ -1,7 +1,7 @@
 package com.datamaps
 
-import com.datamaps.mappings.DM
-import com.datamaps.mappings.Field
+import com.datamaps.maps.DM
+import com.datamaps.maps.Field
 
 class Gender : DM() {
     companion object {

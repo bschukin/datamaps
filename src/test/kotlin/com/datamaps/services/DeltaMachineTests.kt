@@ -1,8 +1,8 @@
 package com.datamaps.services
 
 import com.datamaps.*
-import com.datamaps.mappings.f
-import com.datamaps.mappings.on
+import com.datamaps.maps.f
+import com.datamaps.maps.on
 import com.datamaps.maps.DataMap
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.annotation.DirtiesContext

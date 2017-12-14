@@ -2,7 +2,7 @@ package com.datamaps.services
 
 import com.datamaps.general.throwNIS
 import com.datamaps.general.validateNIY
-import com.datamaps.mappings.*
+import com.datamaps.maps.*
 import org.apache.commons.lang.text.StrSubstitutor
 import org.springframework.stereotype.Service
 

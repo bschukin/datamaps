@@ -2,7 +2,7 @@ package com.datamaps.marp
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
-import com.datamaps.mappings.*
+import com.datamaps.maps.*
 import org.testng.Assert
 import org.testng.annotations.Test
 

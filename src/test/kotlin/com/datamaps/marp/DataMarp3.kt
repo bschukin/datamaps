@@ -3,9 +3,9 @@ package com.datamaps.marp
 import com.datamaps.BaseSpringTests
 import com.datamaps.DTP
 import com.datamaps.Department
-import com.datamaps.mappings.f
-import com.datamaps.mappings.on
-import com.datamaps.mappings.slice
+import com.datamaps.maps.f
+import com.datamaps.maps.on
+import com.datamaps.maps.slice
 import com.datamaps.maps.datamap
 import org.testng.annotations.Test
 

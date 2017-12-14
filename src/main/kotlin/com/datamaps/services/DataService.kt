@@ -2,8 +2,8 @@ package com.datamaps.services
 
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
-import com.datamaps.mappings.DataProjection
-import com.datamaps.mappings.projection
+import com.datamaps.maps.DataProjection
+import com.datamaps.maps.projection
 import com.datamaps.maps.DataMap
 import com.datamaps.maps.mergeDataMaps
 import org.slf4j.LoggerFactory

@@ -2,8 +2,8 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
-import com.datamaps.mappings.DataProjection
-import com.datamaps.mappings.slice
+import com.datamaps.maps.DataProjection
+import com.datamaps.maps.slice
 import com.datamaps.maps.DataMap
 import org.testng.Assert
 import org.testng.annotations.Test
