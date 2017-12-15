@@ -3,7 +3,9 @@ package com.datamaps.services
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
 import com.datamaps.general.throwNIS
-import com.datamaps.mappings.*
+import com.datamaps.mappings.DataField
+import com.datamaps.mappings.DataMapping
+import com.datamaps.mappings.DataMappingsService
 import com.datamaps.maps.*
 import org.apache.commons.lang.text.StrSubstitutor
 import org.springframework.beans.factory.annotation.Autowired
@@ -223,10 +225,10 @@ class QueryBuilder {
 
         return when {
             ref.isM1 -> "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
-                    "${parent.alias}.\"${ref.sqlcolumn}\"=${me.alias}.${ref.manyToOne!!.joinColumn}"
+                    "${parent.alias}.\"${ref.sqlcolumn}\"=${me.alias}.\"${ref.manyToOne!!.joinColumn}\""
 
             ref.is1N -> "\r\nLEFT JOIN ${me.dm.table} as ${me.alias} ON " +
-                    "${parent.alias}.\"${parent.dm.idColumn}\"=${me.alias}.${ref.oneToMany!!.theirJoinColumn}"
+                    "${parent.alias}.\"${parent.dm.idColumn}\"=${me.alias}.\"${ref.oneToMany!!.theirJoinColumn}\""
 
             else -> throwNIS()
         }

@@ -323,7 +323,7 @@ class binaryOP(left: exp, right: exp, var op: Operation) : exp()
 
 
 
-open class Field<T, L>(private var _name: String, val t: T, val t2:L) {
+open class Field<T, L>(private val _name: String, val t: T, val t2:L) {
 
     companion object {
 

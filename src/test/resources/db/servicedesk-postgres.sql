@@ -8,13 +8,13 @@ CREATE TABLE IF NOT EXISTS "timezone"
   name character varying(100) NOT NULL
 );
 
---//////////////////Подразделение ПУ///////////////////////////////////////
+--//////////////////Ответственное Подразделение БФТ///////////////////////////////////////
 --////////////////////////////////////////////////////////////////////
 
-CREATE SEQUENCE IF NOT EXISTS subdivision_id_seq START WITH 1000;
-CREATE TABLE IF NOT EXISTS "subdivision"
+CREATE SEQUENCE IF NOT EXISTS bft_subdivision_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "bftsubdivision"
 (
-  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('subdivision_id_seq'),
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('bft_subdivision_id_seq'),
   name character varying(100) NOT NULL
 );
 
@@ -83,7 +83,8 @@ COMMENT ON COLUMN organisation."dinnerTimeEnd" IS 'Обед по';
 
 ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "timeZoneId" Integer;
 COMMENT ON COLUMN organisation."timeZoneId" IS 'Часовой пояс';
-ALTER TABLE organisation ADD FOREIGN KEY ("timeZoneId") REFERENCES timezone(id);
+ALTER TABLE organisation DROP CONSTRAINT  IF EXISTS   "timeZoneId_fk";
+ALTER TABLE organisation ADD constraint "timeZoneId_fk" FOREIGN KEY ("timeZoneId") REFERENCES timezone(id);
 
 ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "loadedFromPU" BOOLEAN;
 COMMENT ON COLUMN organisation."loadedFromPU" IS 'Загружено из ПУ';
@@ -91,9 +92,8 @@ COMMENT ON COLUMN organisation."loadedFromPU" IS 'Загружено из ПУ';
 ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "description" boolean;
 COMMENT ON COLUMN organisation."description" IS 'Примечание';
 
-ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "subdivisionId" Integer;
-COMMENT ON COLUMN organisation."subdivisionId" IS 'Id подразделения ДЭ';
-ALTER TABLE organisation ADD FOREIGN KEY ("subdivisionId") REFERENCES subdivision(id);
+ALTER TABLE organisation ADD COLUMN IF NOT EXISTS "bftSubdivisionId" Integer REFERENCES bftsubdivision(id);
+COMMENT ON COLUMN organisation."bftSubdivisionId" IS 'Id подразделения ДЭ';
 
 --//////////////////Дочерняя организация//////////////////////////////
 --////////////////////////////////////////////////////////////////////
@@ -176,9 +176,9 @@ COMMENT ON COLUMN contract."state" IS 'Статус';
 ALTER TABLE contract ADD COLUMN IF NOT EXISTS "projectPU" character varying(20);
 COMMENT ON COLUMN contract."projectPU" IS 'Проект в ПУ';
 
-ALTER TABLE contract ADD COLUMN IF NOT EXISTS "subdivisionId" Integer;
-COMMENT ON COLUMN contract."subdivisionId" IS 'Ответственное подразделение';
-ALTER TABLE contract ADD FOREIGN KEY ("subdivisionId") REFERENCES subdivision(id);
+ALTER TABLE contract ADD COLUMN IF NOT EXISTS "bftSubdivisionId" Integer;
+COMMENT ON COLUMN contract."bftSubdivisionId" IS 'Ответственное подразделение';
+ALTER TABLE contract ADD FOREIGN KEY ("bftSubdivisionId") REFERENCES bftsubdivision(id);
 
 ALTER TABLE contract ADD COLUMN IF NOT EXISTS "startDate" date;
 COMMENT ON COLUMN contract."startDate" IS 'Действует с';
@@ -190,3 +190,22 @@ ALTER TABLE contract ADD COLUMN IF NOT EXISTS "active" boolean;
 COMMENT ON COLUMN contract."active" IS 'Действующий';
 
 
+--//////////////////Получатели услуг по контракту/////////////////////
+--////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS contract_org_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "contractorg"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('contract_org_id_seq')
+);
+
+ALTER TABLE "contractorg" ADD COLUMN IF NOT EXISTS "contractId" bigint;
+COMMENT ON COLUMN "contractorg"."contractId" IS 'Контракт';
+
+ALTER TABLE "contractorg" DROP CONSTRAINT  IF EXISTS   "contractorg_contractId_fk";
+ALTER TABLE "contractorg" ADD constraint "contractorg_contractId_fk" FOREIGN KEY ("contractId") REFERENCES contract(id) on delete cascade;;
+
+ALTER TABLE "contractorg" ADD COLUMN IF NOT EXISTS "organisationId" bigint;
+COMMENT ON COLUMN "contractorg"."organisationId" IS 'Клиент';
+
+ALTER TABLE "contractorg" DROP CONSTRAINT  IF EXISTS   "contractorg_organisationId_fk";
+ALTER TABLE "contractorg" ADD constraint "contractorg_organisationId_fk" FOREIGN KEY ("organisationId") REFERENCES organisation(id) on delete cascade;

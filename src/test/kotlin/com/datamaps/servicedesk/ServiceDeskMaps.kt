@@ -3,6 +3,65 @@ package com.datamaps.servicedesk
 import com.datamaps.maps.DM
 import com.datamaps.maps.Field
 
+
+class BftSubdivision : DM() {
+    companion object {
+        val entity = "BftSubdivision"
+        val table = "BftSubdivision"
+
+        val id = Field.long("id")
+        val name = Field.string("name")
+
+    }
+}
+
+class ContractType : DM() {
+    companion object {
+        val entity = "ContractType"
+        val table = "ContractType"
+
+        val id = Field.long("id")
+        val name = Field.string("name")
+
+    }
+}
+
+class Contract : DM() {
+    companion object {
+        val entity = "Contract"
+        val table = "Contract"
+
+        val id = Field.long("id")
+        val number = Field.string("number")
+
+        val numberPU = Field.string("numberPU")
+        val state = Field.string("state")
+        val projectPU = Field.string("projectPU")
+
+
+        val active = Field.boolean("active")
+        val organisation = Field.reference("organisation", Organisation)
+        val contractType = Field.reference("contractType", ContractType)
+        val bftSubdivision = Field.reference("bftSubdivision", BftSubdivision)
+        val orgs = Field.list("contractorgs", ContractOrg)
+
+    }
+}
+
+typealias CTR = Contract
+
+class ContractOrg : DM() {
+    companion object {
+        val entity = "ContractOrg"
+        val table = "ContractOrg"
+
+        val id = Field.long("id")
+        val contract = Field.reference("contract", Contract)
+        val organisation = Field.reference("organisation", Organisation)
+
+    }
+}
+
 class TimeZone : DM() {
     companion object {
         val entity = "TimeZone"
@@ -31,17 +90,6 @@ class OrgUser : DM() {
 }
 
 
-class Subdivision : DM() {
-    companion object {
-        val entity = "Subdivision"
-        val table = "Subdivision"
-
-        val id = Field.long("id")
-        val name = Field.string("name")
-
-    }
-}
-
 class Organisation : DM() {
     companion object {
         val entity = "Organisation"
@@ -66,7 +114,8 @@ class Organisation : DM() {
         val loadedFromPU = Field.boolean("loadedFromPU")
         val description = Field.boolean("description")
         val timeZone = Field.reference("timeZone", TimeZone)
-        val subdivision = Field.reference("subdivision", Subdivision)
+        val bftSubdivision = Field.reference("bftSubdivision", BftSubdivision)
+        val contracts = Field.list("contractorgs", ContractOrg)
 
     }
 }

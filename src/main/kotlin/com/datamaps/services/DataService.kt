@@ -2,10 +2,10 @@ package com.datamaps.services
 
 import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
-import com.datamaps.maps.DataProjection
-import com.datamaps.maps.projection
 import com.datamaps.maps.DataMap
+import com.datamaps.maps.DataProjection
 import com.datamaps.maps.mergeDataMaps
+import com.datamaps.maps.projection
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -21,7 +21,7 @@ interface DataService {
 
     fun find(dp: DataProjection): DataMap?
 
-    fun find_(dp: DataProjection): DataMap?
+    fun find_(dp: DataProjection): DataMap
 
     fun findAll(dp: DataProjection):List<DataMap>
 

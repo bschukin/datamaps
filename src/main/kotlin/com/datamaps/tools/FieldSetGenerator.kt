@@ -43,6 +43,7 @@ class FieldSetGenerator {
             field.javaType==Long::class.java -> "val ${field.name} = Field.long(\"${field.name}\")"
             field.javaType==Int::class.java -> "val ${field.name} = Field.int(\"${field.name}\")"
             field.javaType==DataMap::class.java->"val ${field.name} = Field.reference(\"${field.name}\")"
+            field.is1N->"val ${field.name} = Field.list(\"${field.name}\", ${field.oneToMany!!.to})"
             else ->""
         }
     }
