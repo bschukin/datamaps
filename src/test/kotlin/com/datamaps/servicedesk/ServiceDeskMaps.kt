@@ -43,6 +43,7 @@ class Contract : DM() {
         val contractType = Field.reference("contractType", ContractType)
         val bftSubdivision = Field.reference("bftSubdivision", BftSubdivision)
         val orgs = Field.list("contractorgs", ContractOrg)
+        val products = Field.list("contractproducts", ContractProduct)
 
     }
 }
@@ -57,6 +58,22 @@ class ContractOrg : DM() {
         val id = Field.long("id")
         val contract = Field.reference("contract", Contract)
         val organisation = Field.reference("organisation", Organisation)
+
+    }
+}
+
+class ContractProduct : DM() {
+    companion object {
+        val entity = "ContractProduct"
+        val table = "ContractProduct"
+
+        fun new() = DataMap(ContractProduct)
+        fun on() = on(ContractProduct)
+        fun filter(e: (m: Unit) -> exp) = on(ContractProduct).filter(e)
+
+        val id = Field.long("id")
+        val contract = Field.reference("contract", Contract)
+        val product = Field.reference("product", Product)
 
     }
 }
@@ -136,11 +153,13 @@ class Product : DM() {
         fun new() = DataMap(Product)
         fun on() = on(Product)
         fun filter(e: (m: Unit) -> exp) = on(Product).filter(e)
+        fun where(w:String) = on(Product).where(w)
 
         val id = Field.long("id")
         val name = Field.string("name")
         val email = Field.string("email")
         val modules = Field.list("modules", Module)
+        val contracts = Field.list("contractproducts", ContractProduct)
     }
 }
 

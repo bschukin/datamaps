@@ -225,7 +225,7 @@ ALTER TABLE "product" ADD COLUMN IF NOT EXISTS "email" character varying(50);
 COMMENT ON COLUMN "product"."email" IS 'Email входящий';
 
 
---//////////////////Модуль/////////////////////
+--//////////////////Модуль///////////////////////////////////////////
 --////////////////////////////////////////////////////////////////////
 CREATE SEQUENCE IF NOT EXISTS module_id_seq START WITH 1000;
 CREATE TABLE IF NOT EXISTS "module"
@@ -243,3 +243,24 @@ COMMENT ON COLUMN "module"."productId" IS 'Продукт';
 
 ALTER TABLE "module" DROP CONSTRAINT  IF EXISTS   "module_productId_fk";
 ALTER TABLE "module" ADD constraint "module_productId_fk" FOREIGN KEY ("productId") REFERENCES product(id) on delete cascade;
+
+
+--//////////////////Предмет контракта (Контракт и проданные в рамках него продукты  (и модули))////
+--////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS contractproduct_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "contractproduct"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('contractproduct_id_seq')
+);
+
+ALTER TABLE "contractproduct" ADD COLUMN IF NOT EXISTS "contractId" bigint;
+COMMENT ON COLUMN "contractproduct"."contractId" IS 'Контракт';
+
+ALTER TABLE "contractproduct" DROP CONSTRAINT  IF EXISTS   "contractproduct_contractId_fk";
+ALTER TABLE "contractproduct" ADD constraint "contractproduct_contractId_fk" FOREIGN KEY ("contractId") REFERENCES contract(id) on delete cascade;
+
+ALTER TABLE "contractproduct" ADD COLUMN IF NOT EXISTS "productId" bigint;
+COMMENT ON COLUMN "contractproduct"."productId" IS 'Продукт';
+
+ALTER TABLE "contractproduct" DROP CONSTRAINT  IF EXISTS   "contractproduct_productId_fk";
+ALTER TABLE "contractproduct" ADD constraint "contractproduct_productId_fk" FOREIGN KEY ("productId") REFERENCES product(id) on delete cascade;

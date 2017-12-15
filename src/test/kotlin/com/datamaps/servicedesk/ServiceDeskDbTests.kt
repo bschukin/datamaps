@@ -44,6 +44,14 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         return dataService.find(p) == null
     }
 
+
+    @Test
+    fun testMegaInserts() {
+
+        //создаем продукт
+
+    }
+
     @Test
     fun testbftSubdivision() {
 
@@ -272,6 +280,37 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         dataService.flush()
     }
 
+    @Test
+    fun testContractProducts() {
+        insertContracts()
+        insertProducts()
+
+        var ctr = dataService.find_(on(Contract).where("{{number}} = '666'"))
+        var prd = dataService.find_(Product.where( "{{name}} = 'QDP'"))
+
+        val dm1 = ContractProduct.new()
+        dm1[ContractProduct.contract] = ctr
+        dm1[ContractProduct.product] = prd
+
+        dataService.flush()
+
+        //пример сохранения связи через сохранение самой перевязочной сущности
+        //кайфон
+        ctr = dataService.find_(on(Contract)
+                .full()
+                .with {
+                    slice(Contract.products).withRefs()
+                            .with {
+                                slice(ContractProduct.product)
+                                        .fields(Product.name)
+                            }
+                }
+                .where("{{number}} = '666'")
+        )
+        assertEquals(ctr[CTR.products].size, 1)
+        println(ctr)
+
+    }
 
     @Test
     fun testProduct() {
