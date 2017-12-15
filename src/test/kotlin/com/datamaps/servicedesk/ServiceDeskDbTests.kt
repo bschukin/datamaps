@@ -2,10 +2,7 @@ package com.datamaps.servicedesk
 
 import com.datamaps.mappings.AsIsNameMappingsStrategy
 import com.datamaps.mappings.NameMappingsStrategy
-import com.datamaps.maps.DataMap
-import com.datamaps.maps.f
-import com.datamaps.maps.on
-import com.datamaps.maps.slice
+import com.datamaps.maps.*
 import com.datamaps.services.DataService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
@@ -43,6 +40,10 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         }
     }
 
+    fun notExists(p: projection): Boolean {
+        return dataService.find(p) == null
+    }
+
     @Test
     fun testbftSubdivision() {
 
@@ -65,6 +66,42 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         if (dataService.find(on(BftSubdivision).where("{{name}} = 'DE' ")) == null) {
             val tz2 = DataMap(BftSubdivision)
             tz2[BftSubdivision.name] = "DE"//департамент эксплуатации
+        }
+
+        dataService.flush()
+    }
+
+    @Test
+    fun testInsertModules() {
+        insertModules()
+
+        val p = dataService.find_(on(Product)
+                .withCollections()
+                .filter { f(Product.name) eq "QDP" })
+
+        assertNotNull(p[Product.modules].find { it[Module.name] == "bpm" })
+        assertNotNull(p[Product.modules].find { it[Module.name] == "etl" })
+    }
+
+    fun insertModules() {
+
+        insertProducts()
+
+        val p = dataService.find_(on(Product).filter { f(Product.name) eq "QDP" })
+
+        if (p[Product.modules].find { it[Module.name] == "bpm" } == null) {
+            val m = Module.new()
+            m[Module.name] = "bpm"
+            m[Module.notActive] = false
+
+            p[Product.modules].add(m)
+        }
+
+        if (p[Product.modules].find { it[Module.name] == "etl" } == null) {
+            val m = Module.new()
+            m[Module.name] = "etl"
+            m[Module.notActive] = false
+            p[Product.modules].add(m)
         }
 
         dataService.flush()
@@ -94,7 +131,7 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
     }
 
 
-    @Test
+    @Test()
     fun testOrganisation() {
 
         insertOrgs()
@@ -216,10 +253,11 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
 
         println(org)
 
-        //удалим связь
+        //удалим связь через коллекцию
         ctr[CTR.orgs].remove(dm1)
         dataService.flush()
         assertEquals(ctr[CTR.orgs].size, 0)
+
         //но увы
         assertEquals(org[ORG.contracts].size, 1)
     }
@@ -235,5 +273,31 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
     }
 
 
+    @Test
+    fun testProduct() {
+        insertProducts()
+
+        val p = dataService.find_(Product.on()
+                .full()
+                .filter { f(Product.name) eq "QDP" }
+        )
+        assertNotNull(p)
+    }
+
+    fun insertProducts() {
+        with(Product)
+        {
+            if (notExists(filter { f(name) eq "QDP" })) {
+                val p1 = new()
+                p1[name] = "QDP"
+            }
+
+            if (notExists(filter { f(name) eq "QDP" })) {
+                val p1 = new()
+                p1[name] = "AZK"
+            }
+        }
+        dataService.flush()
+    }
 }
 

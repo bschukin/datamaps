@@ -209,3 +209,37 @@ COMMENT ON COLUMN "contractorg"."organisationId" IS 'Клиент';
 
 ALTER TABLE "contractorg" DROP CONSTRAINT  IF EXISTS   "contractorg_organisationId_fk";
 ALTER TABLE "contractorg" ADD constraint "contractorg_organisationId_fk" FOREIGN KEY ("organisationId") REFERENCES organisation(id) on delete cascade;
+
+
+--//////////////////Продукт/////////////////////
+--////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS product_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "product"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('product_id_seq')
+);
+ALTER TABLE "product" ADD COLUMN IF NOT EXISTS "name" character varying(50);
+COMMENT ON COLUMN "product"."name" IS 'Наименование';
+
+ALTER TABLE "product" ADD COLUMN IF NOT EXISTS "email" character varying(50);
+COMMENT ON COLUMN "product"."email" IS 'Email входящий';
+
+
+--//////////////////Модуль/////////////////////
+--////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS module_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "module"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('module_id_seq')
+);
+ALTER TABLE "module" ADD COLUMN IF NOT EXISTS "name" character varying(50);
+COMMENT ON COLUMN "module"."name" IS 'Наименование';
+
+ALTER TABLE "module" ADD COLUMN IF NOT EXISTS "notActive" boolean;
+COMMENT ON COLUMN "module"."notActive" IS 'Снят с баланса';
+
+ALTER TABLE "module" ADD COLUMN IF NOT EXISTS "productId" bigint;
+COMMENT ON COLUMN "module"."productId" IS 'Продукт';
+
+ALTER TABLE "module" DROP CONSTRAINT  IF EXISTS   "module_productId_fk";
+ALTER TABLE "module" ADD constraint "module_productId_fk" FOREIGN KEY ("productId") REFERENCES product(id) on delete cascade;

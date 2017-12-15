@@ -1,5 +1,6 @@
 package com.datamaps
 
+import com.datamaps.maps.projection
 import com.datamaps.services.DataService
 import com.datamaps.services.QueryBuilder
 import com.datamaps.services.QueryExecutor
@@ -41,6 +42,11 @@ class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
 
     @Resource
     lateinit var queryExecutor: QueryExecutor
+
+    fun notExists(p: projection): Boolean {
+        return dataService.find(p) == null
+    }
+
 
     fun isProstgress(): Boolean = env.activeProfiles.contains("postgresql")
 

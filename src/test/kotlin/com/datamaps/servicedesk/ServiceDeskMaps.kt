@@ -1,7 +1,6 @@
 package com.datamaps.servicedesk
 
-import com.datamaps.maps.DM
-import com.datamaps.maps.Field
+import com.datamaps.maps.*
 
 
 class BftSubdivision : DM() {
@@ -62,13 +61,20 @@ class ContractOrg : DM() {
     }
 }
 
-class TimeZone : DM() {
+class Module : DM() {
     companion object {
-        val entity = "TimeZone"
-        val table = "TimeZone"
+        val entity = "Module"
+        val table = "Module"
+
+        fun new() = DataMap(Module)
+        fun on() = on(Module)
+        fun filter(e: (m: Unit) -> exp) = on(Module).filter(e)
 
         val id = Field.long("id")
         val name = Field.string("name")
+        val notActive = Field.boolean("notActive")
+        val product = Field.reference("product", Product)
+
     }
 }
 
@@ -121,3 +127,30 @@ class Organisation : DM() {
 }
 
 typealias ORG = Organisation
+
+class Product : DM() {
+    companion object {
+        val entity = "Product"
+        val table = "Product"
+
+        fun new() = DataMap(Product)
+        fun on() = on(Product)
+        fun filter(e: (m: Unit) -> exp) = on(Product).filter(e)
+
+        val id = Field.long("id")
+        val name = Field.string("name")
+        val email = Field.string("email")
+        val modules = Field.list("modules", Module)
+    }
+}
+
+
+class TimeZone : DM() {
+    companion object {
+        val entity = "TimeZone"
+        val table = "TimeZone"
+
+        val id = Field.long("id")
+        val name = Field.string("name")
+    }
+}

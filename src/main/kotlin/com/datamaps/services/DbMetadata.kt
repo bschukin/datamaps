@@ -6,7 +6,6 @@ import com.datamaps.general.throwNIS
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.convert.ConversionService
 import org.springframework.core.env.Environment
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
@@ -160,6 +159,7 @@ class GenericDbMetadataService : DbMetadataService, CacheClearable {
 
     private fun readDbMetadata(table: String): DbTable {
 
+        //todo: понять - вовращать ли как то коннекшен в пул
         val c = jdbcTemplate.dataSource.connection
         val md = c.metaData
 

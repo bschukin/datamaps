@@ -22,6 +22,10 @@ class FieldSetGenerator {
                     companion object {
                         val entity = "${name}"
                         val table = "${tableName}"
+
+                        fun new() = DataMap(${name})
+                        fun on() = on(${name})
+                        fun filter(e: (m: Unit) -> exp) = on(${name}).filter(e)
             """
         s+="\r\n"
         mapping.fields.values.forEach { it->

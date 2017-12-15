@@ -29,7 +29,6 @@ import kotlin.reflect.KClass
 open class DM {
 
         val id = Field.id()
-
 }
 
 open class DataProjection {
