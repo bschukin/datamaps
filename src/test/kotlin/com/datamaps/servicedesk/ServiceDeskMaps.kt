@@ -74,9 +74,27 @@ class ContractProduct : DM() {
         val id = Field.long("id")
         val contract = Field.reference("contract", Contract)
         val product = Field.reference("product", Product)
+        val modules = Field.list("contractproductmodules", ContractProductModule)
+    }
+}
+
+class ContractProductModule : DM() {
+    companion object {
+        val entity = "ContractProductModule"
+        val table = "ContractProductModule"
+
+        fun new() = DataMap(ContractProductModule)
+        fun on() = on(ContractProductModule)
+        fun filter(e: (m: Unit) -> exp) = on(ContractProductModule).filter(e)
+
+        val id = Field.long("id")
+        val contractProduct = Field.reference("contractProduct",ContractProduct )
+        val module = Field.reference("module", Module)
 
     }
 }
+
+typealias CPM = ContractProductModule
 
 class Module : DM() {
     companion object {
@@ -95,22 +113,6 @@ class Module : DM() {
     }
 }
 
-class OrgUser : DM() {
-    companion object {
-        val entity = "OrgUser"
-        val table = "OrgUser"
-
-        val id = Field.long("id")
-        val name = Field.string("name")
-        val mobile = Field.string("mobile")
-        val workPhone = Field.string("workPhone")
-        val skype = Field.string("skype")
-        val icq = Field.string("icq")
-        val position = Field.string("position")
-        val organisation = Field.reference("organisation", Organisation)
-
-    }
-}
 
 
 class Organisation : DM() {
@@ -144,6 +146,24 @@ class Organisation : DM() {
 }
 
 typealias ORG = Organisation
+
+class OrgUser : DM() {
+    companion object {
+        val entity = "OrgUser"
+        val table = "OrgUser"
+
+        val id = Field.long("id")
+        val name = Field.string("name")
+        val mobile = Field.string("mobile")
+        val workPhone = Field.string("workPhone")
+        val skype = Field.string("skype")
+        val icq = Field.string("icq")
+        val position = Field.string("position")
+        val organisation = Field.reference("organisation", Organisation)
+
+    }
+}
+
 
 class Product : DM() {
     companion object {

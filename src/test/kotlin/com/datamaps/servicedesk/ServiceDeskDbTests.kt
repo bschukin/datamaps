@@ -81,7 +81,7 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
 
     @Test
     fun testInsertModules() {
-        insertModules()
+        insertProducts()
 
         val p = dataService.find_(on(Product)
                 .withCollections()
@@ -92,8 +92,6 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
     }
 
     fun insertModules() {
-
-        insertProducts()
 
         val p = dataService.find_(on(Product).filter { f(Product.name) eq "QDP" })
 
@@ -285,30 +283,43 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         insertContracts()
         insertProducts()
 
+        //берем контракт
         var ctr = dataService.find_(on(Contract).where("{{number}} = '666'"))
-        var prd = dataService.find_(Product.where( "{{name}} = 'QDP'"))
 
-        val dm1 = ContractProduct.new()
-        dm1[ContractProduct.contract] = ctr
-        dm1[ContractProduct.product] = prd
+        //берем продукт с модулями
+        var prd = dataService.find_(on(Product).full().where("{{name}} = 'QDP'"))
+
+        println(prd)
+
+        //связываем контракт с продуктом
+        val contractProduct = ContractProduct.new()
+        contractProduct[ContractProduct.contract] = ctr
+        contractProduct[ContractProduct.product] = prd
+
+        val contractProductModule = ContractProductModule.new()
+        contractProductModule[CPM.contractProduct] = contractProduct
+        contractProductModule[CPM.module] = prd[Product.modules].first { it[Module.name] == "etl" }
 
         dataService.flush()
 
-        //пример сохранения связи через сохранение самой перевязочной сущности
-        //кайфон
+        //достаем Contract'ы с купленными продуктами и модулями
         ctr = dataService.find_(on(Contract)
                 .full()
                 .with {
-                    slice(Contract.products).withRefs()
+                    slice(Contract.products).full()
                             .with {
-                                slice(ContractProduct.product)
-                                        .fields(Product.name)
+                                slice(ContractProduct.modules)
+                                        .full()
                             }
                 }
                 .where("{{number}} = '666'")
         )
-        assertEquals(ctr[CTR.products].size, 1)
+
         println(ctr)
+
+        assertEquals(ctr[CTR.products].size, 1)
+        assertEquals(ctr[CTR.products][0][ContractProduct.modules].size, 1)
+
 
     }
 
@@ -337,6 +348,8 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
             }
         }
         dataService.flush()
+
+        insertModules()
     }
 }
 

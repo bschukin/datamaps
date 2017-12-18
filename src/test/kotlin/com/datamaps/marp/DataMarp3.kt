@@ -10,10 +10,11 @@ import com.datamaps.maps.slice
 import com.datamaps.servicedesk.Product
 import org.testng.annotations.Test
 
-@Suppress("USELESS_IS_CHECK")
+
+/***
+ * Usages of  static fieldsets
+ */
 class DataMarp3 : BaseSpringTests() {
-
-
 
 
     @Test(invocationCount = 0)
@@ -53,7 +54,7 @@ class DataMarp3 : BaseSpringTests() {
     @Test(invocationCount = 1)
     fun basicDataMapsUses2() {
 
-        val dtp = datamap(Department)
+        val dtp = Department.new()
 
         with(Department)
         {
@@ -76,6 +77,7 @@ class DataMarp3 : BaseSpringTests() {
     }
 
     @Test(invocationCount = 1)
+    //показывается использование функций фиелдсета - new и filter
     fun basicFieldSetsFunctions() {
 
         if (notExists(Product.filter { f(Product.name) eq "QDP" })) { //создание фильтра и проекции  или Product.filter { f(name) eq "QDP" }

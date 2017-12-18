@@ -245,8 +245,9 @@ ALTER TABLE "module" DROP CONSTRAINT  IF EXISTS   "module_productId_fk";
 ALTER TABLE "module" ADD constraint "module_productId_fk" FOREIGN KEY ("productId") REFERENCES product(id) on delete cascade;
 
 
---//////////////////Предмет контракта (Контракт и проданные в рамках него продукты  (и модули))////
---////////////////////////////////////////////////////////////////////
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
+--//////////////////Предмет контракта (Контракт и проданные в рамках него продукты  (и модули))/////////////
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
 CREATE SEQUENCE IF NOT EXISTS contractproduct_id_seq START WITH 1000;
 CREATE TABLE IF NOT EXISTS "contractproduct"
 (
@@ -264,3 +265,26 @@ COMMENT ON COLUMN "contractproduct"."productId" IS 'Продукт';
 
 ALTER TABLE "contractproduct" DROP CONSTRAINT  IF EXISTS   "contractproduct_productId_fk";
 ALTER TABLE "contractproduct" ADD constraint "contractproduct_productId_fk" FOREIGN KEY ("productId") REFERENCES product(id) on delete cascade;
+
+
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
+--//////////////////Продан Модуль (Проданные в рамках контракта модули продукта)/////////////////////////////
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS contractproductmodule_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "contractproductmodule"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('contractproductmodule_id_seq')
+);
+
+ALTER TABLE "contractproductmodule" ADD COLUMN IF NOT EXISTS "contractProductId" bigint;
+COMMENT ON COLUMN "contractproductmodule"."contractProductId" IS 'Предмет контракта';
+
+ALTER TABLE "contractproductmodule" DROP CONSTRAINT  IF EXISTS   "contractproductmodule_contractProductId_fk";
+ALTER TABLE "contractproductmodule" ADD constraint "contractproductmodule_contractProductId_fk"
+                                FOREIGN KEY ("contractProductId") REFERENCES contractproduct(id) on delete cascade;
+
+ALTER TABLE "contractproductmodule" ADD COLUMN IF NOT EXISTS "moduleId" bigint;
+COMMENT ON COLUMN "contractproductmodule"."moduleId" IS 'Модуль';
+
+ALTER TABLE "contractproductmodule" DROP CONSTRAINT  IF EXISTS   "contractproductmodule_moduleId_fk";
+ALTER TABLE "contractproductmodule" ADD constraint "contractproductmodule_moduleId_fk" FOREIGN KEY ("moduleId") REFERENCES module(id);

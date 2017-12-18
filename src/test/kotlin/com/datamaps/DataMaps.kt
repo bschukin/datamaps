@@ -1,6 +1,7 @@
 package com.datamaps
 
 import com.datamaps.maps.DM
+import com.datamaps.maps.DataMap
 import com.datamaps.maps.Field
 
 class Gender : DM() {
@@ -44,6 +45,7 @@ class Department : DM() {
         val fullName = Field.string("fullName")
         val parent = Field.reference("parent", Department)
         val childs = Field.list("childs", Department)
+        fun new()= DataMap(Department)
     }
 }
 typealias DTP = Department

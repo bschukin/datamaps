@@ -6,6 +6,9 @@ import com.datamaps.maps.*
 import org.testng.Assert
 import org.testng.annotations.Test
 
+/***
+ * Example usages of "hard-bounded maps"
+ */
 class DataMarp2 : BaseSpringTests() {
 
     class Gender(var gender: String) : DataMap()
