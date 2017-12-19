@@ -67,8 +67,6 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
                 .filter {  -ORG.name eq "ЗАО БИС"}
         )
 
-
-        ORG.contracts()
         val s = StringBuilder()
         res.forEach {
             s.append("${it[ORG.name]} " +

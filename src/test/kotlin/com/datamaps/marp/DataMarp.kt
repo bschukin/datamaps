@@ -3,6 +3,8 @@ package com.datamaps.marp
 import com.datamaps.BaseSpringTests
 import com.datamaps.StaffUnit
 import com.datamaps.maps.*
+import com.datamaps.servicedesk.ORG
+import com.datamaps.servicedesk.Organisation
 import org.testng.Assert
 import org.testng.annotations.Test
 
@@ -89,15 +91,52 @@ class DataMarp : BaseSpringTests() {
     }
 
 
+    /**
+     * Пример "плоского" API проекций. Просто перечисляются поля через точку.
+     * Только эти поля и будут вытащены
+     */
     @Test
     fun flatProjectionsExamples() {
 
-        var dp = on(StaffUnit).with (
+        var dp = on(StaffUnit).with(
                 +StaffUnit.name,
                 +StaffUnit.worker().name,
                 +StaffUnit.worker().email,
                 +StaffUnit.gender().gender
-        ).filter( -StaffUnit.gender().gender eq "M" )
+        ).filter(-StaffUnit.gender().gender eq "M")
+    }
+
+
+    /**
+     * Пример "плоского" API проекций.
+     * И пример доступа к полю через вложеннную пропертю фиелдсета
+     * (it[ORG.contracts[0].contract().products[0].product().name])
+     */
+    @Test
+    fun flatProjectionsAndNestedPropertyAccess() {
+
+        //1) по организации - показать все имеющиеся SLA
+        //списком:  организация, контракт, продукт, услуга, SLA
+        //способ 1: от организации
+        val res = dataService.findAll(on(Organisation)
+                .with(+ORG.contracts().contract().number,
+                        +ORG.contracts().contract().products().product().name,
+                        +ORG.contracts().contract().products().slas().service().name,
+                        +ORG.contracts().contract().products().slas().sla,
+                        +ORG.name)
+                .filter { -ORG.name eq "ЗАО БИС" }
+        )
+
+        val s = StringBuilder()
+        res.forEach {
+            s.append("${it[ORG.name]} " +
+                    "| ${it[ORG.contracts[0].contract().number]}" +
+                    "| ${it[ORG.contracts[0].contract().products[0].product().name]}" +
+                    "| ${it[ORG.contracts[0].contract().products[0].slas[0].service().name]}" +
+                    "| ${it[ORG.contracts[0].contract().products[0].slas[0].sla]}")
+        }
+
+
     }
 
     @Test
@@ -221,18 +260,16 @@ class DataMarp : BaseSpringTests() {
                 })
 
 
-
         //use complex indexator
         Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].n") == "foo check")
     }
 
 
-
-
     /**
      * Примеры выгрузки в json
      */
-    @Test  fun testPrintToJson() {
+    @Test
+    fun testPrintToJson() {
         var list = dataService.findAll(on("JiraProject")
                 .full()
                 .with {
