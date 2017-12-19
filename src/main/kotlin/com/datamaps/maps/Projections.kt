@@ -427,7 +427,6 @@ class Field<T, L>(private val _name: String, val t: T, val value: L) {
 
     operator fun unaryMinus():f = f(this)
 
-
     val nl: List<String>
         get() {
             if (context.get() == null)

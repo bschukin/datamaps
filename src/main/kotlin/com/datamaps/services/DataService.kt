@@ -4,6 +4,7 @@ import com.datamaps.mappings.DataMapping
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.maps.*
 import com.google.gson.GsonBuilder
+import kotlinx.coroutines.experimental.async
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -33,12 +34,23 @@ interface DataService {
 
     fun toJson(dm: DataMap): String
 
+    fun async():DataServiceAsync
 }
 
+interface DataServiceAsync {
+    fun find_(dp: DataProjection): AsyncResult<DataMap>
+    fun findAll(dp: DataProjection): AsyncResult<List<DataMap>>
+}
+
+interface AsyncResult<T> {
+    fun  doWithResult(aaa: (m: T) -> Unit)
+}
 
 @Service
 class DataServiceImpl : DataService
 {
+
+
     override fun toJson(dm: DataMap): String {
 
         val gson = GsonBuilder()
@@ -116,5 +128,42 @@ class DataServiceImpl : DataService
 
     override fun getDataMapping(name: String): DataMapping {
         return dataMappingsService.getDataMapping(name)
+    }
+
+    private val dataServiceAsyncImpl = DataServiceAsyncImpl(this)
+    override fun async(): DataServiceAsync {
+        return dataServiceAsyncImpl
+    }
+}
+
+private class DataServiceAsyncImpl(val dataServiceImpl: DataServiceImpl):DataServiceAsync
+{
+
+    override fun findAll(dp: DataProjection):AsyncResult<List<DataMap>>{
+        val lamda = {
+            dataServiceImpl.findAll(dp)
+        }
+
+        return AResult(lamda)
+    }
+
+    override fun find_(dp: DataProjection): AsyncResult<DataMap>
+    {
+        val lamda = {
+            dataServiceImpl.find_(dp)
+        }
+
+        return AResult(lamda)
+    }
+
+    private class AResult<T>( var lamda: () -> T):AsyncResult<T>
+    {
+
+        override fun doWithResult(resultLamda: (m: T) -> Unit) {
+            val deferred = async { lamda() }
+            deferred.invokeOnCompletion {
+                resultLamda(deferred.getCompleted())
+            }
+        }
     }
 }

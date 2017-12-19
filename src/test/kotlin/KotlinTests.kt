@@ -1,6 +1,8 @@
 
 import com.datamaps.maps.DataProjection
 import com.datamaps.maps.f
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.delay
 import org.apache.commons.lang.text.StrSubstitutor
 import org.testng.annotations.Test
 import kotlin.reflect.KCallable
@@ -62,6 +64,28 @@ class KotlinTests {
 
         println(s.replace(myStr))
 
+    }
+
+    @Test
+    fun testCorutines() {
+
+        val deferred = async {
+            workload(1000)
+        }
+        deferred.invokeOnCompletion {
+            println( deferred.getCompleted())
+        }
+
+
+        Thread.sleep(2000) // wait for 2 seconds
+
+
+    }
+
+    suspend fun workload(n: Int): Int {
+        delay(1000)
+        println(n)
+        return 6666
     }
 
     var someVar= 0
