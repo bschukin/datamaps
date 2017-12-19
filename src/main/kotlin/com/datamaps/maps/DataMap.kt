@@ -1,6 +1,7 @@
 package com.datamaps.maps
 
 import com.datamaps.general.checkNIS
+import com.datamaps.services.DataService
 import com.datamaps.services.DeltaStore
 import com.datamaps.util.caseInsMapOf
 import com.google.gson.*
@@ -14,11 +15,12 @@ import java.util.*
  */
 open class DataMap {
     companion object {
-        private val empty:DataMap = DataMap()
-        private val emptyList:MutableList<DataMap> = mutableListOf()
-
-        fun empty():DataMap  = empty
-        fun emptyList():MutableList<DataMap>  = emptyList
+        private val empty: DataMap = DataMap()
+        private val emptyList: MutableList<DataMap> = mutableListOf()
+        private val emptyMap = caseInsMapOf<Any>()
+        fun empty(): DataMap = empty
+        fun emptyList(): MutableList<DataMap> = emptyList
+        fun emptyMap() = emptyMap
     }
 
     @SerializedName("entity")
@@ -42,17 +44,15 @@ open class DataMap {
     //техническое поле: все зарегистрированные обратные ссылки на родителя
     private val backRefs = caseInsMapOf<String>()
 
-    constructor ():this("", null, false)
-    {
+    constructor () : this("", null, false) {
     }
 
-    constructor (name: String):this(name, null, true)
+    constructor (name: String) : this(name, null, true)
 
-    constructor  (t:Any):this(getEntityNameFromClass(t), null, true)
-    {
+    constructor  (t: Any) : this(getEntityNameFromClass(t), null, true) {
     }
 
-    constructor (name: String, id: Any?  = null, isNew: Boolean = false) {
+    constructor (name: String, id: Any? = null, isNew: Boolean = false) {
         this.entity = name
         this.id = id
         if (isNew) {
@@ -64,25 +64,27 @@ open class DataMap {
         }
     }
 
-    constructor (name: String, id: Any, props: Map<String, Any>, isNew: Boolean  = false)
+    constructor (name: String, id: Any, props: Map<String, Any>, isNew: Boolean = false)
             : this(name, id, isNew) {
         props.forEach { t, u -> map[t] = u }
     }
 
     fun isNew(): Boolean = newMapGuid != null
-    fun persisted(){newMapGuid = null}
+    fun persisted() {
+        newMapGuid = null
+    }
 
-    operator  fun <L> get(field: Field<*, L>):L {
-        if(field.t2 is List<*>)
+    operator fun <L> get(field: Field<*, L>): L {
+        if (field.t2 is List<*>)
             return list(field.n) as L
-        return map[field.n] as L
+        return nested(field.n) as L
     }
 
     operator fun get(field: String): Any? {
         return map[field]
     }
 
-    operator  fun <L> set(field: Field<*, L>, silent: Boolean = false, value: L?) {
+    operator fun <L> set(field: Field<*, L>, silent: Boolean = false, value: L?) {
         set(field.n, silent, value)
     }
 
@@ -90,7 +92,7 @@ open class DataMap {
         val old = map[field]
         silentSet(field, value)
 
-        if(!silent)
+        if (!silent)
             DeltaStore.delta(this, field, old, value)
     }
 
@@ -151,7 +153,7 @@ open class DataMap {
 
         if (!entity.equals(other.entity, true)) return false
         if (id != other.id) return false
-        if(newMapGuid!=other.newMapGuid) return false
+        if (newMapGuid != other.newMapGuid) return false
 
         return true
     }
@@ -164,14 +166,15 @@ open class DataMap {
 
 }
 
-fun <T:Any> datamap (t:T, id: Any?  = null, isNew: Boolean = false): DataMap
-{
+fun <T : Any> datamap(t: T, id: Any? = null, isNew: Boolean = false): DataMap {
     val ent = getEntityNameFromClass(t)
-    val res =  DataMap(ent, id, isNew)
+    val res = DataMap(ent, id, isNew)
     return res
 }
 
-class DMSerializer : JsonSerializer<DataMap> {
+open class DMSerializer : JsonSerializer<DataMap> {
+
+    private val map  = mutableMapOf<DataMap, DataMap>()
 
     override fun serialize(obj: DataMap, foo: Type, context: JsonSerializationContext): JsonElement {
 
@@ -183,24 +186,63 @@ class DMSerializer : JsonSerializer<DataMap> {
             is Long -> jsonObject.addProperty("id", obj.id as Long)
             else -> jsonObject.addProperty("id", obj.id as String)
         }
+
         obj.map.forEach { t, u ->
+            addJsonNode(u, obj, t, jsonObject, context)
+        }
+        return jsonObject
+    }
 
-            when (u) {
-                is DataMap -> {
-                    if (obj.isBackRef(t))
-                        jsonObject.add(t, context.serialize(
-                                DataMap(u.entity, u.id!!, mapOf("isBackRef" to true)))
-                        )
-                    else jsonObject.add(t, context.serialize(u))
+    fun addJsonNode(u: Any?, obj: DataMap, t: String, jsonObject: JsonObject, context: JsonSerializationContext) {
+        when (u) {
+            is DataMap -> {
+
+                if (obj.isBackRef(t) || map.containsKey(u))
+                    jsonObject.add(t, context.serialize(
+                            DataMap(u.entity, u.id!!, mapOf("isBackRef" to true)))
+                    )
+                else {
+                    map.put(u,u)
+                    jsonObject.add(t, context.serialize(u))
                 }
-                is Collection<*> -> {
-                    val arr = JsonArray()
-                    u.forEach { e -> arr.add(context.serialize(e)) }
-                    jsonObject.add(t, arr)
-                }
-                else -> jsonObject.addProperty(t, u?.toString() ?: "[null]")
             }
+            is Collection<*> -> {
+                val arr = JsonArray()
+                u.forEach { e -> arr.add(context.serialize(e)) }
+                jsonObject.add(t, arr)
+            }
+            else -> jsonObject.addProperty(t, u?.toString() ?: "[null]")
+        }
+    }
+}
 
+class DMSerializer2(val dataService: DataService) : DMSerializer() {
+
+
+    override fun serialize(obj: DataMap, foo: Type, context: JsonSerializationContext): JsonElement {
+
+        val jsonObject = JsonObject()
+
+        jsonObject.addProperty("entity", obj.entity)
+        when (obj.id) {
+            null -> jsonObject.addProperty("id", "null")
+            is Long -> jsonObject.addProperty("id", obj.id as Long)
+            is Int -> jsonObject.addProperty("id", obj.id as Int)
+            else -> jsonObject.addProperty("id", obj.id as String)
+        }
+        if (obj["isBackRef"] == true) {
+            jsonObject.addProperty("isBackRef", "true")
+            return jsonObject
+        }
+        val mapping = dataService.getDataMapping(obj.entity)
+        mapping.scalars().filter { !it.key.equals("id", true) }.toSortedMap().forEach { t, u ->
+            addJsonNode(obj[u.name], obj, t, jsonObject, context)
+        }
+        mapping.refs().toSortedMap().forEach { t, u ->
+            addJsonNode(obj[u.name], obj, t, jsonObject, context)
+        }
+        mapping.lists().toSortedMap().forEach { t, u ->
+            addJsonNode(obj[u.name], obj, t, jsonObject, context)
         }
         return jsonObject
     }

@@ -7,6 +7,7 @@ import com.datamaps.mappings.LIST
 import com.datamaps.mappings.REFS
 import com.datamaps.util.lcims
 import com.datamaps.util.linkedCaseInsMapOf
+import java.util.*
 import kotlin.concurrent.getOrSet
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
@@ -147,6 +148,13 @@ open class DataProjection {
         }
         return this
     }
+    fun fields(vararg fields: String): DataProjection {
+        fields.forEach {
+            field(it)
+        }
+        return this
+    }
+
 
 
     fun with(slice: () -> DataProjection): DataProjection {
@@ -339,6 +347,11 @@ open class Field<T, L>(private val _name: String, val t: T, val t2:L) {
         fun int(aname:String): Field<Int, Int>
         {
             return Field(aname, 350, 350)
+        }
+
+        fun date(aname:String): Field<Date, Date>
+        {
+            return Field(aname, Date(), Date())
         }
 
         fun boolean(aname:String): Field<Boolean, Boolean>

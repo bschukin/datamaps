@@ -4,6 +4,7 @@ import com.datamaps.BaseSpringTests
 import com.datamaps.Gender
 import com.datamaps.maps.on
 import com.datamaps.maps.projection
+import com.datamaps.maps.slice
 import org.testng.annotations.Test
 
 /**
@@ -34,7 +35,21 @@ class DataServiceTests01Basics : BaseSpringTests()
     {
         var res = dataService.findAll(
                 projection("JiraWorker")
-                        .field("n")
+                        .field("name")
+        )
+        res.forEach {r->
+            println(r)
+        }
+    }
+
+
+    @Test
+    fun test2SlicesOnOneFloor()
+    {
+        var res = dataService.findAll(
+                projection("JiraStaffUnit")
+                        .with { slice("worker").field("name") }
+                        .with { slice("gender").field("gender") }
         )
         res.forEach {r->
             println(r)

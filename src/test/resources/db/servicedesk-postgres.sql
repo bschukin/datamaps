@@ -288,3 +288,74 @@ COMMENT ON COLUMN "contractproductmodule"."moduleId" IS 'Модуль';
 
 ALTER TABLE "contractproductmodule" DROP CONSTRAINT  IF EXISTS   "contractproductmodule_moduleId_fk";
 ALTER TABLE "contractproductmodule" ADD constraint "contractproductmodule_moduleId_fk" FOREIGN KEY ("moduleId") REFERENCES module(id);
+
+
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
+--//////////////////Услуга*/////////////////////////////////////////////////////////////////////////////////
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS service_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "service"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('service_id_seq')
+);
+
+ALTER TABLE service ADD COLUMN IF NOT EXISTS "name" character varying(100);
+COMMENT ON COLUMN service ."name" IS 'Наименование';
+
+ALTER TABLE service ADD COLUMN IF NOT EXISTS "default" boolean;
+COMMENT ON COLUMN service."default" IS 'По умолчанию';
+
+
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
+--//////////////////Приоритет///////////////////////////////////////////////////////////////////////////////
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS priority_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "priority"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('priority_id_seq')
+);
+
+ALTER TABLE priority ADD COLUMN IF NOT EXISTS "name" character varying(50);
+COMMENT ON COLUMN priority ."name" IS 'Наименование';
+
+ALTER TABLE priority ADD COLUMN IF NOT EXISTS "rang" int;
+COMMENT ON COLUMN priority."rang" IS 'Значение';
+
+
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
+--//////////////////SLA///////////////////////////////////////////////////////////////////////////////
+--//////////////////////////////////////////////////////////////////////////////////////////////////////////
+CREATE SEQUENCE IF NOT EXISTS sla_id_seq START WITH 1000;
+CREATE TABLE IF NOT EXISTS "sla"
+(
+  id bigint NOT NULL PRIMARY KEY DEFAULT NEXTVAL('sla_id_seq')
+);
+
+ALTER TABLE sla ADD COLUMN IF NOT EXISTS "sla" int;
+COMMENT ON COLUMN sla ."sla" IS 'SLA (секунды)';
+
+
+ALTER TABLE "sla" ADD COLUMN IF NOT EXISTS "contractOrgId" bigint;
+COMMENT ON COLUMN "sla"."contractOrgId" IS 'Предмет контракта';
+ALTER TABLE "sla" DROP CONSTRAINT  IF EXISTS   "sla_contractOrgId_fk";
+ALTER TABLE "sla" ADD constraint "sla_contractOrgId_fk"
+                                FOREIGN KEY ("contractOrgId") REFERENCES contractorg(id) on delete cascade;
+
+ALTER TABLE "sla" ADD COLUMN IF NOT EXISTS "contractProductId" bigint;
+COMMENT ON COLUMN "sla"."contractProductId" IS 'Предмет контракта';
+ALTER TABLE "sla" DROP CONSTRAINT  IF EXISTS   "sla_contractProductId_fk";
+ALTER TABLE "sla" ADD constraint "sla_contractProductId_fk"
+                                FOREIGN KEY ("contractProductId") REFERENCES contractproduct(id) on delete cascade;
+
+
+ALTER TABLE "sla" ADD COLUMN IF NOT EXISTS "serviceId" bigint;
+COMMENT ON COLUMN "sla"."serviceId" IS 'Услуга';
+ALTER TABLE "sla" DROP CONSTRAINT  IF EXISTS   "sla_serviceId_fk";
+ALTER TABLE "sla" ADD constraint "sla_serviceId_fk"
+                                FOREIGN KEY ("serviceId") REFERENCES service(id);
+
+ALTER TABLE "sla" ADD COLUMN IF NOT EXISTS "priorityId" bigint;
+COMMENT ON COLUMN "sla"."priorityId" IS 'Приоритет';
+ALTER TABLE "sla" DROP CONSTRAINT  IF EXISTS   "sla_priorityId_fk";
+ALTER TABLE "sla" ADD constraint "sla_priorityId_fk"
+                                FOREIGN KEY ("priorityId") REFERENCES priority(id);

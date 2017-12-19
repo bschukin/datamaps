@@ -1,6 +1,5 @@
 package com.datamaps.mappings
 
-import com.datamaps.general.NIS
 import com.datamaps.general.NIY
 import com.datamaps.general.SNF
 import com.datamaps.general.checkNIS
@@ -69,6 +68,12 @@ class DataMapping(var name: String, var table: String) {
             it.referencedOneToAnother(oneToMany)
         }!!
     }
+
+    fun scalars() =  fields.filter { u->u.value.isSimple }
+
+    fun refs() =  fields.filter { u->u.value.isM1 }
+
+    fun lists() =  fields.filter { u->u.value.is1N }
 
     override fun toString(): String {
         return "DataMapping(entity='$name', table='$table')"

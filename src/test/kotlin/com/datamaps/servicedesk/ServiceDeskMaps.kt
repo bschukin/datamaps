@@ -30,14 +30,18 @@ class Contract : DM() {
         val entity = "Contract"
         val table = "Contract"
 
+        fun new() = DataMap(Contract)
+        fun on() = on(Contract)
+        fun filter(e: (m: Unit) -> exp) = on(Contract).filter(e)
+
         val id = Field.long("id")
         val number = Field.string("number")
-
+        val conclusionDate = Field.date("conclusionDate")
         val numberPU = Field.string("numberPU")
         val state = Field.string("state")
         val projectPU = Field.string("projectPU")
-
-
+        val startDate = Field.date("startDate")
+        val finishDate = Field.date("finishDate")
         val active = Field.boolean("active")
         val organisation = Field.reference("organisation", Organisation)
         val contractType = Field.reference("contractType", ContractType)
@@ -58,7 +62,7 @@ class ContractOrg : DM() {
         val id = Field.long("id")
         val contract = Field.reference("contract", Contract)
         val organisation = Field.reference("organisation", Organisation)
-
+        val slas = Field.list("slas", SLA)
     }
 }
 
@@ -75,6 +79,7 @@ class ContractProduct : DM() {
         val contract = Field.reference("contract", Contract)
         val product = Field.reference("product", Product)
         val modules = Field.list("contractproductmodules", ContractProductModule)
+        val slas = Field.list("slas", SLA)
     }
 }
 
@@ -180,6 +185,58 @@ class Product : DM() {
         val email = Field.string("email")
         val modules = Field.list("modules", Module)
         val contracts = Field.list("contractproducts", ContractProduct)
+    }
+}
+
+class Priority : DM() {
+    companion object {
+        val entity = "Priority"
+        val table = "Priority"
+
+        fun new() = DataMap(Priority)
+        fun on() = on(Priority)
+        fun filter(e: (m: Unit) -> exp) = on(Priority).filter(e)
+
+        val id = Field.long("id")
+        val name = Field.string("name")
+        val rang = Field.int("rang")
+
+    }
+}
+
+class Service : DM() {
+    companion object {
+        val entity = "Service"
+        val table = "Service"
+
+        fun new() = DataMap(Service)
+        fun on() = on(Service)
+        fun filter(e: (m: Unit) -> exp) = on(Service).filter(e)
+
+        val id = Field.long("id")
+        val name = Field.string("name")
+        val default = Field.boolean("default")
+
+    }
+}
+
+
+class SLA : DM() {
+    companion object {
+        val entity = "SLA"
+        val table = "SLA"
+
+        fun new() = DataMap(SLA)
+        fun on() = on(SLA)
+        fun filter(e: (m: Unit) -> exp) = on(SLA).filter(e)
+
+        val id = Field.long("id")
+        val sla = Field.int("sla")
+        val contractOrg = Field.reference("contractOrg", ContractOrg)
+        val contractProduct = Field.reference("contractProduct", ContractProduct)
+        val service = Field.reference("service", Service)
+        val priority = Field.reference("priority", Priority)
+
     }
 }
 
