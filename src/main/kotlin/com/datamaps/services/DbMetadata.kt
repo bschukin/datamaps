@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
+import java.sql.Connection
 import java.sql.JDBCType
 import java.sql.ResultSet
 import java.util.stream.Collectors
+import javax.annotation.PostConstruct
 import javax.annotation.Resource
 import kotlin.streams.toList
 
@@ -128,11 +130,18 @@ class GenericDbMetadataService : DbMetadataService, CacheClearable {
     @Resource
     lateinit var jdbcTemplate: JdbcTemplate
 
+    lateinit var connection: Connection
+
     val tables = caseInsMapOf<DbTable>()
 
     fun isProstgress(): Boolean = env.activeProfiles.contains("postgresql")
     fun isHsqlDb(): Boolean = env.activeProfiles.contains("hsqldb")
 
+
+    @PostConstruct fun init()
+    {
+        connection = jdbcTemplate.dataSource.connection
+    }
 
     override fun clearCache() {
         tables.clear()
@@ -159,8 +168,7 @@ class GenericDbMetadataService : DbMetadataService, CacheClearable {
 
     private fun readDbMetadata(table: String): DbTable {
 
-        //todo: понять - вовращать ли как то коннекшен в пул
-        val c = jdbcTemplate.dataSource.connection
+        val c = connection
         val md = c.metaData
 
         val rs = md.getTables(null, null, dbDialect.getDbIdentifier(table), null)

@@ -27,10 +27,7 @@ import kotlin.reflect.KClass
  * }
  *
  */
-open class DM {
 
-    val id = Field.id()
-}
 
 open class DataProjection {
 
@@ -270,16 +267,21 @@ open class DataProjection {
     }
 }
 
+typealias projection = DataProjection
+
+
 data class Lateral(val table: String, val sql: String, val mappings: lcims)
 
 
-class slice(f: String) : DataProjection(null, f) {
+class Slice(f: String) : DataProjection(null, f) {
     constructor(f: KCallable<*>) : this(f.name)
 
     constructor(f: Field<*, *>) : this(f.n)
 }
 
-open class exp {
+typealias slice = Slice
+
+open class Expression {
 
     infix fun or(exp: exp): exp {
         return OR(this, exp)
@@ -340,8 +342,9 @@ open class exp {
         return binaryOP(this, exp2, op)
     }
 
-
 }
+typealias exp = Expression
+
 
 fun extractField(exp: exp): exp {
     if (exp is Field<*, *>)
@@ -349,7 +352,7 @@ fun extractField(exp: exp): exp {
     return exp
 }
 
-class binaryOP(left: exp, right: exp, var op: Operation) : exp() {
+internal class binaryOP(left: exp, right: exp, var op: Operation) : exp() {
     var left: exp
     var right: exp
 
@@ -360,8 +363,7 @@ class binaryOP(left: exp, right: exp, var op: Operation) : exp() {
 
 }
 
-
-open class Field<T, L>(private val _name: String, val t: T, val value: L) {
+class Field<T, L>(private val _name: String, val t: T, val value: L) {
 
     companion object {
 
@@ -447,7 +449,7 @@ open class Field<T, L>(private val _name: String, val t: T, val value: L) {
 }
 
 
-data class f(val name: String) : exp() {
+data class ExpressionField(val name: String) : exp() {
 
     constructor(d: Field<*, *>) : this(d.n)
 
@@ -464,12 +466,13 @@ data class f(val name: String) : exp() {
     }
 }
 
-typealias ExpressionField = f
+typealias f = ExpressionField
 
-data class value(val v: Any) : exp() {
+
+data class ExpressionValue(val v: Any) : exp() {
 
 }
-
+typealias value = ExpressionValue
 
 class OR(left: exp, right: exp) : exp() {
     var left: exp
@@ -546,8 +549,6 @@ fun <T : Any> getEntityNameFromClass(t: T): String {
 
 
 
-typealias expLamda = (m: Unit) -> exp
-typealias projection = DataProjection
 
 enum class Operation(val value: String) {
     eq("="),

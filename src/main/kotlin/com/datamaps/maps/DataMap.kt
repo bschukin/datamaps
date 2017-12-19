@@ -17,10 +17,8 @@ open class DataMap {
     companion object {
         private val empty: DataMap = DataMap()
         private val emptyList: MutableList<DataMap> = mutableListOf()
-        private val emptyMap = caseInsMapOf<Any>()
         fun empty(): DataMap = empty
         fun emptyList(): MutableList<DataMap> = emptyList
-        fun emptyMap() = emptyMap
     }
 
     @SerializedName("entity")
@@ -170,6 +168,12 @@ fun <T : Any> datamap(t: T, id: Any? = null, isNew: Boolean = false): DataMap {
     val ent = getEntityNameFromClass(t)
     val res = DataMap(ent, id, isNew)
     return res
+}
+
+//заготовка для фиелдсетов. зачем она нужна - не очень понятно.
+open class DM {
+
+    val id = Field.id()
 }
 
 open class DMSerializer : JsonSerializer<DataMap> {
