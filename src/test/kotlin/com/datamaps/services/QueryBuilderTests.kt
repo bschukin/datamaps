@@ -1,6 +1,7 @@
 package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
+import com.datamaps.StaffUnit
 import com.datamaps.assertBodyEquals
 import com.datamaps.maps.DataProjection
 import com.datamaps.maps.on
@@ -308,5 +309,30 @@ class QueryBuilderTests : BaseSpringTests() {
                 "WHERE jira_project1.id = :_id1  ")
     }
 
+
+    @Test
+    fun testProjectionWithFieldsFlatEnumerarion() {
+        var dp = on(StaffUnit).with (
+                +StaffUnit.name,
+                +StaffUnit.worker().name,
+                +StaffUnit.worker().email,
+                +StaffUnit.gender().gender
+                )
+
+
+        //1 тест на  структуру по которой построится запрос
+        val qr = QueryBuildContext()
+        queryBuilder.buildMainQueryStructure(qr, dp)
+
+
+        val q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+
+        assertBodyEquals(q.sql, "SELECT \n" +
+                "\t  JIRA_STAFF_UNIT1.\"ID\"  AS  ID1,  JIRA_STAFF_UNIT1.\"NAME\"  AS  NAME1,  JIRA_WORKER1.\"ID\"  AS  ID2,  JIRA_WORKER1.\"NAME\"  AS  NAME2,  JIRA_WORKER1.\"EMAIL\"  AS  EMAIL1,  JIRA_GENDER1.\"ID\"  AS  ID3,  JIRA_GENDER1.\"GENDER\"  AS  GENDER1\n" +
+                "FROM JIRA_STAFF_UNIT as JIRA_STAFF_UNIT1\n" +
+                "LEFT JOIN JIRA_WORKER as JIRA_WORKER1 ON JIRA_STAFF_UNIT1.\"WORKER_ID\"=JIRA_WORKER1.\"ID\" \n" +
+                "LEFT JOIN JIRA_GENDER as JIRA_GENDER1 ON JIRA_STAFF_UNIT1.\"GENDER_ID\"=JIRA_GENDER1.\"ID\"  ")
+    }
 
 }

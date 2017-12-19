@@ -29,7 +29,7 @@ import kotlin.reflect.KClass
  */
 open class DM {
 
-        val id = Field.id()
+    val id = Field.id()
 }
 
 open class DataProjection {
@@ -148,6 +148,7 @@ open class DataProjection {
         }
         return this
     }
+
     fun fields(vararg fields: String): DataProjection {
         fields.forEach {
             field(it)
@@ -156,10 +157,42 @@ open class DataProjection {
     }
 
 
-
     fun with(slice: () -> DataProjection): DataProjection {
         val sl = slice()
         fields[sl.parentField] = sl
+        return this
+    }
+
+    fun with(vararg fields: String): DataProjection {
+
+        fields.forEach {
+            var currProjection = this
+
+            val names = it.split('.')
+            names.forEach {n->
+
+                if (currProjection.fields[n] == null)
+                    currProjection.fields[n] = slice(n)
+                currProjection = currProjection.fields[n]!!
+            }
+
+        }
+        return this
+    }
+
+    fun with(vararg fields: Field<*, *>): DataProjection {
+        fields.forEach {
+            var currProjection = this
+
+            val names = it.nl
+            names.forEach {n->
+
+                if (currProjection.fields[n] == null)
+                    currProjection.fields[n] = slice(n)
+                currProjection = currProjection.fields[n]!!
+            }
+
+        }
         return this
     }
 
@@ -311,13 +344,12 @@ open class exp {
 }
 
 fun extractField(exp: exp): exp {
-    if(exp is Field<*, *>)
+    if (exp is Field<*, *>)
         return f(exp.n)
     return exp
 }
 
-class binaryOP(left: exp, right: exp, var op: Operation) : exp()
-{
+class binaryOP(left: exp, right: exp, var op: Operation) : exp() {
     var left: exp
     var right: exp
 
@@ -329,48 +361,39 @@ class binaryOP(left: exp, right: exp, var op: Operation) : exp()
 }
 
 
-
-open class Field<T, L>(private val _name: String, val t: T, val t2:L) {
+open class Field<T, L>(private val _name: String, val t: T, val value: L) {
 
     companion object {
 
-        fun id(): Field<Long, Long>
-        {
+        fun id(): Field<Long, Long> {
             return long("id")
         }
 
-        fun long(aname:String): Field<Long, Long>
-        {
+        fun long(aname: String): Field<Long, Long> {
             return Field(aname, 350L, 350L)
         }
 
-        fun int(aname:String): Field<Int, Int>
-        {
+        fun int(aname: String): Field<Int, Int> {
             return Field(aname, 350, 350)
         }
 
-        fun date(aname:String): Field<Date, Date>
-        {
+        fun date(aname: String): Field<Date, Date> {
             return Field(aname, Date(), Date())
         }
 
-        fun boolean(aname:String): Field<Boolean, Boolean>
-        {
+        fun boolean(aname: String): Field<Boolean, Boolean> {
             return Field(aname, false, false)
         }
 
-        fun string(aname:String): Field<String, String>
-        {
+        fun string(aname: String): Field<String, String> {
             return Field(aname, "", "")
         }
 
-        fun <T> reference(aname:String, t:T ): Field<T, DataMap>
-        {
+        fun <T> reference(aname: String, t: T): Field<T, DataMap> {
             return Field(aname, t, DataMap.empty())
         }
 
-        fun <T> list(aname:String, t:T ): Field<T, MutableList<DataMap>>
-        {
+        fun <T> list(aname: String, t: T): Field<T, MutableList<DataMap>> {
             return Field(aname, t, DataMap.emptyList())
         }
 
@@ -383,12 +406,32 @@ open class Field<T, L>(private val _name: String, val t: T, val t2:L) {
         context.getOrSet { mutableListOf() }.add(_name)
     }
 
+    operator fun get(index: Int): T {
+        context.getOrSet { mutableListOf() }.add("$_name[$index]")
+        return t
+    }
+
     val n: String
         get() {
-           if(context.get()==null)
-               return _name
+            if (context.get() == null)
+                return _name
             name()
             val res = context.get().joinToString(".")
+            context.remove()
+            return res
+        }
+
+    operator fun unaryPlus():String = n
+
+    operator fun unaryMinus():f = f(this)
+
+
+    val nl: List<String>
+        get() {
+            if (context.get() == null)
+                return listOf(_name)
+            name()
+            val res = context.get()
             context.remove()
             return res
         }
@@ -397,6 +440,9 @@ open class Field<T, L>(private val _name: String, val t: T, val t2:L) {
         name()
         return t
     }
+
+
+
 
 }
 
@@ -439,8 +485,7 @@ data class NOT(val right: exp) : exp() {
 
 }
 
-class AND(left: exp, right: exp) : exp()
-{
+class AND(left: exp, right: exp) : exp() {
     var left: exp
     var right: exp
 
@@ -486,14 +531,13 @@ fun on(entity: KClass<*>): DataProjection {
     return DataProjection(entity)
 }
 
-fun <T:Any> on (t:T): DataProjection
-{
+fun <T : Any> on(t: T): DataProjection {
     val ent = getEntityNameFromClass(t)
     val res = DataProjection(ent)
     return res
 }
 
-public fun <T : Any> getEntityNameFromClass(t: T):String {
+fun <T : Any> getEntityNameFromClass(t: T): String {
     val cl = t::class
     val ent = cl.members.find { it.name.equals("entity", true) }
     return ent!!.call(t) as String

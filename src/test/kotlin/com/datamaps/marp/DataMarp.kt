@@ -1,11 +1,15 @@
 package com.datamaps.marp
 
 import com.datamaps.BaseSpringTests
-import com.datamaps.assertBodyEquals
+import com.datamaps.StaffUnit
 import com.datamaps.maps.*
 import org.testng.Assert
 import org.testng.annotations.Test
 
+
+/***
+ * Базовые примеры на слайсы и проекции
+ */
 class DataMarp : BaseSpringTests() {
 
 
@@ -82,6 +86,18 @@ class DataMarp : BaseSpringTests() {
                             .alias("JT")
                             .scalars().withRefs()
                 }
+    }
+
+
+    @Test
+    fun flatProjectionsExamples() {
+
+        var dp = on(StaffUnit).with (
+                +StaffUnit.name,
+                +StaffUnit.worker().name,
+                +StaffUnit.worker().email,
+                +StaffUnit.gender().gender
+        ).filter( -StaffUnit.gender().gender eq "M" )
     }
 
     @Test
@@ -211,8 +227,12 @@ class DataMarp : BaseSpringTests() {
     }
 
 
-    @Test(invocationCount = 1)//Коллеция 1-N
-    fun testPrintToJson() {
+
+
+    /**
+     * Примеры выгрузки в json
+     */
+    @Test  fun testPrintToJson() {
         var list = dataService.findAll(on("JiraProject")
                 .full()
                 .with {
@@ -225,62 +245,6 @@ class DataMarp : BaseSpringTests() {
         list.forEach { e -> res.append(e.toString()) }
         list.forEach { e -> println(e) }
 
-        assertBodyEquals("""
-            {
-  "entity": "JiraProject",
-  "id": 1,
-  "n": "SAUMI",
-  "jiraTasks": [
-    {
-      "entity": "JiraTask",
-      "id": 1,
-      "jiraProject": {
-        "entity": "JiraProject",
-        "id": 1,
-        "isBackRef": "true"
-      },
-      "n": "SAUMI-001"
-    },
-    {
-      "entity": "JiraTask",
-      "id": 2,
-      "jiraProject": {
-        "entity": "JiraProject",
-        "id": 1,
-        "isBackRef": "true"
-      },
-      "n": "SAUMI-002"
-    }
-  ]
-}
-{
-  "entity": "JiraProject",
-  "id": 2,
-  "n": "QDP",
-  "jiraTasks": [
-    {
-      "entity": "JiraTask",
-      "id": 3,
-      "jiraProject": {
-        "entity": "JiraProject",
-        "id": 2,
-        "isBackRef": "true"
-      },
-      "n": "QDP-003"
-    },
-    {
-      "entity": "JiraTask",
-      "id": 4,
-      "jiraProject": {
-        "entity": "JiraProject",
-        "id": 2,
-        "isBackRef": "true"
-      },
-      "n": "QDP-004"
-    }
-  ]
-}
-        """.trimIndent(), res.toString())
     }
 
 

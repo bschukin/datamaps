@@ -75,7 +75,7 @@ open class DataMap {
     }
 
     operator fun <L> get(field: Field<*, L>): L {
-        if (field.t2 is List<*>)
+        if (field.value is List<*>)
             return list(field.n) as L
         return nested(field.n) as L
     }

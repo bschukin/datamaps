@@ -49,11 +49,130 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         return dataService.find_(dp)
     }
 
+    @Test
+            //тест на создание SLA и его поиск и выдачу
+    fun testSLA1() {
+
+        insertSLA()
+
+        //1) по организации - показать все имеющиеся SLA
+        //списком:  организация, контракт, продукт, услуга, SLA
+        //способ 1: от организации
+        val res = dataService.findAll(on(ORG)
+                .with(+ORG.contracts().contract().number,
+                       + ORG.contracts().contract().products().product().name,
+                       + ORG.contracts().contract().products().slas().service().name,
+                       + ORG.contracts().contract().products().slas().sla,
+                       + ORG.name)
+                .filter {  -ORG.name eq "ЗАО БИС"}
+        )
+
+
+        ORG.contracts()
+        val s = StringBuilder()
+        res.forEach {
+            s.append("${it[ORG.name]} " +
+                    "| ${it[ORG.contracts[0].contract().number]}"+
+                    "| ${it[ORG.contracts[0].contract().products[0].product().name]}"+
+                    "| ${it[ORG.contracts[0].contract().products[0].slas[0].service().name]}" +
+                    "| ${it[ORG.contracts[0].contract().products[0].slas[0].sla]}")
+        }
+        Assert.assertEquals("ЗАО БИС | 666| QDP| Consulting| 600", s.trim())
+    }
 
     @Test
-    fun testMegaInserts() {
+            //тест на создание SLA и его поиск и выдачу
+    fun testSLA() {
 
-        //создаем продукт
+        insertSLA()
+
+        //1) по организации - показать все имеющиеся SLA
+        //списком:  организация, контракт, продукт, услуга, SLA
+        //способ 1: от организации
+        val res = dataService.findAll(on(ORG).full()
+                .with {
+                    slice(ORG.contracts)
+                            .with {
+                                slice(ContractOrg.contract)
+                                        .fields(Contract.number)
+                                        .with {
+                                            slice(Contract.products).full()
+                                                    .with { slice(ContractProduct.slas).withRefs() }
+                                        }
+                            }
+                }
+                .where("{{name}} = 'ЗАО БИС'")
+        )
+
+
+        val s = StringBuilder()
+        res.forEach {
+            s.append("${it[ORG.name]} " +
+                    "| ${it[ORG.contracts][0][ContractOrg.contract][Contract.number]}" +
+                    "| ${it[ORG.contracts][0][ContractOrg.contract][Contract.products][0][ContractProduct.product][Product.name]}" +
+                    "| ${it[ORG.contracts][0][ContractOrg.contract][Contract.products][0][ContractProduct.slas][0][SLA.service][Service.name]}" +
+                    "| ${it[ORG.contracts][0][ContractOrg.contract][Contract.products][0][ContractProduct.slas][0][SLA.sla]}")
+        }
+        Assert.assertEquals("ЗАО БИС | 666| QDP| Consulting| 600", s.trim())
+
+        //второй вариант: от SLA
+        val res2 = dataService
+                .findAll(on(SLA).full()
+                        .with {
+                            slice(SLA.contractProduct)
+                                    .with {
+                                        slice(ContractProduct.product)
+                                                .field("name")
+                                    }
+                        }
+                        .with {
+                            slice(SLA.contractOrg).with {
+                                slice(ContractOrg.organisation).field(ORG.name)
+                            }
+                        }
+                        .where("{{contractOrg.organisation.name}} = 'ЗАО БИС'")
+                )
+
+        println(dataService.toJson(res2[0]))
+        val s2 = StringBuilder()
+        res2.forEach {
+            s2.append("${it[SLA.contractOrg().organisation().name]}  " +
+                    "| ${it[SLA.contractProduct().contract().number]}" +
+                    "| ${it[SLA.contractProduct().product().name]}" +
+                    "| ${it[SLA.service().name]}" +
+                    "| ${it[SLA.sla]}")
+        }
+        println(s2)
+        Assert.assertEquals("ЗАО БИС | 666| QDP| Consulting| 600", s.trim())
+    }
+
+    fun insertSLA() {
+        //справочники
+        insertPriorities()
+        insertServices()
+
+        insertOrg() //   tz[ORG.name] = "ЗАО БИС",  tz[ORG.bftSubdivision] = on(BftSubdivision)("{{name}} = 'DE'")
+        insertContracts()// tz[CTR.number] = "666" tz[CTR.bftSubdivision] = on(BftSubdivision).where("{{name}} = 'DE'"))
+        val co = insertContractOrg() // on(Contract).where("{{number}} = '666'"), on(ORG).where("{{name}} = 'ЗАО БИС'"))
+
+        //вставляем продукт и пару модулей
+        insertProducts() //p1[name] = "QDP". ,  m[Module.name] = "bpm",  m[Module.name] = "etl"
+        //связываем контракт (#666), продукт(QDP) и модуль (etl)
+        val contrProduct = insertContractProduct()
+
+        //создаем SLA
+        with(SLA)
+        {
+            val sla = new()
+            sla[contractOrg] = co //сопоставляем с организацией-получателеем услуг по контракту
+            sla[contractProduct] = contrProduct //сопосатвляем с купленным продуктом
+            sla[priority] = find_(Priority.filter { f(Priority.name) eq "High" }) //определяем приоритет
+            sla[service] = find_(Service.filter { f(Service.name) eq "Consulting" })//ставим услугу
+            sla[this.sla] = 600 //секунды
+        }
+
+        dataService.flush()
+
 
     }
 
@@ -187,7 +306,7 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
 
     }
 
-    @Test(invocationCount = 0)
+    @Test(invocationCount = 1)
     fun testOrgInfo() {
 
         insertTimeZones()
@@ -417,101 +536,6 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         dataService.flush()
     }
 
-    @Test
-            //тест на создание SLA и его поиск и выдачу
-    fun testSLA() {
-
-        insertSLA()
-
-        //1) по организации - показать все имеющиеся SLA
-        //списком:  организация, контракт, продукт, услуга, SLA
-        //способ 1: от организации
-        val res = dataService.findAll(on(ORG).full()
-                .with {
-                    slice(ORG.contracts)
-                            .with {
-                                slice(ContractOrg.contract)
-                                        .fields(Contract.number)
-                                        .with {
-                                            slice(Contract.products).full()
-                                                    .with { slice(ContractProduct.slas).withRefs() }
-                                        }
-                            }
-                }
-                .where("{{name}} = 'ЗАО БИС'")
-        )
-
-
-        val s = StringBuilder()
-        res.forEach {
-            s.append("${it[ORG.name]} " +
-                    "| ${it[ORG.contracts][0][ContractOrg.contract][Contract.number]}" +
-                    "| ${it[ORG.contracts][0][ContractOrg.contract][Contract.products][0][ContractProduct.product][Product.name]}" +
-                    "| ${it[ORG.contracts][0][ContractOrg.contract][Contract.products][0][ContractProduct.slas][0][SLA.service][Service.name]}" +
-                    "| ${it[ORG.contracts][0][ContractOrg.contract][Contract.products][0][ContractProduct.slas][0][SLA.sla]}")
-        }
-        Assert.assertEquals("ЗАО БИС | 666| QDP| Consulting| 600", s.trim())
-
-        //второй вариант: от SLA
-        val res2 = dataService
-                .findAll(on(SLA).full()
-                        .with {
-                            slice(SLA.contractProduct)
-                                    .with {
-                                        slice(ContractProduct.product)
-                                                .field("name")
-                                    }
-                        }
-                        .with {
-                            slice(SLA.contractOrg).with {
-                                slice(ContractOrg.organisation).field(ORG.name)
-                            }
-                        }
-                        .where("{{contractOrg.organisation.name}} = 'ЗАО БИС'")
-                )
-
-        println(dataService.toJson(res2[0]))
-        val s2 = StringBuilder()
-        res2.forEach {
-            s2.append("${it[SLA.contractOrg().organisation().name]}  " +
-                    "| ${it[SLA.contractProduct().contract().number]}" +
-                    "| ${it[SLA.contractProduct().product().name]}" +
-                    "| ${it[SLA.service().name]}" +
-                    "| ${it[SLA.sla]}")
-        }
-        println(s2)
-        Assert.assertEquals("ЗАО БИС | 666| QDP| Consulting| 600", s.trim())
-    }
-
-    fun insertSLA() {
-        //справочники
-        insertPriorities()
-        insertServices()
-
-        insertOrg() //   tz[ORG.name] = "ЗАО БИС",  tz[ORG.bftSubdivision] = on(BftSubdivision)("{{name}} = 'DE'")
-        insertContracts()// tz[CTR.number] = "666" tz[CTR.bftSubdivision] = on(BftSubdivision).where("{{name}} = 'DE'"))
-        val co = insertContractOrg() // on(Contract).where("{{number}} = '666'"), on(ORG).where("{{name}} = 'ЗАО БИС'"))
-
-        //вставляем продукт и пару модулей
-        insertProducts() //p1[name] = "QDP". ,  m[Module.name] = "bpm",  m[Module.name] = "etl"
-        //связываем контракт (#666), продукт(QDP) и модуль (etl)
-        val contrProduct = insertContractProduct()
-
-        //создаем SLA
-        with(SLA)
-        {
-            val sla = new()
-            sla[contractOrg] = co //сопоставляем с организацией-получателеем услуг по контракту
-            sla[contractProduct] = contrProduct //сопосатвляем с купленным продуктом
-            sla[priority] = find_(Priority.filter { f(Priority.name) eq "High" }) //определяем приоритет
-            sla[service] = find_(Service.filter { f(Service.name) eq "Consulting" })//ставим услугу
-            sla[this.sla] = 600 //секунды
-        }
-
-        dataService.flush()
-
-
-    }
 
 }
 

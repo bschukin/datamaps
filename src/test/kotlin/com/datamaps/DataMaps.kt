@@ -19,6 +19,8 @@ class Worker : DM() {
         val entity = "JiraWorker"
         val id = Field.id()
         val gender = Field.reference("gender", Gender)
+        val name = Field.string("name")
+        val email = Field.string("email")
     }
 }
 
