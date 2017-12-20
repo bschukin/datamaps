@@ -2,8 +2,8 @@ package com.datamaps.services
 
 import com.datamaps.general.throwNIS
 import com.datamaps.mappings.DataMapping
-import com.datamaps.maps.DataProjection
 import com.datamaps.maps.DataMap
+import com.datamaps.maps.DataProjection
 import com.datamaps.util.caseInsMapOf
 import com.datamaps.util.linkedCaseInsMapOf
 import org.apache.commons.lang.text.StrLookup
@@ -14,7 +14,7 @@ import java.util.stream.Collectors
 /**
  * Created by b.schukin on 14.11.2017.
  */
-class QueryBuildContext {
+class QueryBuildContext(val queryBuilder: QueryBuilder? = null) {
 
     //карта ключ: {алиасТаблицы.имяколонки}-->{уникальный алиас колонки в запросе}
     var columnAliases = linkedCaseInsMapOf<String>()
@@ -101,13 +101,18 @@ class QueryBuildContext {
         parentPathes.merge(key, alias, { _, _ -> throwNIS("$key already exist") })
     }
 
-    fun getAliasByPathFromParent(parentAlias: String?, parentProp: String?): String? {
+    fun getAliasByPathFromParent(ql: QueryLevel,parentAlias: String?, parentProp: String?): String? {
 
         if (parentAlias.isNullOrBlank())
             return rootAlias
 
         val key = SPair(parentAlias ?: "", parentProp ?: "")
-        return parentPathes[key]
+        var res = parentPathes[key]
+        if (res == null) {
+            queryBuilder!!.lateCreateAlias(this, ql, parentProp!!)
+            res = parentPathes[key]
+        }
+        return res
     }
 
     fun addMapper(alias: String, rowMapper: RowMapper) {
@@ -162,7 +167,7 @@ class QueryBuildContext {
                 currLevel = getAliasQueryLevel(list[i])
 
             } else {
-                alias = getAliasByPathFromParent(alias, list[i])!!
+                alias = getAliasByPathFromParent(currLevel, alias, list[i])!!
                 currLevel = currLevel.childProps[list[i]]!!
             }
 
@@ -190,7 +195,7 @@ class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
         if (dp.formulas.containsKey(name))
             return "(${dp.formulas[name]!!})"
 
-        if(dp.isLateral(alias))
+        if (dp.isLateral(alias))
             return "$alias.$name"
 
         return if (useAlias)
@@ -199,7 +204,7 @@ class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
             getEscapedColumn(dm[name].sqlcolumn!!)
     }
 
-    fun getEscapedColumn(name:String) = dbDialect.getQuotedDbIdentifier(name)
+    fun getEscapedColumn(name: String) = dbDialect.getQuotedDbIdentifier(name)
 
 }
 

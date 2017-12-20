@@ -32,7 +32,6 @@ class QueryBuilder {
     lateinit var conversionService: ConversionService
 
 
-
     @Autowired
     lateinit var dmUtilService: DmUtilService
 
@@ -59,7 +58,7 @@ class QueryBuilder {
 
     fun createQueryByDataProjection(dp: DataProjection): SqlQueryContext {
 
-        val qr = QueryBuildContext()
+        val qr = QueryBuildContext(this)
 
 
         buildMainQueryStructure(qr, dp, null)
@@ -152,6 +151,36 @@ class QueryBuilder {
 
 
         return qr.stack.pop()
+    }
+
+
+    fun lateCreateAlias(qr: QueryBuildContext, parentLevel: QueryLevel, field: String): QueryLevel {
+
+
+        //если мы на руте - берем рутовый маппинг
+        val dm = dataMappingsService.getRefDataMapping(parentLevel.dm, field)
+
+        //если мы на руте - берем рутовую проекцию, иначе берем проекцию с поля
+        val currProjection = parentLevel.dp.fields.getOrDefault(field, DataProjection(dm.name, field = field))
+
+        //генерим алиас
+        val alias = currProjection.queryAlias ?: qr.createTableAlias(dm.table)
+
+        //запомним в таблицу алиасов - родительский путь к нам
+        qr.addParentPathAlias(parentLevel.alias, field, alias)
+
+        val ql = QueryLevel(dm, currProjection, alias, field, parentLevel, dbDialect)
+
+        //зарегистрируем алиас
+        qr.addTableAlias(alias, ql)
+
+        //строим дерево
+        parentLevel.childProps[field] = ql
+
+        qr.addJoin(buildJoin(qr,parentLevel, ql))
+
+
+        return ql
     }
 
 

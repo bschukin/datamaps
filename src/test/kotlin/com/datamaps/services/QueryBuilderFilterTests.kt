@@ -15,13 +15,13 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         var dp = DataProjection(Gender.entity)
         var q = queryBuilder.createQueryByDataProjection(dp)
 
-        var alias = q.qr.getAliasByPathFromParent(null, Gender.gender.n)!!
+        var alias = q.qr.getAliasByPathFromParent(q.qr.root, null, Gender.gender.n)!!
         assertBodyEquals(alias, "JIRA_GENDER1")
 
         dp = DataProjection(Gender.entity).alias("jg")
         q = queryBuilder.createQueryByDataProjection(dp)
 
-        alias = q.qr.getAliasByPathFromParent(null, Gender.gender.n)!!
+        alias = q.qr.getAliasByPathFromParent(q.qr.root, null, Gender.gender.n)!!
         assertBodyEquals(alias, "jg")
 
     }
@@ -33,7 +33,7 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
         var q = queryBuilder.createQueryByDataProjection(dp)
 
-        var alias = q.qr.getAliasByPathFromParent("jira_worker1", "gender")
+        var alias = q.qr.getAliasByPathFromParent(q.qr.root, "jira_worker1", "gender")
         assertBodyEquals(alias!!, "JIRA_GENDER1")
     }
 
@@ -50,10 +50,10 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
         var q = queryBuilder.createQueryByDataProjection(dp)
 
-        var alias = q.qr.getAliasByPathFromParent("Jira_Staff_Unit1", "worker")
+        var alias = q.qr.getAliasByPathFromParent(q.qr.root, "Jira_Staff_Unit1", "worker")
         assertBodyEquals(alias!!, "jira_worker1")
 
-        alias = q.qr.getAliasByPathFromParent("jira_worker1", "gender")
+        alias = q.qr.getAliasByPathFromParent(q.qr.root, "jira_worker1", "gender")
         assertBodyEquals(alias!!, "jira_gender1")
 
 
@@ -69,13 +69,13 @@ class QueryBuilderFilterTests : BaseSpringTests() {
 
         q = queryBuilder.createQueryByDataProjection(dp)
 
-        alias = q.qr.getAliasByPathFromParent("jsu", "worker")
+        alias = q.qr.getAliasByPathFromParent(q.qr.root, "jsu", "worker")
         assertBodyEquals(alias!!, "jira_worker1")
 
-        alias = q.qr.getAliasByPathFromParent("jira_worker1", "gender")
+        alias = q.qr.getAliasByPathFromParent(q.qr.root, "jira_worker1", "gender")
         assertBodyEquals(alias!!, "jira_gender1")
 
-        alias = q.qr.getAliasByPathFromParent("jsu", "gender")
+        alias = q.qr.getAliasByPathFromParent(q.qr.root, "jsu", "gender")
         assertBodyEquals(alias!!, "jira_gender2")
 
     }
@@ -604,9 +604,88 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         })
     }
 
+    //тестируем следующее: использование обращения   в фильтре,
+    // к проперте, которая явно не прописана в слайсах
+    @Test
+    fun testUseFilterPropertyWithNoSlice() {
 
+        var dp = on(StaffUnit)
+                .where("""
+                         {{gender.id}} = {{worker.gender.id}}
+                """)
+
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        assertBodyEquals(q.sql, "SELECT \n" +
+                "\t  JIRA_STAFF_UNIT1.\"ID\"  AS  ID1,  JIRA_STAFF_UNIT1.\"NAME\"  AS  NAME1\n" +
+                "FROM JIRA_STAFF_UNIT as JIRA_STAFF_UNIT1\n" +
+                "LEFT JOIN JIRA_GENDER as JIRA_GENDER1 ON JIRA_STAFF_UNIT1.\"GENDER_ID\"=JIRA_GENDER1.\"ID\" \n" +
+                "LEFT JOIN JIRA_WORKER as JIRA_WORKER1 ON JIRA_STAFF_UNIT1.\"WORKER_ID\"=JIRA_WORKER1.\"ID\" \n" +
+                "LEFT JOIN JIRA_GENDER as JIRA_GENDER2 ON JIRA_WORKER1.\"GENDER_ID\"=JIRA_GENDER2.\"ID\" \n" +
+                "WHERE \n" +
+                "                         JIRA_GENDER1.\"ID\" = JIRA_GENDER2.\"ID\"")
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID1")}")
+            }
+        })
+    }
+
+    //тестируем следующее: использование обращения   в фильтре,
+    // к проперте, которая явно не прописана в слайсах
+    @Test
+    fun testUseFilterPropertyWithNoSlice2() {
+
+        var dp = on(StaffUnit)
+                .filter(-StaffUnit.worker().gender().id eq -StaffUnit.gender().id)
+
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        assertBodyEquals(q.sql, """
+            SELECT
+	                JIRA_STAFF_UNIT1."ID"  AS  ID1,  JIRA_STAFF_UNIT1."NAME"  AS  NAME1
+                    FROM JIRA_STAFF_UNIT as JIRA_STAFF_UNIT1
+                    LEFT JOIN JIRA_WORKER as JIRA_WORKER1 ON JIRA_STAFF_UNIT1."WORKER_ID"=JIRA_WORKER1."ID"
+                    LEFT JOIN JIRA_GENDER as JIRA_GENDER1 ON JIRA_WORKER1."GENDER_ID"=JIRA_GENDER1."ID"
+                    LEFT JOIN JIRA_GENDER as JIRA_GENDER2 ON JIRA_STAFF_UNIT1."GENDER_ID"=JIRA_GENDER2."ID"
+                    WHERE JIRA_GENDER1."ID" = JIRA_GENDER2."ID"
+            """)
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID1")}")
+            }
+        })
+    }
+
+    //тестируем следующее: использование обращения   в фильтре,
+    // к проперте, которая явно не прописана в слайсах
+    @Test
+    fun testUseSortPropertyWithNoSlice() {
+
+        val dp =
+                on(StaffUnit).order(-StaffUnit.worker().name)
+
+
+        val q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        assertBodyEquals(q.sql, """SELECT
+            	  JIRA_STAFF_UNIT1."ID"  AS  ID1,  JIRA_STAFF_UNIT1."NAME"  AS  NAME1
+                    FROM JIRA_STAFF_UNIT as JIRA_STAFF_UNIT1
+                    LEFT JOIN JIRA_WORKER as JIRA_WORKER1 ON JIRA_STAFF_UNIT1."WORKER_ID"=JIRA_WORKER1."ID"
+                ORDER BY JIRA_WORKER1."NAME" ASC
+        """)
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID1")}")
+            }
+        })
+    }
 }
-
-
-
-
