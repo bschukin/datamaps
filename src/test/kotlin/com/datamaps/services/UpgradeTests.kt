@@ -80,5 +80,46 @@ class UpgradeTests : BaseSpringTests() {
 
     }
 
+    @Test
+    fun testUpgradesWith2Collections() {
+
+        //1 грузим  проекты без коллекций
+        val projects = dataService.findAll(
+                on("JiraProject")
+                        .scalars()
+                        .where("{{name}} = 'QDP'")
+        )
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0]["jiraTasks"] == null)
+        Assert.assertTrue(projects[0]["jiraProjectWorkers"] == null)
+
+        //2 догружаем 2 коллекции
+        dataService.upgrade(projects, projection()
+                .with {
+                    slice("jiraTasks") //загружаем коллекуию тасков
+                            .full() //все поля - следвателоьно и вложенная коллекция чеклистов полетит
+                }
+                .with {
+                    slice("jiraProjectWorkers") //загружаем коллекуию тасков
+                            .full() //все поля - следвателоьно и вложенная коллекция чеклистов полетит
+                })
+
+        println(projects)
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].list("jiraTasks").size == 2)
+        Assert.assertTrue(projects[0].list("jiraProjectWorkers").size == 2)
+
+        Assert.assertTrue(projects[0].nestedl("jiraTasks[0].jiraChecklists").size == 2)
+
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].name") == "foo check")
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[1].name") == "bar check")
+
+        Assert.assertTrue(projects[0].nested("jiraTasks[1].jiraChecklists") == null)
+
+
+    }
+
 
 }

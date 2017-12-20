@@ -194,7 +194,7 @@ class QueryBuilderTests : BaseSpringTests() {
     @Test(invocationCount = 1)//Коллеция 1-N
     fun testBuildQuery06() {
         var dp = DataProjection("JiraProject")
-                .full()
+                .scalars().withRefs()
                 .with {
                     slice("JiraTasks")
                             .scalars().withRefs()
@@ -217,7 +217,7 @@ class QueryBuilderTests : BaseSpringTests() {
     @Test
     fun testBuildQuery07WithId() {
         var dp = projection("JiraProject", 1)
-                .full()
+                .scalars().withRefs()
                 .with {
                     slice("jiraTasks")
                             .scalars().withRefs()
@@ -241,7 +241,7 @@ class QueryBuilderTests : BaseSpringTests() {
     @Test//Тест на использования алиасов
     fun testBuildQuery08WithAlias01() {
         var dp = DataProjection("JiraProject", 1)
-                .full()
+                .scalars().withRefs()
                 .alias("JP")
                 .with {
                     slice("jiraTasks")
@@ -266,7 +266,7 @@ class QueryBuilderTests : BaseSpringTests() {
     @Test//Тест на использования алиасов
     fun testBuildQuery08WithAlias02() {
         var dp = DataProjection("JiraProject", 1)
-                .full()
+                .scalars().withRefs()
                 .alias("JP")
                 .with {
                     slice("jiraTasks")

@@ -2,9 +2,9 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
+import com.datamaps.maps.DataMap
 import com.datamaps.maps.DataProjection
 import com.datamaps.maps.slice
-import com.datamaps.maps.DataMap
 import org.testng.Assert
 import org.testng.annotations.Test
 
@@ -140,7 +140,7 @@ class QueryExecutorTests : BaseSpringTests() {
     @Test(invocationCount = 1)//Коллеция 1-N
     fun testExecQuery06() {
         var dp = DataProjection("JiraProject")
-                .full()
+                .scalars().withRefs()
                 .with {
                     slice("jiraTasks")
                             .scalars().withRefs()

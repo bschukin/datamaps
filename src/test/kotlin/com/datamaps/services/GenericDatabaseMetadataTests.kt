@@ -113,7 +113,7 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
         table = genericDbMetadataService.getTableInfo("Jira_Project")
 
         println(table.oneToManyCollections.size)
-        Assert.assertTrue(table.oneToManyCollections.size==1)
+        Assert.assertTrue(table.oneToManyCollections.size==2)
 
         fk = table.oneToManyCollections[0]
         assertEqIgnoreCase(fk.pkTable, "Jira_Project")

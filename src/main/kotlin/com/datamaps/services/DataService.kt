@@ -132,6 +132,9 @@ class DataServiceImpl : DataService
 
         //составляем запрос на slice
         val q = queryBuilder.createUpgradeQueryByMapsAndSlices(maps, slice)
+
+        LOGGER.info("\r\nupgrade: ${q.sql} \n\t with params ${q.params}")
+
         //исполняем запрос
         val sliceMaps = queryExecutor.findAll(q)
 
