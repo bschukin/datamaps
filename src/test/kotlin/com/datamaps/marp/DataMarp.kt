@@ -2,6 +2,7 @@ package com.datamaps.marp
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.StaffUnit
+import com.datamaps.Worker
 import com.datamaps.maps.*
 import com.datamaps.servicedesk.ORG
 import com.datamaps.servicedesk.Organisation
@@ -262,6 +263,32 @@ class DataMarp : BaseSpringTests() {
 
         //use complex indexator
         Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].n") == "foo check")
+    }
+
+
+    @Test
+            /**
+             * пример создания датамапа на основе выполнения SQL.
+             * маппинг в адатамап осуществляет по именам колонок (columnLabel) представленным в резулт-сете.
+             * */
+    fun testSqlToMapMethod() {
+        var res = dataService.sqlToFlatMap(Worker.entity,
+                "select w.id , w.name as noname, g.gender, g.id as gid from jira_worker w " +
+                        "left join jira_gender g on g.id = w.gender_id " +
+                        "where g.gender = :_name",
+                mapOf("_name" to "man"))!!
+
+        println(res)
+
+        """
+            {
+                "entity": "JiraWorker",
+                "id": 2,
+                "GID": "2",
+                "GENDER": "man",
+                "NONAME": "John Lennon"
+        }"""
+
     }
 
 

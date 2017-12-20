@@ -18,7 +18,6 @@ public class SpecialClass {
 
     void ttt()
     {
-        //dataService2.new("")
     }
 
 }

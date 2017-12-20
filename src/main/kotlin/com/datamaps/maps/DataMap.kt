@@ -188,6 +188,7 @@ open class DMSerializer : JsonSerializer<DataMap> {
         when (obj.id) {
             null -> jsonObject.addProperty("id", "null")
             is Long -> jsonObject.addProperty("id", obj.id as Long)
+            is Int -> jsonObject.addProperty("id", obj.id as Int)
             else -> jsonObject.addProperty("id", obj.id as String)
         }
 

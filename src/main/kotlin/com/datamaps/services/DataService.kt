@@ -28,6 +28,10 @@ interface DataService {
 
     fun delete(datamap: DataMap)
 
+    fun sqlToFlatMaps(entity:String, sql:String, params:Map<String, Any> = mapOf(), idColumn:String = "ID"): List<DataMap>
+
+    fun sqlToFlatMap(entity:String, sql:String, params:Map<String, Any> = mapOf(), idColumn:String = "ID"): DataMap?
+
     fun flush()
 
     fun getDataMapping(name: String): DataMapping
@@ -36,6 +40,7 @@ interface DataService {
 
     fun async():DataServiceAsync
 }
+
 
 interface DataServiceAsync {
     fun find_(dp: DataProjection): AsyncResult<DataMap>
@@ -103,6 +108,21 @@ class DataServiceImpl : DataService
         LOGGER.info("\r\nsql: ${q.sql} \n\t with params ${q.params}")
 
         return queryExecutor.findAll(q)
+    }
+
+
+    override fun sqlToFlatMaps(entity:String, sql:String, params:Map<String, Any>,idColumn:String): List<DataMap>
+    {
+        LOGGER.info("\r\nnative sql: $sql \n\t with params $params")
+
+        return queryExecutor.sqlToFlatMaps(entity, sql, idColumn, params)
+    }
+
+    override fun sqlToFlatMap(entity:String, sql:String, params:Map<String, Any>,idColumn:String): DataMap?
+    {
+        LOGGER.info("\r\nnative sql: $sql \n\t with params $params")
+
+        return queryExecutor.sqlToFlatMap(entity, sql, idColumn, params)
     }
 
     override fun upgrade(maps: List<DataMap>, slice: projection): List<DataMap> {

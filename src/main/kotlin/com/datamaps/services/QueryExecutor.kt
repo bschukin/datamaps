@@ -46,4 +46,42 @@ class QueryExecutor {
         mc.clear()
     }
 
+
+    fun sqlToFlatMaps(entity: String, sql: String, idField: String, params: Map<String, Any>): List<DataMap> {
+        val list = mutableListOf<DataMap>()
+        namedParameterJdbcTemplate.query(sql, params, { resultSet, _ ->
+            run {
+                list.add(mapRowAsFlatMap(resultSet, entity, idField))
+            }
+        })
+        return list
+    }
+
+    fun sqlToFlatMap(entity: String, sql: String, idField: String, params: Map<String, Any>): DataMap?{
+        val list = mutableListOf<DataMap>()
+        namedParameterJdbcTemplate.query(sql, params, { resultSet, _ ->
+            run {
+                list.add(mapRowAsFlatMap(resultSet, entity, idField))
+            }
+        })
+        if(list.size>1)
+            throw RuntimeException("more than one row returned")
+
+        return list.firstOrNull()
+    }
+
+    fun mapRowAsFlatMap(resultSet: ResultSet, entity: String, idField: String): DataMap {
+        val dm = DataMap(entity, resultSet.getObject(idField))
+        var i = 0
+        while (i < resultSet.metaData.columnCount) {
+            i++
+            val columnName = resultSet.metaData.getColumnLabel(i)
+            val columnValue = resultSet.getObject(i)
+            if (columnName.equals(idField, true))
+                continue
+            dm[columnName] = columnValue
+        }
+        return dm
+    }
+
 }

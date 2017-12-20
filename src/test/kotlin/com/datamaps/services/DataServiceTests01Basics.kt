@@ -2,6 +2,7 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.Gender
+import com.datamaps.Worker
 import com.datamaps.maps.on
 import com.datamaps.maps.projection
 import com.datamaps.maps.slice
@@ -44,6 +45,19 @@ class DataServiceTests01Basics : BaseSpringTests()
 
 
     @Test
+    fun testSqlToMapMethod()
+    {
+        var res = dataService.sqlToFlatMap(Worker.entity,
+                "select w.id,w.name, g.gender from jira_worker w " +
+                        "left join jira_gender g on g.id = w.gender_id " +
+                        "where g.gender = :_name",
+                mapOf("_name" to "man"))!!
+
+        assertTrue(res[Worker.name]=="John Lennon")
+    }
+
+
+    @Test
     fun test2SlicesOnOneFloor()
     {
         var res = dataService.findAll(
@@ -55,6 +69,9 @@ class DataServiceTests01Basics : BaseSpringTests()
             println(r)
         }
     }
+
+
+
 
 
 }
