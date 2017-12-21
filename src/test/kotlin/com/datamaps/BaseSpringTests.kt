@@ -4,6 +4,7 @@ import com.datamaps.maps.projection
 import com.datamaps.services.DataService
 import com.datamaps.services.QueryBuilder
 import com.datamaps.services.QueryExecutor
+import com.datamaps.services.SqlStatistics
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.env.Environment
@@ -42,6 +43,9 @@ class BaseSpringTests : AbstractTransactionalTestNGSpringContextTests() {
 
     @Resource
     lateinit var queryExecutor: QueryExecutor
+
+    @Autowired
+    lateinit var sqlStatistics: SqlStatistics
 
     fun notExists(p: projection): Boolean {
         return dataService.find(p) == null

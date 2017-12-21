@@ -265,6 +265,37 @@ class DataMarp : BaseSpringTests() {
         Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].n") == "foo check")
     }
 
+    /***
+     * Пример с отдельными запросами для вложенных коллекций
+     *
+     * мне короче удалсоь сделать так, что будет три запроса ровно:
+    - первый на проекты.
+    - второй на все задачи выбраных проектов
+    - третий - на все чеклисты всех выбранных задач
+     */
+    @Test
+
+    fun testSelectCollectionWithSeparateSelect() {
+
+        //1 грузим  проекты без коллекций
+        val projects = dataService
+                .findAll(on("JiraProject")
+                        .scalars()
+                        .with {
+                            slice("jiraTasks") //загружаем коллекуию тасков
+                                    .scalars().asSelect()
+                                    .with {
+                                        slice("jiraChecklists") //загружаем коллекуию чеклистов
+                                                .scalars().asSelect()
+                                    }
+                        }
+                        .where("{{name}} = 'QDP'")
+                )
+
+
+        println(projects)
+    }
+
 
     @Test
             /**

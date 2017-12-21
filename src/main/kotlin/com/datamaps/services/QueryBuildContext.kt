@@ -66,6 +66,8 @@ class QueryBuildContext(val queryBuilder: QueryBuilder? = null) {
     var offset: Int? = null
     var limit: Int? = null
 
+    var postMappers = mutableListOf<PostMapper>()
+
     fun getSelectString(): String {
         return selectColumns.stream()
                 .collect(Collectors.joining(", "))
@@ -262,9 +264,9 @@ class MappingContext(private val q: SqlQueryContext) {
 typealias RowMapper = (MappingContext, ResultSet) -> Unit
 
 class SqlQueryContext(val sql: String, val params: Map<String, Any?>,
-                      var qr: QueryBuildContext, var postMapper: PostMapper? = null)
+                      var qr: QueryBuildContext)
 
-typealias PostMapper = (List<DataMap>) -> List<DataMap>
+typealias PostMapper = (List<DataMap>, DataService) -> List<DataMap>
 
 class SPair(s1: String, s2: String) {
 

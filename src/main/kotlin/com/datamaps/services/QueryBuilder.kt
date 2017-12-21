@@ -63,8 +63,8 @@ class QueryBuilder {
 
         val sqlquerycontext = createQueryByDataProjection(proj)
 
-        sqlquerycontext.postMapper = mapper
-
+        if (mapper != null)
+            sqlquerycontext.qr.postMappers.add(mapper)
 
 
         return sqlquerycontext
@@ -85,15 +85,14 @@ class QueryBuilder {
         sl.filter { f(backField.name) IN maps }
 
 
-        val postMapper: PostMapper = { list ->
+        val postMapper: PostMapper = { list, dataService ->
             val map = mutableMapOf<Any, DataMap>()
-            list.forEach{ dataMap ->
+            list.forEach { dataMap ->
                 val id = dataMap["_backRefId"]!!
                 val dmNew = map.computeIfAbsent(id, { DataMap(parentMapping.name, id) })
-                when
-                {
-                    parentMapping[field].isM1->dmNew[field, true] = dataMap
-                    parentMapping[field].is1N->dmNew.list(field).addIfNotInSilent(dataMap)
+                when {
+                    parentMapping[field].isM1 -> dmNew[field, true] = dataMap
+                    parentMapping[field].is1N -> dmNew.list(field).addIfNotInSilent(dataMap)
                 }
             }
             map.values.stream().toList()
@@ -179,7 +178,15 @@ class QueryBuilder {
                     entityField.sqlcolumn == dm.idColumn -> buildIDfield(qr, dm, alias, entityField)
                     entityField.isSimple -> buildSimpleField(qr, dm, alias, entityField)
                     entityField.isM1 -> buildManyToOneField(qr, currProjection, entityField)
-                    entityField.is1N -> buildMainQueryStructure(qr, currProjection, entityField.name)
+                    entityField.is1N -> {
+                        val proj = currProjection.fields.get(entityField.name)
+                        when {
+                            proj == null || proj.collectionJoinType == JoinType.JOIN -> buildMainQueryStructure(qr, currProjection, entityField.name)
+                            proj.collectionJoinType == JoinType.SELECT -> createPostSelectUpgradeAction(qr, currProjection, entityField)
+                            else -> throwNIS()
+                        }
+                    }
+
                     else -> throw NIY()
                 }
             }
@@ -197,6 +204,32 @@ class QueryBuilder {
 
 
         return qr.stack.pop()
+    }
+
+    private fun createPostSelectUpgradeAction(qr: QueryBuildContext, currProjection: DataProjection, entityField: DataField) {
+
+        //надо создать такую функцию, которая после того как отработает основной запрос
+        //сделает апгрейд на данную коллекцию
+
+        //на вход нам придет список
+        //надо собрать из него мапы-родители (помним, что уровень вложенности может быть любым)
+        //и на них сделать апгрейд
+        val stackOfProps = qr.stack.map { ql -> ql.parentLinkField }.toMutableList()
+        //удаляем первый и последний элементы
+        stackOfProps.removeAt(0)
+        val mapper:PostMapper = { list, dataService ->
+
+            var parents = list
+            stackOfProps.forEach {
+                parents = parents.flatMap { el -> el.list(it!!) }
+            }
+
+            dataService.upgrade(parents, currProjection)
+
+            list
+        }
+
+        qr.postMappers.add(mapper)
     }
 
 

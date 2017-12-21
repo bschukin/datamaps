@@ -307,8 +307,6 @@ private fun mergeDataMaps(target: DataMap, provider: DataMap, map: MutableMap<Da
 private fun mergeDataMaps(target: List<DataMap>?, provider: List<DataMap>,
                           map: MutableMap<DataMap, DataMap>, canAddNewEntities: Boolean = true): List<DataMap> {
 
-    if (!canAddNewEntities)
-        checkNIS(target?.size == provider.size)
 
     if (target == null || target.isEmpty()) return ArrayList(provider)
 

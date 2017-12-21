@@ -2,6 +2,7 @@ package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
 import com.datamaps.assertBodyEquals
+import com.datamaps.maps.f
 import com.datamaps.maps.on
 import com.datamaps.maps.projection
 import com.datamaps.maps.slice
@@ -121,8 +122,8 @@ class UpgradeTests : BaseSpringTests() {
     }
 
     @Test
-    //тоже самое что и в предыдущем тесте, но последовательно
-    //последовательно апгрейдим коллекции
+            //тоже самое что и в предыдущем тесте, но последовательно
+            //последовательно апгрейдим коллекции
     fun testUpgradesWith2CollectionsSerial() {
 
         //1 грузим  проекты без коллекций
@@ -177,5 +178,127 @@ class UpgradeTests : BaseSpringTests() {
 
     }
 
+    @Test
+            //сделаем апгрейд на третем уровне:
+            //JiraProject(1)-->Tasks(2)-->Checklist(3) - загрузим чеклисты
+    fun testUpgradesOnSecondLevel() {
+
+        //1 грузим  проекты без коллекций
+        val projects = dataService.findAll(
+                on("JiraProject")
+                        .scalars().withCollections()
+                        .where("{{name}} = 'QDP'")
+                        .order(f("jiraTasks.id"))
+        )
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].list("jiraTasks").size == 2)
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists") == null)
+        //2 догружаем 1ю коллекцию
+        //todo: запрос здесь генерится не оптимальный:есть лишний джойн на  jiraTask хотя он не нужен
+        dataService.upgrade(projects, projection()
+                .with {
+                    slice("jiraTasks") //загружаем коллекуию тасков
+                            .with {
+                                slice("jiraChecklists") //загружаем коллекуию чеков
+                                        .scalars()
+                            }
+                }
+        )
+
+        println(projects)
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].nestedl("jiraTasks[0].jiraChecklists").size == 2)
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].name") == "foo check")
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[1].name") == "bar check")
+
+    }
+
+
+    //сделаем апгрейд на третем уровне:
+    //JiraProject(1)-->Tasks(2)-->Checklist(3) - загрузим чеклисты
+    //тест такой же, но на самом деле мы апгрейдим таски
+    @Test
+    fun testUpgradesOnSecondLevel2() {
+
+        //1 грузим  проекты без коллекций
+        val projects = dataService.findAll(
+                on("JiraProject")
+                        .scalars().withCollections()
+                        .where("{{name}} = 'QDP'")
+                        .order(f("jiraTasks.id"))
+        )
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].list("jiraTasks").size == 2)
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists") == null)
+
+        //2 догружаем 1ю коллекцию
+        dataService.upgrade(projects.flatMap { p -> p.list("jiraTasks") }, projection()
+                .with {
+                    slice("jiraChecklists") //загружаем коллекуию чеков
+                            .scalars()
+                }
+        )
+
+        println(projects)
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].nestedl("jiraTasks[0].jiraChecklists").size == 2)
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].name") == "foo check")
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[1].name") == "bar check")
+
+    }
+
+
+    //тест на использолвание отдельного запроса на вытягивание коллекции
+    @Test
+    fun testSelectCollectionWithSeparateSelect() {
+
+        sqlStatistics.start()
+        //1 грузим  проекты без коллекций
+        val projects = dataService
+                .findAll(on("JiraProject")
+                        .scalars()
+                        .with {
+                            slice("jiraTasks") //загружаем коллекуию тасков
+                                    .scalars().asSelect()
+                                    .with {
+                                        slice("jiraChecklists") //загружаем коллекуию чеклистов
+                                                .scalars().asSelect()
+                                    }
+                        }
+                        .where("{{name}} = 'QDP'")
+                )
+
+        println(projects)
+
+        Assert.assertTrue(sqlStatistics.queries().size==3)
+
+        assertBodyEquals(sqlStatistics.queries()[0].sql,
+                "SELECT \n" +
+                        "\t jira_project1.\"id\"  AS  id1,  jira_project1.\"name\"  AS  name1\n" +
+                        "FROM jira_project as jira_project1 WHERE jira_project1.\"name\" = 'QDP' ")
+
+        assertBodyEquals(sqlStatistics.queries()[1].sql,
+                "SELECT \n" +
+                        "\t jira_task1.\"id\"  AS  id1,  jira_task1.\"name\"  AS  name1,  (jira_project_id) AS  _backRefId\n" +
+                        "FROM jira_task as jira_task1 \n" +
+                        "WHERE jira_task1.\"jira_project_id\" in (:param0)   ")
+
+        assertBodyEquals(sqlStatistics.queries()[2].sql,
+                "SELECT \n" +
+                        "\t jira_checklist1.\"id\"  AS  id1,  jira_checklist1.\"name\"  AS  name1,  (jira_task_id) AS  _backRefId\n" +
+                        "FROM jira_checklist as jira_checklist1 \n" +
+                        "WHERE jira_checklist1.\"jira_task_id\" in (:param0)   ")
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].nestedl("jiraTasks[0].jiraChecklists").size == 2)
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].name") == "foo check")
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[1].name") == "bar check")
+
+        sqlStatistics.stop()
+    }
 
 }

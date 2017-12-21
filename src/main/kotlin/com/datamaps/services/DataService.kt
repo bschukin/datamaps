@@ -28,9 +28,9 @@ interface DataService {
 
     fun delete(datamap: DataMap)
 
-    fun sqlToFlatMaps(entity:String, sql:String, params:Map<String, Any> = mapOf(), idColumn:String = "ID"): List<DataMap>
+    fun sqlToFlatMaps(entity: String, sql: String, params: Map<String, Any> = mapOf(), idColumn: String = "ID"): List<DataMap>
 
-    fun sqlToFlatMap(entity:String, sql:String, params:Map<String, Any> = mapOf(), idColumn:String = "ID"): DataMap?
+    fun sqlToFlatMap(entity: String, sql: String, params: Map<String, Any> = mapOf(), idColumn: String = "ID"): DataMap?
 
     fun flush()
 
@@ -38,7 +38,7 @@ interface DataService {
 
     fun toJson(dm: DataMap): String
 
-    fun async():DataServiceAsync
+    fun async(): DataServiceAsync
 }
 
 
@@ -48,22 +48,12 @@ interface DataServiceAsync {
 }
 
 interface AsyncResult<T> {
-    fun  doWithResult(aaa: (m: T) -> Unit)
+    fun doWithResult(aaa: (m: T) -> Unit)
 }
 
 @Service
-class DataServiceImpl : DataService
-{
+class DataServiceImpl : DataService {
 
-
-    override fun toJson(dm: DataMap): String {
-
-        val gson = GsonBuilder()
-                .registerTypeAdapter(DataMap::class.java, DMSerializer2(this))
-                .setPrettyPrinting().create()
-
-        return gson.toJson(dm)
-    }
 
     private val LOGGER = LoggerFactory.getLogger(this.javaClass)
 
@@ -111,15 +101,13 @@ class DataServiceImpl : DataService
     }
 
 
-    override fun sqlToFlatMaps(entity:String, sql:String, params:Map<String, Any>,idColumn:String): List<DataMap>
-    {
+    override fun sqlToFlatMaps(entity: String, sql: String, params: Map<String, Any>, idColumn: String): List<DataMap> {
         LOGGER.info("\r\nnative sql: $sql \n\t with params $params")
 
         return queryExecutor.sqlToFlatMaps(entity, sql, idColumn, params)
     }
 
-    override fun sqlToFlatMap(entity:String, sql:String, params:Map<String, Any>,idColumn:String): DataMap?
-    {
+    override fun sqlToFlatMap(entity: String, sql: String, params: Map<String, Any>, idColumn: String): DataMap? {
         LOGGER.info("\r\nnative sql: $sql \n\t with params $params")
 
         return queryExecutor.sqlToFlatMap(entity, sql, idColumn, params)
@@ -149,6 +137,15 @@ class DataServiceImpl : DataService
         deltaMachine.flush()
     }
 
+    override fun toJson(dm: DataMap): String {
+
+        val gson = GsonBuilder()
+                .registerTypeAdapter(DataMap::class.java, DMSerializer2(this))
+                .setPrettyPrinting().create()
+
+        return gson.toJson(dm)
+    }
+
     override fun getDataMapping(name: String): DataMapping {
         return dataMappingsService.getDataMapping(name)
     }
@@ -159,10 +156,9 @@ class DataServiceImpl : DataService
     }
 }
 
-private class DataServiceAsyncImpl(val dataServiceImpl: DataServiceImpl):DataServiceAsync
-{
+private class DataServiceAsyncImpl(val dataServiceImpl: DataServiceImpl) : DataServiceAsync {
 
-    override fun findAll(dp: DataProjection):AsyncResult<List<DataMap>>{
+    override fun findAll(dp: DataProjection): AsyncResult<List<DataMap>> {
         val lamda = {
             dataServiceImpl.findAll(dp)
         }
@@ -170,8 +166,7 @@ private class DataServiceAsyncImpl(val dataServiceImpl: DataServiceImpl):DataSer
         return AResult(lamda)
     }
 
-    override fun find_(dp: DataProjection): AsyncResult<DataMap>
-    {
+    override fun find_(dp: DataProjection): AsyncResult<DataMap> {
         val lamda = {
             dataServiceImpl.find_(dp)
         }
@@ -179,8 +174,7 @@ private class DataServiceAsyncImpl(val dataServiceImpl: DataServiceImpl):DataSer
         return AResult(lamda)
     }
 
-    private class AResult<T>( var lamda: () -> T):AsyncResult<T>
-    {
+    private class AResult<T>(var lamda: () -> T) : AsyncResult<T> {
 
         override fun doWithResult(resultLamda: (m: T) -> Unit) {
             val deferred = async { lamda() }

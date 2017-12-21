@@ -66,6 +66,8 @@ open class DataProjection {
     var limit: Int? = null
     var offset: Int? = null
 
+    internal var collectionJoinType = JoinType.JOIN
+
     constructor()
 
     constructor(entity: KClass<*>) {
@@ -166,7 +168,7 @@ open class DataProjection {
             var currProjection = this
 
             val names = it.split('.')
-            names.forEach {n->
+            names.forEach { n ->
 
                 if (currProjection.fields[n] == null)
                     currProjection.fields[n] = slice(n)
@@ -182,7 +184,7 @@ open class DataProjection {
             var currProjection = this
 
             val names = it.nl
-            names.forEach {n->
+            names.forEach { n ->
 
                 if (currProjection.fields[n] == null)
                     currProjection.fields[n] = slice(n)
@@ -263,6 +265,18 @@ open class DataProjection {
 
     fun param(k: String, v: Any?): DataProjection {
         this.params[k] = v
+        return this
+    }
+
+    fun asSelect():DataProjection
+    {
+        collectionJoinType = JoinType.SELECT
+        return this
+    }
+
+    fun asJoin():DataProjection
+    {
+        collectionJoinType = JoinType.JOIN
         return this
     }
 }
@@ -423,9 +437,9 @@ class Field<T, L>(private val _name: String, val t: T, val value: L) {
             return res
         }
 
-    operator fun unaryPlus():String = n
+    operator fun unaryPlus(): String = n
 
-    operator fun unaryMinus():f = f(this)
+    operator fun unaryMinus(): f = f(this)
 
     val nl: List<String>
         get() {
@@ -441,8 +455,6 @@ class Field<T, L>(private val _name: String, val t: T, val value: L) {
         name()
         return t
     }
-
-
 
 
 }
@@ -546,8 +558,10 @@ fun <T : Any> getEntityNameFromClass(t: T): String {
 }
 
 
-
-
+enum class JoinType() {
+    JOIN,
+    SELECT
+}
 
 enum class Operation(val value: String) {
     eq("="),

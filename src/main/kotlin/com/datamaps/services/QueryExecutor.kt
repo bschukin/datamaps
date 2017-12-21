@@ -2,9 +2,13 @@ package com.datamaps.services
 
 import com.datamaps.maps.DataMap
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataAccessException
+import org.springframework.jdbc.core.RowMapper
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Service
 import java.sql.ResultSet
+import javax.annotation.PostConstruct
 
 /**
  * Created by Щукин on 03.11.2017.
@@ -13,7 +17,20 @@ import java.sql.ResultSet
 class QueryExecutor {
 
     @Autowired
-    lateinit var namedParameterJdbcTemplate: NamedParameterJdbcTemplate
+    lateinit var namedParameterJdbcTemplate: NamedParameterJdbcOperations
+
+    @Autowired
+    lateinit var dataService: DataService
+
+    @Autowired
+    lateinit var sqlStatistics: SqlStatistics
+
+    @PostConstruct
+    fun init() {
+        namedParameterJdbcTemplate = JdbcTemplateWrapper(
+                namedParameterJdbcTemplate as NamedParameterJdbcTemplate,
+                sqlStatistics)
+    }
 
 
     fun findAll(q: SqlQueryContext): List<DataMap> {
@@ -24,9 +41,9 @@ class QueryExecutor {
             }
         })
 
-        val res = mc.result()
-        q.postMapper?.let {
-            return q.postMapper!!(res)
+        var res = mc.result()
+        q.qr.postMappers.forEach {
+            res = it(res, dataService)
         }
         return res
     }
@@ -61,14 +78,14 @@ class QueryExecutor {
         return list
     }
 
-    fun sqlToFlatMap(entity: String, sql: String, idField: String, params: Map<String, Any>): DataMap?{
+    fun sqlToFlatMap(entity: String, sql: String, idField: String, params: Map<String, Any>): DataMap? {
         val list = mutableListOf<DataMap>()
         namedParameterJdbcTemplate.query(sql, params, { resultSet, _ ->
             run {
                 list.add(mapRowAsFlatMap(resultSet, entity, idField))
             }
         })
-        if(list.size>1)
+        if (list.size > 1)
             throw RuntimeException("more than one row returned")
 
         return list.firstOrNull()
@@ -86,6 +103,24 @@ class QueryExecutor {
             dm[columnName] = columnValue
         }
         return dm
+    }
+
+}
+
+internal class JdbcTemplateWrapper(val template: NamedParameterJdbcTemplate,
+                                   val sqlStatistics: SqlStatistics)
+    : NamedParameterJdbcOperations by template {
+
+    @Throws(DataAccessException::class)
+    override fun <T> query(sql: String, paramMap: Map<String, *>, rowMapper: RowMapper<T>): List<T> {
+        val start = System.currentTimeMillis()
+        val res = template.query(sql, paramMap, rowMapper)
+        val end = System.currentTimeMillis()
+
+        sqlStatistics.addSqlStat(sql, paramMap, end - start)
+
+        return res
+
     }
 
 }
