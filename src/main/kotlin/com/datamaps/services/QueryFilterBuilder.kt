@@ -71,7 +71,7 @@ class QueryFilterBuilder {
         return when (exp) {
             is f -> qr.getFieldNameInQuery(exp.name)
             is value -> buildFilterValue(qr, exp)
-            is binaryOP -> buildBinaryOperation(qr, exp)
+            is BinaryOP -> buildBinaryOperation(qr, exp)
             is OR -> "(${buildWhereByExp(qr, exp.left)} OR ${buildWhereByExp(qr, exp.right)})"
             is AND -> "(${buildWhereByExp(qr, exp.left)} AND ${buildWhereByExp(qr, exp.right)})"
             is NOT -> "NOT (${buildWhereByExp(qr, exp.right)})"
@@ -80,7 +80,7 @@ class QueryFilterBuilder {
         }
     }
 
-    private fun buildBinaryOperation(qr: QueryBuildContext, exp: binaryOP): String {
+    private fun buildBinaryOperation(qr: QueryBuildContext, exp: BinaryOP): String {
 
         return when {
             exp.op == Operation.inn -> "${buildWhereByExp(qr, exp.left)} ${exp.op.value} (${buildWhereByExp(qr, exp.right)})"

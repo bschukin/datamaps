@@ -32,7 +32,7 @@ open class DataMap {
         }
 
     @SerializedName("_")
-    var map = caseInsMapOf<Any>()
+    val map = caseInsMapOf<Any>()
 
     //техническое поле: гуид нового объекта
     //его наличие также говорит что объект новый
@@ -40,6 +40,7 @@ open class DataMap {
 
 
     //техническое поле: все зарегистрированные обратные ссылки на родителя
+    //на данный момент нужно больше для красоты.
     private val backRefs = caseInsMapOf<String>()
 
     constructor () : this("", null, false) {
@@ -168,12 +169,6 @@ fun <T : Any> datamap(t: T, id: Any? = null, isNew: Boolean = false): DataMap {
     val ent = getEntityNameFromClass(t)
     val res = DataMap(ent, id, isNew)
     return res
-}
-
-//заготовка для фиелдсетов. зачем она нужна - не очень понятно.
-open class DM {
-
-    val id = Field.id()
 }
 
 open class DMSerializer : JsonSerializer<DataMap> {
@@ -339,6 +334,28 @@ fun MutableList<DataMap>.addIfNotInSilent(dataMap: DataMap) {
         (this as DataList).addSilent(dataMap)
 }
 
+
+//не является частью АПИ
+//коллекция датамапов
+//нужна для передачи сообщений об изменении
+internal class DataList(val list: ArrayList<DataMap>,
+                        val parent: DataMap, val property: String) : MutableList<DataMap> by list {
+
+    override fun add(element: DataMap): Boolean {
+        DeltaStore.listAdd(parent, element, property)
+        return list.add(element)
+    }
+
+    override fun remove(element: DataMap): Boolean {
+        DeltaStore.listRemove(parent, element, property)
+        return list.remove(element)
+    }
+
+    fun addSilent(element: DataMap): Boolean {
+        return list.add(element)
+    }
+
+}
 
 fun getNestedPropertiy(dm: DataMap, nested: String): Any? {
     var curr = dm

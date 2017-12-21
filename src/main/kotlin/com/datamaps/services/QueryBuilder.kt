@@ -9,7 +9,6 @@ import com.datamaps.mappings.DataMappingsService
 import com.datamaps.maps.*
 import org.apache.commons.lang.text.StrSubstitutor
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.convert.ConversionService
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
 import kotlin.streams.toList
@@ -28,10 +27,6 @@ class QueryBuilder {
 
     @Resource
     lateinit var dbDialect: DbDialect
-
-    @Resource
-    lateinit var conversionService: ConversionService
-
 
     @Autowired
     lateinit var dmUtilService: DmUtilService
@@ -363,7 +358,7 @@ class QueryBuilder {
         val columnAlias = qr.addSelect(entityAlias, entityField.sqlcolumn)
         val ql = qr.stack.peek()
         qr.addMapper(columnAlias, { mc, rs ->
-            val id = rs.getObject(columnAlias)//conversionService.convert(rs.getObject(columnAlias), Long::class.java)
+            val id = rs.getObject(columnAlias)
             when (id) {
                 null ->
                     mc.curr(ql.parent!!.alias)?.let {
