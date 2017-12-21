@@ -2,6 +2,7 @@ package com.datamaps.services
 
 import com.datamaps.*
 import com.datamaps.maps.*
+import org.testng.Assert
 import org.testng.annotations.Test
 
 /**
@@ -705,5 +706,29 @@ class QueryBuilderFilterTests : BaseSpringTests() {
         """)
         val w = dataService.findAll(on(Worker).filter { -Worker.gender eq gender })
         println(w)
+    }
+
+
+    @Test
+            //ntcnbhetv ghbvtytytb
+    fun testExistsInQuery() {
+        val p = (on("JiraProject")
+                .with {
+                    slice("jiraTasks") //загружаем коллекцию тасков
+                            .with {
+                                slice("jiraChecklists") //загружаем коллекцию чеков
+                                        .scalars()
+                            }
+                }
+                .where("{{name}} = 'QDP' AND " +
+                        "EXISTS (SELECT j.id FROM JIRA_CHECKLIST j WHERE j.JIRA_TASK_ID = {{jiraTasks.id}})")
+                )
+
+        val projects = dataService.findAll(p)
+        println(projects)
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].list("jiraTasks").size == 1)
+        Assert.assertTrue(projects[0].nestedl("jiraTasks[0].jiraChecklists").size == 2)
     }
 }

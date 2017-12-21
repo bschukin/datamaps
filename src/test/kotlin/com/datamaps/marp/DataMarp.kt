@@ -215,6 +215,27 @@ class DataMarp : BaseSpringTests() {
                 """)
     }
 
+    @Test
+    fun testExistsInQueryWithBindinds() {
+
+        //пример использования байндинга объектов графа запроса в WHERE-выражении
+
+        val p = (on("JiraProject")
+                .with {
+                    slice("jiraTasks") //загружаем коллекцию тасков
+                            .with {
+                                slice("jiraChecklists") //загружаем коллекцию чеков
+                                        .scalars()
+                            }
+                }
+                .where("{{name}} = 'QDP' AND " +
+                        "EXISTS (SELECT j.id FROM JIRA_CHECKLIST j WHERE j.JIRA_TASK_ID = {{jiraTasks.id}})")
+                )
+
+        val projects = dataService.findAll(p)
+        println(projects)
+    }
+
 
     @Test
     fun basicFormulas() {
