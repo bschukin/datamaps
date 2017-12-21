@@ -41,9 +41,6 @@ class DeltaMachine {
     lateinit var sequenceIncrementor: SequenceIncrementor
 
     @Resource
-    lateinit var conversionService: ConversionService
-
-    @Resource
     lateinit var dbDialect: DbDialect
 
     @PostConstruct
@@ -152,7 +149,7 @@ class DeltaMachine {
         }, holder)
 
         if (db.dm.id == null)
-            db.dm.id = conversionService.convert(holder.keys["id"], Long::class.java)
+            db.dm.id = holder.keys["id"]
 
         return Pair(sql, map)
     }

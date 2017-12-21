@@ -27,7 +27,7 @@ class QueryExecutorTests : BaseSpringTests() {
         list.forEach { e -> println(e) }
         Assert.assertEquals(list.size, 4)
 
-        val indeх = list.indexOf(DataMap("JiraGender", 1L))
+        val indeх = list.indexOf(DataMap("JiraGender", 1))
         Assert.assertTrue(indeх >= 0)
         val dm = list[indeх]
         Assert.assertTrue(dm["gender"] as String == "woman")
@@ -52,13 +52,13 @@ class QueryExecutorTests : BaseSpringTests() {
         Assert.assertEquals(list.size, 5)
 
         //всякие проверочки
-        val indeх = list.indexOf(DataMap("JiraWorker", 1L))
+        val indeх = list.indexOf(DataMap("JiraWorker", 1))
         Assert.assertTrue(indeх >= 0)
         val dm = list[indeх]
         Assert.assertTrue(dm["email"] as String == "madonna@google.com")
         Assert.assertTrue(dm("gender")["gender"] == "woman")
 
-        val indeх2 = list.indexOf(DataMap("JiraWorker", 5L))
+        val indeх2 = list.indexOf(DataMap("JiraWorker", 5))
         val dm2 = list[indeх2]
 
         Assert.assertTrue(dm2["email"] as String == "mylene@francetelecom.fr")
@@ -85,13 +85,13 @@ class QueryExecutorTests : BaseSpringTests() {
         list.forEach { e -> println(e) }
 
         //всякие проверочки
-        val indeх = list.indexOf(DataMap("JiraWorker", 1L))
+        val indeх = list.indexOf(DataMap("JiraWorker", 1))
         Assert.assertTrue(indeх >= 0)
         val dm = list[indeх]
         Assert.assertTrue(dm["email"] == null)
         Assert.assertTrue(dm("gender")["gender"] == "woman")
 
-        val indeх2 = list.indexOf(DataMap("JiraWorker", 5L))
+        val indeх2 = list.indexOf(DataMap("JiraWorker", 5))
         val dm2 = list[indeх2]
 
         Assert.assertTrue(dm2["email"] == null)
@@ -229,7 +229,7 @@ class QueryExecutorTests : BaseSpringTests() {
 
         with(e!!)
         {
-            assertTrue(id == 1L)
+            assertTrue(id == 1)
             assertTrue(this["name"] == "SAUMI")
             assertTrue(list("jiraTasks").size == 2)
         }

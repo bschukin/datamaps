@@ -24,7 +24,11 @@ class QueryExecutor {
             }
         })
 
-        return mc.result()
+        val res = mc.result()
+        q.postMapper?.let {
+            return q.postMapper!!(res)
+        }
+        return res
     }
 
     fun executeSingle(q: SqlQueryContext): DataMap? {

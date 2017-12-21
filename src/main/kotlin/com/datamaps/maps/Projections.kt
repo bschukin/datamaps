@@ -194,7 +194,7 @@ open class DataProjection {
     }
 
 
-    fun id(id: Any): DataProjection {
+    fun id(id: Any?): DataProjection {
         validate(isRoot())
         this.id = id
         return this

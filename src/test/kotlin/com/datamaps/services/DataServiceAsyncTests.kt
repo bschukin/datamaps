@@ -21,8 +21,7 @@ class DataServiceAsyncTests : BaseSpringTests() {
                         .filter(-Gender.gender eq "woman")
                 )
                 .doWithResult { g ->
-                    println(g[Gender.isClassic])
-                    assertTrue(g[Gender.isClassic])
+                    assertTrue(g[Gender.gender]=="woman")
                 }
 
         Thread.sleep(500)

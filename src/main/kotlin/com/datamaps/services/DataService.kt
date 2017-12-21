@@ -16,7 +16,7 @@ import javax.annotation.Resource
  */
 interface DataService {
 
-    fun get(entityName: String, id: Long): DataMap?
+    fun get(entityName: String, id: Any?): DataMap?
 
     fun find(dp: DataProjection): DataMap?
 
@@ -80,7 +80,7 @@ class DataServiceImpl : DataService
     lateinit var dataMappingsService: DataMappingsService
 
 
-    override fun get(entityName: String, id: Long): DataMap? {
+    override fun get(entityName: String, id: Any?): DataMap? {
 
         val q = queryBuilder.createQueryByEntityNameAndId(entityName, id)
         return queryExecutor.executeSingle(q)

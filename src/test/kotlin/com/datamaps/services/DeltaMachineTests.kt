@@ -171,7 +171,7 @@ class DeltaMachineTests : BaseSpringTests() {
         assertFalse(department.isNew())
         assertNotNull(department.id)
 
-        val department_ = dataService.get("JiraDepartment", department.id as Long)
+        val department_ = dataService.get("JiraDepartment", department.id)
         assertNotNull(department_)
     }
 
@@ -300,11 +300,11 @@ class DeltaMachineTests : BaseSpringTests() {
 
         val task001_ = dataService.find(
                 on("JiraTask")
-                        .id(task001.id as Long))
+                        .id(task001.id))
 
         val ch01_ = dataService.find(
                 on("JiraChecklist")
-                        .id(ch01.id as Long))
+                        .id(ch01.id))
 
         assertNull(task001_)
         assertNull(ch01_)

@@ -145,7 +145,7 @@ class QueryBuildContext(val queryBuilder: QueryBuilder? = null) {
     ///добавить параметр в карту, сгенерировать для него имя и вернуть
     fun addParam(value: Any): String {
         val name = "param${paramNameCounter++}"
-        params.put(name, value)
+        params.put(name, extractIdIfNeed(value))
         return name
     }
 
@@ -184,6 +184,20 @@ class QueryBuildContext(val queryBuilder: QueryBuilder? = null) {
         return columnAliases[fullName] ?: fullName
     }
 
+    private fun extractIdIfNeed(value: Any):Any {
+        if(value is DataMap)
+        {
+            if(value.id==null)
+                throwNIS("datamap with null id in query parameter")
+            return value.id!!
+        }
+        if(value is List<*>)
+        {
+            return value.map {v-> extractIdIfNeed(v!!) }.toList()
+        }
+        return value
+    }
+
 }
 
 class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
@@ -212,19 +226,19 @@ class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
 class MappingContext(private val q: SqlQueryContext) {
 
     //карта карт: "Ентити" -> {карта {id of entity}->{DataMap}  }
-    private var mapOfMaps = caseInsMapOf<MutableMap<Long, DataMap>>()
+    private var mapOfMaps = caseInsMapOf<MutableMap<Any, DataMap>>()
 
     //карта "текущих" сущностей в текущей строке RowResult
     //{alias таблицы}-->{DataMap}
     //используется при маппировании
     var curr = caseInsMapOf<DataMap>()
 
-    private var resultMap = linkedMapOf<Long, DataMap>()
+    private var resultMap = linkedMapOf<Any, DataMap>()
 
     /**
      * getOrCreate
      */
-    fun create(alias: String, entityName: String, id: Long): DataMap {
+    fun create(alias: String, entityName: String, id: Any): DataMap {
         val map = mapOfMaps.computeIfAbsent(entityName, { mutableMapOf() })
         val datamap = map.computeIfAbsent(id, { DataMap(entityName, id) })
         curr[alias] = datamap
@@ -248,7 +262,9 @@ class MappingContext(private val q: SqlQueryContext) {
 typealias RowMapper = (MappingContext, ResultSet) -> Unit
 
 class SqlQueryContext(val sql: String, val params: Map<String, Any?>,
-                      var qr: QueryBuildContext)
+                      var qr: QueryBuildContext, var postMapper: PostMapper? = null)
+
+typealias PostMapper = (List<DataMap>) -> List<DataMap>
 
 class SPair(s1: String, s2: String) {
 

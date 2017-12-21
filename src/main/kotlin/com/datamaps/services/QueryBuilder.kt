@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.convert.ConversionService
 import org.springframework.stereotype.Service
 import javax.annotation.Resource
+import kotlin.streams.toList
 
 /**
  * Created by Щукин on 03.11.2017.
@@ -35,25 +36,70 @@ class QueryBuilder {
     @Autowired
     lateinit var dmUtilService: DmUtilService
 
-    fun createQueryByEntityNameAndId(name: String, id: Long): SqlQueryContext {
+    fun createQueryByEntityNameAndId(name: String, id: Any?): SqlQueryContext {
 
         val dp = DataProjection(name, id).scalars().withRefs()
         return createQueryByDataProjection(dp)
     }
 
     fun createUpgradeQueryByMapsAndSlices(maps: List<DataMap>, slice: projection): SqlQueryContext {
+        var proj = slice
+        var mapper: PostMapper? = null
+        if (slice.fields.size == 1) {
+            //todo: сейчас есть лишний джойн на родительскую сущность
+            //на самом деле от него можно избавиться (если в слайсе только одна ссылка)
+            //slice {collcetion1,
+            // collection2} - в этом случае не избавиться от джойна на родительскую суть
+            //если же slice {collcetion1} то джойн на родителя не нужен
+            val pair = createSelectForJoinedEntity(maps, proj, slice.fields.keys.first())
+            proj = pair.first
+            mapper = pair.second
+        } else {
+            slice.entity = maps[0].entity
 
-        slice.entity = maps[0].entity
+            slice.onlyId()
+                    .filter(f("id") IN maps.map { dm -> dm.id })
+        }
 
-        //todo: сейчас есть лишний джойн на родительскую сущность
-        //на самом деле от него можно избавиться (если в слайсе только одна ссылка)
-        //slice {collcetion1,
-        // collection2} - в этом случае не избавиться от джойна на родительскую суть
-        //если же slice {collcetion1} то джойн на родителя не нужен
-        slice.onlyId()
-                .filter(f("id") IN maps.map { dm -> dm.id })
+        val sqlquerycontext = createQueryByDataProjection(proj)
 
-        return createQueryByDataProjection(slice)
+        sqlquerycontext.postMapper = mapper
+
+
+
+        return sqlquerycontext
+    }
+
+
+    private fun createSelectForJoinedEntity(maps: List<DataMap>, original: projection, field: String): Pair<DataProjection, PostMapper> {
+        val parentMapping = dataMappingsService.getDataMapping(maps[0].entity)
+
+
+        val mapping = dataMappingsService.getRefDataMapping(parentMapping, field)
+        val backField = mapping.getBackReferenceFieldForThisList(parentMapping, field)
+
+
+        val sl = original[field]!!
+        sl.entity = mapping.name
+        sl.formula("_backRefId", backField.sqlcolumn!!)
+        sl.filter { f(backField.name) IN maps }
+
+
+        val postMapper: PostMapper = { list ->
+            val map = mutableMapOf<Any, DataMap>()
+            list.forEach{ dataMap ->
+                val id = dataMap["_backRefId"]!!
+                val dmNew = map.computeIfAbsent(id, { DataMap(parentMapping.name, id) })
+                when
+                {
+                    parentMapping[field].isM1->dmNew[field, true] = dataMap
+                    parentMapping[field].is1N->dmNew.list(field).addIfNotInSilent(dataMap)
+                }
+            }
+            map.values.stream().toList()
+        }
+
+        return Pair(sl, postMapper)
     }
 
     fun createQueryByDataProjection(dp: DataProjection): SqlQueryContext {
@@ -177,7 +223,7 @@ class QueryBuilder {
         //строим дерево
         parentLevel.childProps[field] = ql
 
-        qr.addJoin(buildJoin(qr,parentLevel, ql))
+        qr.addJoin(buildJoin(qr, parentLevel, ql))
 
 
         return ql
@@ -284,7 +330,7 @@ class QueryBuilder {
         val columnAlias = qr.addSelect(entityAlias, entityField.sqlcolumn)
         val ql = qr.stack.peek()
         qr.addMapper(columnAlias, { mc, rs ->
-            val id = conversionService.convert(rs.getObject(columnAlias), Long::class.java)
+            val id = rs.getObject(columnAlias)//conversionService.convert(rs.getObject(columnAlias), Long::class.java)
             when (id) {
                 null ->
                     mc.curr(ql.parent!!.alias)?.let {

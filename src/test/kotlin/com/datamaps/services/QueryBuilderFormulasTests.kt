@@ -1,11 +1,10 @@
 package com.datamaps.services
 
 import com.datamaps.BaseSpringTests
+import com.datamaps.Worker
+import com.datamaps.assertBodyEquals
 import com.datamaps.assertEqIgnoreCase
-import com.datamaps.maps.DataProjection
-import com.datamaps.maps.f
-import com.datamaps.maps.projection
-import com.datamaps.maps.slice
+import com.datamaps.maps.*
 import org.testng.Assert
 import org.testng.Assert.assertEquals
 import org.testng.Assert.assertNotEquals
@@ -91,4 +90,27 @@ class QueryBuilderFormulasTests : BaseSpringTests() {
         assertNotEquals(res[0].id, res[1].id)
     }
 
+
+    @Test
+    /**
+     * тест показывает как вытащить айдишник не как REF а как число
+     * с помощью формулы
+     * */
+    fun testRefAsId() {
+        var dp = on(Worker)
+                .scalars().formula("genderId","GENDER_ID")
+
+        //1 тест на  структуру по которой построится запрос
+        val qr = QueryBuildContext()
+        queryBuilder.buildMainQueryStructure(qr, dp)
+
+
+        val q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        assertBodyEquals(q.sql, "SELECT \n" +
+                "\t  JIRA_WORKER1.\"ID\"  AS  ID1,  JIRA_WORKER1.\"NAME\"  AS  NAME1,  JIRA_WORKER1.\"EMAIL\"  AS  EMAIL1,  (GENDER_ID) AS  genderId\n" +
+                "FROM JIRA_WORKER as JIRA_WORKER1 ")
+
+        println(dataService.findAll(dp))
+    }
 }

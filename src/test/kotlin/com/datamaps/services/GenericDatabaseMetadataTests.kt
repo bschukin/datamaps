@@ -115,7 +115,8 @@ class GenericDatabaseMetadataTests : BaseSpringTests() {
         println(table.oneToManyCollections.size)
         Assert.assertTrue(table.oneToManyCollections.size==2)
 
-        fk = table.oneToManyCollections[0]
+        fk = table.oneToManyCollections.stream().filter { fk->fk.fkTable.equals("Jira_Task", true) }
+                .findFirst().orElse(null)
         assertEqIgnoreCase(fk.pkTable, "Jira_Project")
         assertEqIgnoreCase(fk.pkColumn, "ID")
         assertEqIgnoreCase(fk.fkTable, "Jira_Task")

@@ -688,4 +688,22 @@ class QueryBuilderFilterTests : BaseSpringTests() {
             }
         })
     }
+
+
+    @Test
+            //тест на поиск по M-1 полю по датамапа-значению ссылки
+    fun testQueryFilterWithReferencedDatamap() {
+
+        val gender = dataService.find_(on(Gender).filter { -Gender.id eq 1 })
+
+        val q = queryBuilder.createQueryByDataProjection(on(Worker).filter { -Worker.gender eq gender })
+        println(q.sql)
+        assertBodyEquals(q.sql, """SELECT
+        	  JIRA_WORKER1."ID"  AS  ID1,  JIRA_WORKER1."NAME"  AS  NAME1,  JIRA_WORKER1."EMAIL"  AS  EMAIL1
+                FROM JIRA_WORKER as JIRA_WORKER1
+            WHERE JIRA_WORKER1."GENDER_ID" = :param0
+        """)
+        val w = dataService.findAll(on(Worker).filter { -Worker.gender eq gender })
+        println(w)
+    }
 }

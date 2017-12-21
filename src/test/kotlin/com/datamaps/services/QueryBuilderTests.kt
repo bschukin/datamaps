@@ -310,6 +310,8 @@ class QueryBuilderTests : BaseSpringTests() {
     }
 
 
+
+
     @Test
     fun testProjectionWithFieldsFlatEnumerarion() {
         var dp = on(StaffUnit).with (
