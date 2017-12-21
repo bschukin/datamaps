@@ -301,4 +301,40 @@ class UpgradeTests : BaseSpringTests() {
         sqlStatistics.stop()
     }
 
+
+    //тест на использолвание отдельного запроса на вытягивание коллекции
+    //Здесь смотрится, что проекция после asSelect() - будет применена.
+    //в конкретном случае - просто говорим что вместе с селектом коллекции тасков
+    //загружайте сразу и чеклисты
+    @Test
+    fun testSelectCollectionWithSeparateSelect2() {
+
+        sqlStatistics.start()
+        //1 грузим  проекты без коллекций
+        val projects = dataService
+                .findAll(on("JiraProject")
+                        .scalars()
+                        .with {
+                            slice("jiraTasks") //загружаем коллекуию тасков
+                                    .scalars().asSelect()
+                                    .with {
+                                        slice("jiraChecklists") //загружаем коллекуию чеклистов
+                                                .scalars()
+                                    }
+                        }
+                        .where("{{name}} = 'QDP'")
+                )
+
+        println(projects)
+
+        Assert.assertTrue(sqlStatistics.queries().size==2)
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].nestedl("jiraTasks[0].jiraChecklists").size == 2)
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[0].name") == "foo check")
+        Assert.assertTrue(projects[0].nested("jiraTasks[0].jiraChecklists[1].name") == "bar check")
+
+        sqlStatistics.stop()
+    }
+
 }
