@@ -4,8 +4,8 @@ import com.datamaps.BaseSpringTests
 import com.datamaps.StaffUnit
 import com.datamaps.Worker
 import com.datamaps.maps.*
-import com.datamaps.servicedesk.ORG
-import com.datamaps.servicedesk.Organisation
+import com.datamaps.ORG
+import com.datamaps.Organisation
 import org.testng.Assert
 import org.testng.annotations.Test
 

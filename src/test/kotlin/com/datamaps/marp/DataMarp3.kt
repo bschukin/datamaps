@@ -3,11 +3,10 @@ package com.datamaps.marp
 import com.datamaps.BaseSpringTests
 import com.datamaps.DTP
 import com.datamaps.Department
-import com.datamaps.maps.datamap
 import com.datamaps.maps.f
 import com.datamaps.maps.on
 import com.datamaps.maps.slice
-import com.datamaps.servicedesk.Product
+import com.datamaps.Product
 import org.testng.annotations.Test
 
 

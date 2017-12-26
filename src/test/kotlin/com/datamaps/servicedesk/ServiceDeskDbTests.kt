@@ -1,5 +1,6 @@
 package com.datamaps.servicedesk
 
+import com.datamaps.*
 import com.datamaps.mappings.AsIsNameMappingsStrategy
 import com.datamaps.mappings.NameMappingsStrategy
 import com.datamaps.maps.*

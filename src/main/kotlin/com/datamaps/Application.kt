@@ -65,10 +65,11 @@ fun main(args: Array<String>) {
 
     val ctx = SpringApplication.run(ServiceDeskApplication::class.java, *args)
 
-    val cli = CliService()
-    ctx.autowireCapableBeanFactory.autowireBean(cli)
-    cli.init()
-
-
+    ctx.getBean(CliService::class.java).startCommandLine()
+    //вынесено сюда, только ради того, чтобы ">spring" распечаталось последним после старта приложения
+    //все таки надо использовать CliService как обычный бин
+    //val cli = CliService()
+    //ctx.autowireCapableBeanFactory.autowireBean(cli)
+    //cli.init()
 }
 

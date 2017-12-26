@@ -1,4 +1,4 @@
-package com.datamaps.servicedesk
+package com.datamaps
 
 import com.datamaps.maps.*
 
@@ -10,19 +10,19 @@ class BftSubdivision : DM() {
 
         val id = Field.long("id")
         val name = Field.string("name")
-
     }
 }
 
-class ContractType : DM() {
-    companion object {
-        val entity = "ContractType"
-        val table = "ContractType"
+object ContractType : DM() {
+    val entity = "ContractType"
+    val table = "ContractType"
 
-        val id = Field.long("id")
-        val name = Field.string("name")
+    val name = Field.string("name")
+    val name3 = Field.string("nameeasdasaddasdas")
+    val name5 = Field.string("5asdasddas")
 
-    }
+
+    fun filter(e: (m: Unit) -> exp) = on(ContractType).filter(e)
 }
 
 class Contract : DM() {
@@ -48,7 +48,8 @@ class Contract : DM() {
         val bftSubdivision = Field.reference("bftSubdivision", BftSubdivision)
         val orgs = Field.list("contractorgs", ContractOrg)
         val products = Field.list("contractproducts", ContractProduct)
-
+        val products2 = Field.list("contractproducts", ContractProduct)
+        val products4 = Field.reference("ContractType", ContractType)
     }
 }
 
@@ -58,11 +59,11 @@ class ContractOrg : DM() {
     companion object {
         val entity = "ContractOrg"
         val table = "ContractOrg"
-
         val id = Field.long("id")
         val contract = Field.reference("contract", Contract)
         val organisation = Field.reference("organisation", Organisation)
         val slas = Field.list("slas", SLA)
+        val slas2 = Field.list("slas", SLA)
     }
 }
 
@@ -93,7 +94,7 @@ class ContractProductModule : DM() {
         fun filter(e: (m: Unit) -> exp) = on(ContractProductModule).filter(e)
 
         val id = Field.long("id")
-        val contractProduct = Field.reference("contractProduct",ContractProduct )
+        val contractProduct = Field.reference("contractProduct", ContractProduct)
         val module = Field.reference("module", Module)
 
     }
@@ -117,7 +118,6 @@ class Module : DM() {
 
     }
 }
-
 
 
 class Organisation : DM() {
@@ -178,7 +178,7 @@ class Product : DM() {
         fun new() = DataMap(Product)
         fun on() = on(Product)
         fun filter(e: (m: Unit) -> exp) = on(Product).filter(e)
-        fun where(w:String) = on(Product).where(w)
+        fun where(w: String) = on(Product).where(w)
 
         val id = Field.long("id")
         val name = Field.string("name")

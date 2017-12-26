@@ -1,5 +1,6 @@
 package com.datamaps.tools
 
+import com.datamaps.ContractType
 import com.datamaps.mappings.DataField
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.maps.DataMap
@@ -10,11 +11,14 @@ import javax.annotation.Resource
 
 @Service
 class FieldSetGenerator {
+
     @Resource
     lateinit var dataMappingsService: DataMappingsService
 
 
     fun generateFieldSet(tableName: String): String {
+        println(ContractType.name)
+
 
         val name = dataMappingsService.getEntityDefaultNameByTableName(tableName)
         val mapping = dataMappingsService.getDataMapping(name)

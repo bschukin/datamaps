@@ -8,12 +8,15 @@ import kotlin.concurrent.getOrSet
 open class FieldSet {
 
     val id = Field.id()
+
 }
 
 typealias DM = FieldSet
 
 //Фиелдсеты строятся на основе данного филда
 data class Field<T, L>(private val _name: String, val t: T, val value: L) {
+
+
 
     companion object {
 
@@ -90,6 +93,11 @@ data class Field<T, L>(private val _name: String, val t: T, val value: L) {
     operator fun invoke(): T {
         name()
         return t
+    }
+
+    override fun toString(): String {
+        val tt = if(t is Any) t else Object()
+        return "Field('$_name', type='${tt::class.java.simpleName}')"
     }
 
 

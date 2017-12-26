@@ -52,13 +52,20 @@ class Department : DM() {
 }
 typealias DTP = Department
 
-class Task : DM() {
+/*class Task : DM() {
     companion object {
         val entity = "JiraTask"
         val id = Field.id()
         val name = Field.string("name")
         val checks = Field.list("jiraChecklists", Check)
     }
+}*/
+
+object Task : DM() {
+
+        val entity = "JiraTask"
+        val name = Field.string("name")
+        val checks = Field.list("jiraChecklists", Check)
 }
 
 typealias TSK = Task
