@@ -48,8 +48,9 @@ open class DataMap {
 
     constructor (name: String) : this(name, null, true)
 
-    constructor  (t: Any) : this(getEntityNameFromClass(t), null, true) {
-    }
+    constructor (dm: DM) : this(getEntityNameFromClass(dm), null, true)
+
+    constructor  (t: Any) : this(getEntityNameFromClass(t), null, true)
 
     constructor (name: String, id: Any? = null, isNew: Boolean = false) {
         this.entity = name

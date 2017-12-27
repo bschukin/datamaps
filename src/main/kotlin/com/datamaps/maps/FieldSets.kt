@@ -7,8 +7,6 @@ import kotlin.concurrent.getOrSet
 //заготовка для фиелдсетов. зачем она нужна - не очень понятно.
 open class FieldSet {
 
-    val id = Field.id()
-
 }
 
 typealias DM = FieldSet
