@@ -1,11 +1,7 @@
 package com.datamaps.marp
 
-import com.datamaps.BaseSpringTests
-import com.datamaps.StaffUnit
-import com.datamaps.Worker
+import com.datamaps.*
 import com.datamaps.maps.*
-import com.datamaps.ORG
-import com.datamaps.Organisation
 import org.testng.Assert
 import org.testng.annotations.Test
 
@@ -17,25 +13,85 @@ class DataMarp : BaseSpringTests() {
 
 
     @Test
+    fun dataMapsAndFieldSets() {
+        //create API
+        val m1 = create(Gender).with {
+            it[id] = 100L
+            it[gender] = "ccc"
+        }
+
+        val myGender = Gender.create {
+            it[id] = 100L
+            it[gender] = "был такой"
+        }
+
+        val worker = Worker.create {
+            it[id] = 100L
+            it[name] = "some hero"
+            it[gender] = myGender
+            it[gender().gender] = "стал другой"
+        }
+
+        //update API
+        //часть вторая - апдейты
+        update(Gender, m1).with {
+            it[id] = 100L
+            it[gender] = "zzz"
+        }
+
+        Worker.update(worker) {
+            it[id] = 100L
+            it[name] = "some zero"
+            it[gender] = m1
+            it[gender().gender] = "совсем иной"
+        }
+    }
+
+    @Test
+    fun testInsertAndUpdate() {
+
+        ORG.create {
+            it[name] = "БИС"
+            it[fullName] = "ЗАО БИС"
+            it[INN] = "123456789101"
+        }
+
+        dataService.flush()
+
+        val org = dataService.find_(on(ORG)
+                .full().filter { -ORG.INN eq "123456789101" })
+
+        ORG.update(org) {
+            it[legalAddress] = "Москва, Лефортово, все дела"
+            it[workTimeStart] = 12
+            it[timeZone] = dataService.find(on(TimeZone).where("{{name}}='NY'"))
+        }
+
+        dataService.flush()
+    }
+
+
+    @Test
     fun basicProjectionUses() {
 
         //простой пример
-        val gender = dataService.find(
-                on("JiraGender")
-                        .id(2L))!!
-        gender["gender"] = "men"
+        val gender = dataService.find_(
+                on(Gender).id(2L)
+        )
+
+        gender[Gender.gender] = "men"
         dataService.flush()
 
         //более сложный пример
-        val worker = dataService.find(
-                on("JiraWorker")
+        val worker = dataService.find_(
+                on(Worker)
                         .id(1L)
-                        .field("n")
+                        .field(Worker.name)
                         .with {
-                            slice("gender")
-                                    .field("gender")
+                            slice(Worker.gender)
+                                    .field(Gender.gender)
                         }
-        )!!
+        )
 
         if (worker("gender")["gender"] != gender["gender"])
             worker["gender"] = gender

@@ -1,17 +1,92 @@
 package com.datamaps.maps
 
+import com.datamaps.Gender
+import com.datamaps.Worker
 import org.testng.Assert
 import org.testng.annotations.Test
+import kotlin.test.assertTrue
 
 /**
  * Created by Щукин on 27.10.2017.
  */
 class DataMapTests {
 
+    @Test
+    fun testCreateApiWithFieldsSets() {
+
+        //create
+
+        val m1 = create(Gender).with {
+            it[id] = 100L
+            it[gender] = "ccc"
+        }
+        println(m1)
+        with(Gender)
+        {
+            assertTrue(m1[id] == 100L)
+            assertTrue(m1[gender] == "ccc")
+        }
+
+        val myGender = Gender.create {
+            it[id] = 100L
+            it[gender] = "был такой"
+        }
+        println(myGender)
+        with(Gender)
+        {
+            assertTrue(myGender[id] == 100L)
+            assertTrue(myGender[gender] == "был такой")
+        }
+
+
+        val worker = Worker.create {
+            it[id] = 100L
+            it[name] = "some hero"
+            it[gender] = myGender
+            it[gender().gender] = "стал другой"
+        }
+        with(Worker)
+        {
+            assertTrue(worker[id] == 100L)
+            assertTrue(worker[name] == "some hero")
+            assertTrue(worker[gender().gender] == "стал другой")
+        }
+        println(worker)
+
+        //часть вторая - апдейты
+        update(Gender, m1).with {
+            it[id] = 100L
+            it[gender] = "zzz"
+        }
+        println(m1)
+        with(Gender)
+        {
+            assertTrue(m1[gender] == "zzz")
+        }
+
+        Worker.update(worker) {
+            it[id] = 100L
+            it[name] = "some zero"
+            it[gender] = m1
+            it[gender().gender] = "совсем иной"
+        }
+
+        with(Worker)
+        {
+            assertTrue(worker[id] == 100L)
+            assertTrue(worker[name] == "some zero")
+            assertTrue(worker[gender().gender] == "совсем иной")
+        }
+        with(Gender)
+        {
+            assertTrue(m1[gender] == "совсем иной")
+            assertTrue(myGender[gender] == "стал другой")
+        }
+
+    }
 
     @Test
-    fun testEquality()
-    {
+    fun testEquality() {
         val dm01 = DataMap("A", 1L)
         val dm011 = DataMap("A", 1L)
 
@@ -32,7 +107,6 @@ class DataMapTests {
         val dm05 = DataMap("C", 1L)//типо из базы
         val dm051 = DataMap("C", 1L, true)//типо новый и с присвоенным айдишником сразу от нас
         Assert.assertNotEquals(dm05, dm051)
-
 
     }
 

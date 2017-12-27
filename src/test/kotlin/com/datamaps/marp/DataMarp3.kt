@@ -3,10 +3,10 @@ package com.datamaps.marp
 import com.datamaps.BaseSpringTests
 import com.datamaps.DTP
 import com.datamaps.Department
+import com.datamaps.Product
 import com.datamaps.maps.f
 import com.datamaps.maps.on
 import com.datamaps.maps.slice
-import com.datamaps.Product
 import org.testng.annotations.Test
 
 
@@ -16,7 +16,7 @@ import org.testng.annotations.Test
 class DataMarp3 : BaseSpringTests() {
 
 
-    @Test(invocationCount = 0)
+    @Test(invocationCount = 1)
     fun basicProjectionUses() {
 
         //пример запроса
@@ -80,18 +80,21 @@ class DataMarp3 : BaseSpringTests() {
     fun basicFieldSetsFunctions() {
 
         if (notExists(Product.filter { f(Product.name) eq "QDP" })) { //создание фильтра и проекции  или Product.filter { f(name) eq "QDP" }
-            val p1 = Product.new()                  //создание новой мапы. или Product.new()
-            p1[Product.name] = "QDP"
-            p1[Product.email] = "bschukin@gmaik.com"
+            val p1 = Product.create {
+                //создание новой мапы. или Product.new()
+                it[name] = "QDP"
+                it[email] = "bschukin@gmaik.com"
+            }
         }
 
         //или тоже самое
         with(Product)
         {
             if (notExists(filter { f(name) eq "QDP" })) { //создание фильтра и проекции  или Product.filter { f(name) eq "QDP" }
-                val p1 = new()                  //создание новой мапы. или Product.new()
-                p1[name] = "QDP"
-                p1[email] = "bschukin@gmaik.com"
+                val p1 = create{                  //создание новой мапы. или Product.new()
+                    it[name] = "QDP"
+                    it[email] = "bschukin@gmaik.com"
+                }
             }
         }
     }

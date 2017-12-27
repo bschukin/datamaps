@@ -61,18 +61,18 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         //способ 1: от организации
         val res = dataService.findAll(on(ORG)
                 .with(+ORG.contracts().contract().number,
-                       + ORG.contracts().contract().products().product().name,
-                       + ORG.contracts().contract().products().slas().service().name,
-                       + ORG.contracts().contract().products().slas().sla,
-                       + ORG.name)
-                .filter {  -ORG.name eq "ЗАО БИС"}
+                        +ORG.contracts().contract().products().product().name,
+                        +ORG.contracts().contract().products().slas().service().name,
+                        +ORG.contracts().contract().products().slas().sla,
+                        +ORG.name)
+                .filter { -ORG.name eq "ЗАО БИС" }
         )
 
         val s = StringBuilder()
         res.forEach {
             s.append("${it[ORG.name]} " +
-                    "| ${it[ORG.contracts[0].contract().number]}"+
-                    "| ${it[ORG.contracts[0].contract().products[0].product().name]}"+
+                    "| ${it[ORG.contracts[0].contract().number]}" +
+                    "| ${it[ORG.contracts[0].contract().products[0].product().name]}" +
                     "| ${it[ORG.contracts[0].contract().products[0].slas[0].service().name]}" +
                     "| ${it[ORG.contracts[0].contract().products[0].slas[0].sla]}")
         }
@@ -162,7 +162,7 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         //создаем SLA
         with(SLA)
         {
-            val sla = new()
+            val sla = create()
             sla[contractOrg] = co //сопоставляем с организацией-получателеем услуг по контракту
             sla[contractProduct] = contrProduct //сопосатвляем с купленным продуктом
             sla[priority] = find_(Priority.filter { f(Priority.name) eq "High" }) //определяем приоритет
@@ -178,7 +178,7 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
     @Test
     fun testbftSubdivision() {
 
-        val dm = dataService.getDataMapping("BftSubdivision")
+        val dm = dataService.getDataMapping(BftSubdivision.table)
         dm.print()
 
         insertBftSubdivions()
@@ -219,18 +219,20 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         val p = find_(on(Product).filter { f(Product.name) eq "QDP" })
 
         if (p[Product.modules].find { it[Module.name] == "bpm" } == null) {
-            val m = Module.new()
-            m[Module.name] = "bpm"
-            m[Module.notActive] = false
+            Module.create {
+                it[Module.name] = "bpm"
+                it[Module.notActive] = false
 
-            p[Product.modules].add(m)
+                p[Product.modules].add(it)
+            }
         }
 
         if (p[Product.modules].find { it[Module.name] == "etl" } == null) {
-            val m = Module.new()
-            m[Module.name] = "etl"
-            m[Module.notActive] = false
-            p[Product.modules].add(m)
+            Module.create {
+                it[Module.name] = "etl"
+                it[Module.notActive] = false
+                p[Product.modules].add(it)
+            }
         }
 
         dataService.flush()
@@ -239,11 +241,9 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
     @Test(invocationCount = 1)
     fun workTimeZone() {
 
-        val dm = dataService.getDataMapping("TimeZone")
-        dm.print()
-
-        val tz = DataMap("TimeZone")
-        tz["name"] = "Moscow"
+        val tz = TimeZone.create {
+            it["name"] = "Moscow"
+        }
 
         dataService.flush()
         println(tz.id)
@@ -313,19 +313,23 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         val dm = dataService.getDataMapping("Organisation")
         dm.print()
 
-        val org = DataMap(ORG.entity)
-        org[ORG.name] = "БИС"
-        org[ORG.fullName] = "ЗАО БИС"
-        org[ORG.INN] = "123456789101"
+        val r = ORG.create {
+            it[name] = "БИС"
+            it[fullName] = "ЗАО БИС"
+            it[INN] = "123456789101"
+        }
 
         dataService.flush()
 
         val org2 = dataService.find(on(ORG)
                 .full().filter { f("inn") eq "123456789101" })!!
 
-        org2["legalAddress"] = "Москва, Лефортово, все дела"
-        org2["workTimeStart"] = 12
-        org2[ORG.timeZone] = dataService.find(on(TimeZone).where("{{name}}='NY'"))
+        ORG.update(org2)
+        {
+            it[legalAddress] = "Москва, Лефортово, все дела"
+            it[workTimeStart] = 12
+            it[timeZone] = dataService.find(on(TimeZone).where("{{name}}='NY'"))
+        }
         dataService.flush()
 
         val org3 = dataService.find(on("Organisation")
@@ -444,13 +448,15 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         val prd = find_(on(Product).full().where("{{name}} = 'QDP'"))
 
         //связываем контракт с продуктом
-        val contractProduct = ContractProduct.new()
-        contractProduct[ContractProduct.contract] = ctr
-        contractProduct[ContractProduct.product] = prd
+        val contractProduct = ContractProduct.create() {
+            it[ContractProduct.contract] = ctr
+            it[ContractProduct.product] = prd
+        }
 
-        val contractProductModule = ContractProductModule.new()
-        contractProductModule[CPM.contractProduct] = contractProduct
-        contractProductModule[CPM.module] = prd[Product.modules].first { it[Module.name] == "etl" }
+        ContractProductModule.create {
+            it[CPM.contractProduct] = contractProduct
+            it[CPM.module] = prd[Product.modules].first { it[Module.name] == "etl" }
+        }
 
         return contractProduct
     }
@@ -470,13 +476,10 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         with(Product)
         {
             if (notExists(filter { f(name) eq "QDP" })) {
-                val p1 = new()
-                p1[name] = "QDP"
+                create { it[name] = "QDP" }
             }
-
             if (notExists(filter { f(name) eq "AZK" })) {
-                val p1 = new()
-                p1[name] = "AZK"
+                create { it[name] = "AZK" }
             }
         }
         dataService.flush()
@@ -497,13 +500,15 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         with(Priority)
         {
             if (notExists(filter { f(name) eq "High" })) {
-                val s1 = new()
-                s1[name] = "High"
+                create {
+                    it[name] = "High"
+                }
             }
 
             if (notExists(filter { f(name) eq "Low" })) {
-                val s1 = new()
-                s1[name] = "Low"
+                create {
+                    it[name] = "Low"
+                }
             }
         }
         dataService.flush()
@@ -523,13 +528,11 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         with(Service)
         {
             if (notExists(filter { f(name) eq "Consulting" })) {
-                val s1 = new()
-                s1[name] = "Consulting"
+                create { it[name] = "Consulting" }
             }
 
             if (notExists(filter { f(name) eq "Management" })) {
-                val s1 = new()
-                s1[name] = "Management"
+                create { it[name] = "Management" }
             }
         }
         dataService.flush()

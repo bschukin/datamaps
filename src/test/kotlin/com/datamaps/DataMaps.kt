@@ -1,33 +1,30 @@
 package com.datamaps
 
-import com.datamaps.maps.DM
 import com.datamaps.maps.DataMap
 import com.datamaps.maps.Field
+import com.datamaps.maps.MFS
 
-class Gender : DM() {
-    companion object {
-        val entity = "JiraGender"
-        val id = Field.id()
-        val gender = Field.string("gender")
-        val isClassic = Field.boolean("isClassic")
-    }
+object Gender : MFS<Gender>() {
+    val entity = "JiraGender"
+    val id = Field.id()
+    val gender = Field.string("gender")
+    val isClassic = Field.boolean("isClassic")
 }
 typealias GDR = Gender
 
-class Worker : DM() {
-    companion object {
+object Worker : MFS<Worker>() {
         val entity = "JiraWorker"
         val id = Field.id()
         val gender = Field.reference("gender", Gender)
         val name = Field.string("name")
         val email = Field.string("email")
-    }
+
 }
 
 typealias WRKR = Worker
 
 
-class StaffUnit : DM() {
+class StaffUnit : MFS<StaffUnit>() {
     companion object {
         val entity = "JiraStaffUnit"
         val id = Field.long("ID")
@@ -39,7 +36,7 @@ class StaffUnit : DM() {
 
 typealias SU = StaffUnit
 
-class Department : DM() {
+class Department : MFS<Department>() {
     companion object {
         val entity = "JiraDepartment"
         val id = Field.id()
@@ -47,7 +44,7 @@ class Department : DM() {
         val fullName = Field.string("fullName")
         val parent = Field.reference("parent", Department)
         val childs = Field.list("childs", Department)
-        fun new()= DataMap(Department)
+        fun new() = DataMap(Department)
     }
 }
 typealias DTP = Department
@@ -61,16 +58,16 @@ typealias DTP = Department
     }
 }*/
 
-object Task : DM() {
+object Task : MFS<Task>() {
 
-        val entity = "JiraTask"
-        val name = Field.string("name")
-        val checks = Field.list("jiraChecklists", Check)
+    val entity = "JiraTask"
+    val name = Field.string("name")
+    val checks = Field.list("jiraChecklists", Check)
 }
 
 typealias TSK = Task
 
-class Check : DM() {
+class Check : MFS<Check>() {
     companion object {
         val entity = "JiraChecklist"
         val id = Field.id()

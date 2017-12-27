@@ -3,18 +3,66 @@ package com.datamaps.maps
 import java.util.*
 import kotlin.concurrent.getOrSet
 
-////ЭТО ФАЙЛ для всего что имеет отношение к фиелдсетам
-//заготовка для фиелдсетов. зачем она нужна - не очень понятно.
+////ЭТО ФАЙЛ для всего что имеет отношение к фиелдсетам (маппингам)
+
+/*Базовый класс маппингов (фиелдсетов). Чтобы не таскать женерики (см. MappingFieldSet)*/
+//FieldSet - потому что маппинг описывается пользователем.
+//DataMapping -
 open class FieldSet {
 
 }
 
-typealias DM = FieldSet
+open class MappingFieldSet<T: FieldSet>: FieldSet() {
+
+    /**
+     * Создать новый инстанс мапы для даннного фиелдсета и заполнить поля
+     */
+    fun create(): DataMap {
+        val c =  DataMap(this)
+        return c
+    }
+
+    /**
+     * Создать новый инстанс мапы для даннного фиелдсета и заполнить поля
+     */
+    fun create(body: T.(DataMap) -> Unit): DataMap {
+        val c =  DataMap(this)
+        body(this as T, c)
+        return c
+    }
+
+    /**
+     * Обновить данный инстанс мапы для даннного фиелдсета и заполнить поля
+     */
+    fun update(dataMap: DataMap, body: T.(DataMap) -> Unit): DataMap {
+        body(this as T, dataMap)
+        return dataMap
+    }
+
+    /***
+     * Создать проекцию на
+     */
+    fun on() = on(this)
+
+    /**
+     * Создать проекцию с фильтром
+     */
+    fun filter(e: (m: Unit) -> exp) = on(this).filter(e)
+
+
+    /**создать процекцию с where выражнием
+     *
+     */
+    fun where(w: String) = on(this).where(w)
+
+
+
+}
+typealias MFS<T> = MappingFieldSet<T>
+
 
 //Фиелдсеты строятся на основе данного филда
 data class Field<T, L>(private val _name: String, val t: T, val value: L) {
-
-
 
     companion object {
 

@@ -1,9 +1,10 @@
 package com.datamaps
 
-import com.datamaps.maps.*
+import com.datamaps.maps.Field
+import com.datamaps.maps.MFS
 
 
-object BftSubdivision : DM() {
+object BftSubdivision : MFS<BftSubdivision>() {
     val entity = "BftSubdivision"
     val table = "BftSubdivision"
 
@@ -11,19 +12,16 @@ object BftSubdivision : DM() {
     val name = Field.string("name")
 }
 
-object ContractType : DM() {
+object ContractType : MFS<ContractType>() {
     val entity = "ContractType"
     val table = "ContractType"
     val name = Field.string("name")
 }
 
-object Contract : DM() {
+object Contract : MFS<Contract>() {
     val entity = "Contract"
     val table = "Contract"
 
-    fun new() = DataMap(Contract)
-    fun on() = on(Contract)
-    fun filter(e: (m: Unit) -> exp) = on(Contract).filter(e)
 
     val id = Field.long("id")
     val number = Field.string("number")
@@ -43,7 +41,7 @@ object Contract : DM() {
 
 typealias CTR = Contract
 
-object ContractOrg : DM() {
+object ContractOrg : MFS<ContractOrg>() {
     val entity = "ContractOrg"
     val table = "ContractOrg"
     val id = Field.long("id")
@@ -52,13 +50,9 @@ object ContractOrg : DM() {
     val slas = Field.list("slas", SLA)
 }
 
-object ContractProduct : DM() {
+object ContractProduct : MFS<ContractProduct>() {
     val entity = "ContractProduct"
     val table = "ContractProduct"
-
-    fun new() = DataMap(ContractProduct)
-    fun on() = on(ContractProduct)
-    fun filter(e: (m: Unit) -> exp) = on(ContractProduct).filter(e)
 
     val id = Field.long("id")
     val contract = Field.reference("contract", Contract)
@@ -67,13 +61,9 @@ object ContractProduct : DM() {
     val slas = Field.list("slas", SLA)
 }
 
-object ContractProductModule : DM() {
+object ContractProductModule : MFS<ContractProductModule>() {
     val entity = "ContractProductModule"
     val table = "ContractProductModule"
-
-    fun new() = DataMap(ContractProductModule)
-    fun on() = on(ContractProductModule)
-    fun filter(e: (m: Unit) -> exp) = on(ContractProductModule).filter(e)
 
     val id = Field.long("id")
     val contractProduct = Field.reference("contractProduct", ContractProduct)
@@ -82,14 +72,9 @@ object ContractProductModule : DM() {
 
 typealias CPM = ContractProductModule
 
-object Module : DM() {
+object Module : MFS<Module>() {
     val entity = "Module"
     val table = "Module"
-
-    fun new() = DataMap(Module)
-    fun on() = on(Module)
-    fun filter(e: (m: Unit) -> exp) = on(Module).filter(e)
-
     val id = Field.long("id")
     val name = Field.string("name")
     val notActive = Field.boolean("notActive")
@@ -98,7 +83,7 @@ object Module : DM() {
 }
 
 
-object Organisation : DM() {
+object Organisation : MFS<Organisation>() {
     val entity = "Organisation"
     val table = "Organisation"
 
@@ -127,7 +112,7 @@ object Organisation : DM() {
 
 typealias ORG = Organisation
 
-object OrgUser : DM() {
+object OrgUser : MFS<OrgUser>() {
     val entity = "OrgUser"
     val table = "OrgUser"
 
@@ -142,14 +127,9 @@ object OrgUser : DM() {
 }
 
 
-object Product : DM() {
+object Product : MFS<Product>() {
     val entity = "Product"
     val table = "Product"
-
-    fun new() = DataMap(Product)
-    fun on() = on(Product)
-    fun filter(e: (m: Unit) -> exp) = on(Product).filter(e)
-    fun where(w: String) = on(Product).where(w)
 
     val id = Field.long("id")
     val name = Field.string("name")
@@ -158,40 +138,28 @@ object Product : DM() {
     val contracts = Field.list("contractproducts", ContractProduct)
 }
 
-object Priority : DM() {
+object Priority : MFS<Priority>() {
     val entity = "Priority"
     val table = "Priority"
-
-    fun new() = DataMap(Priority)
-    fun on() = on(Priority)
-    fun filter(e: (m: Unit) -> exp) = on(Priority).filter(e)
 
     val id = Field.long("id")
     val name = Field.string("name")
     val rang = Field.int("rang")
 }
 
-object Service : DM() {
+object Service : MFS<Service>() {
     val entity = "Service"
     val table = "Service"
-
-    fun new() = DataMap(Service)
-    fun on() = on(Service)
-    fun filter(e: (m: Unit) -> exp) = on(Service).filter(e)
 
     val id = Field.long("id")
     val name = Field.string("name")
     val default = Field.boolean("default")
 }
 
-
-object SLA : DM() {
+object SLA : MFS<SLA>() {
     val entity = "SLA"
     val table = "SLA"
 
-    fun new() = DataMap(SLA)
-    fun on() = on(SLA)
-    fun filter(e: (m: Unit) -> exp) = on(SLA).filter(e)
 
     val id = Field.long("id")
     val sla = Field.int("sla")
@@ -202,7 +170,7 @@ object SLA : DM() {
 }
 
 
-object TimeZone : DM() {
+object TimeZone : MFS<TimeZone>() {
     val entity = "TimeZone"
     val table = "TimeZone"
 

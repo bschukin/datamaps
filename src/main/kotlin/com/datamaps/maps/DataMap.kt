@@ -48,7 +48,7 @@ open class DataMap {
 
     constructor (name: String) : this(name, null, true)
 
-    constructor (dm: DM) : this(getEntityNameFromClass(dm), null, true)
+    constructor (dm: FieldSet) : this(getEntityNameFromClass(dm), null, true)
 
     constructor  (t: Any) : this(getEntityNameFromClass(t), null, true)
 
@@ -89,6 +89,11 @@ open class DataMap {
     }
 
     operator fun set(field: String, silent: Boolean = false, value: Any?) {
+        if (field.contains('.')) {
+            nestedSet(field, silent, value)
+            return
+        }
+
         val old = map[field]
         silentSet(field, value)
 
@@ -136,11 +141,27 @@ open class DataMap {
     }
 
     fun nested(property: String): Any? {
-        return getNestedPropertiy(this, property)
+        return getNestedProperty(this, property)
     }
 
     fun nestedl(property: String): List<DataMap> {
-        return getNestedPropertiy(this, property) as List<DataMap>
+        return getNestedProperty(this, property) as List<DataMap>
+    }
+
+    fun nestedSet(property: String, silent: Boolean = false, value: Any?) {
+        var curr = this
+        val props = property.split('.')
+
+        for (item: Int in IntRange(0, props.size - 2)) {
+            val prop = getIndexedProperty(props[item])
+            var obj = curr[prop.first]
+            if (obj is List<*> && prop.second >= 0)
+                obj = obj[prop.second]
+
+            if (obj is DataMap)
+                curr = obj
+        }
+        curr.set(props[props.size - 1], silent, value)
     }
 
     override fun toString(): String {
@@ -172,9 +193,31 @@ fun <T : Any> datamap(t: T, id: Any? = null, isNew: Boolean = false): DataMap {
     return res
 }
 
+data class CreateDmSeed<T : FieldSet>(val dm: T, val map: DataMap) {
+    fun with(body: T.(DataMap) -> Unit): DataMap {
+        body(dm, map)
+        return map
+    }
+}
+
+data class UpdateDmSeed<T : FieldSet>(val dm: T, val map: DataMap) {
+    fun with(body: T.(DataMap) -> Unit): DataMap {
+        body(dm, map)
+        return map
+    }
+}
+
+fun <T : FieldSet> create(dm: T): CreateDmSeed<T> {
+    return CreateDmSeed(dm, DataMap(dm))
+}
+fun <T : FieldSet> update(dm: T, dataMap: DataMap): UpdateDmSeed<T> {
+    return UpdateDmSeed(dm, dataMap)
+}
+
+
 open class DMSerializer : JsonSerializer<DataMap> {
 
-    private val map  = mutableMapOf<DataMap, DataMap>()
+    private val map = mutableMapOf<DataMap, DataMap>()
 
     override fun serialize(obj: DataMap, foo: Type, context: JsonSerializationContext): JsonElement {
 
@@ -203,7 +246,7 @@ open class DMSerializer : JsonSerializer<DataMap> {
                             DataMap(u.entity, u.id!!, mapOf("isBackRef" to true)))
                     )
                 else {
-                    map.put(u,u)
+                    map.put(u, u)
                     jsonObject.add(t, context.serialize(u))
                 }
             }
@@ -358,12 +401,12 @@ internal class DataList(val list: ArrayList<DataMap>,
 
 }
 
-fun getNestedPropertiy(dm: DataMap, nested: String): Any? {
+fun getNestedProperty(dm: DataMap, nested: String): Any? {
     var curr = dm
-    val list = nested.split('.')
+    val props = nested.split('.')
 
-    for (item: Int in IntRange(0, list.size - 2)) {
-        val prop = getIndexedProperty(list[item])
+    for (item: Int in IntRange(0, props.size - 2)) {
+        val prop = getIndexedProperty(props[item])
         var obj = curr[prop.first]
         if (obj is List<*> && prop.second >= 0)
             obj = obj[prop.second]
@@ -371,7 +414,7 @@ fun getNestedPropertiy(dm: DataMap, nested: String): Any? {
         if (obj is DataMap)
             curr = obj
     }
-    return curr[list[list.size - 1]]
+    return curr[props[props.size - 1]]
 }
 
 private fun getIndexedProperty(prop: String): Pair<String, Int> {
