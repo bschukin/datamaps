@@ -1,6 +1,5 @@
 package com.datamaps.tools
 
-import com.datamaps.ContractType
 import com.datamaps.mappings.DataField
 import com.datamaps.mappings.DataMappingsService
 import com.datamaps.maps.DataMap
@@ -17,27 +16,19 @@ class FieldSetGenerator {
 
 
     fun generateFieldSet(tableName: String): String {
-        println(ContractType.name)
-
 
         val name = dataMappingsService.getEntityDefaultNameByTableName(tableName)
         val mapping = dataMappingsService.getDataMapping(name)
         var s = """
-                class ${name} : DM() {
-                    companion object {
+                object ${name} : MFS<${name}>() {
                         val entity = "${name}"
                         val table = "${tableName}"
-
-                        fun new() = DataMap(${name})
-                        fun on() = on(${name})
-                        fun filter(e: (m: Unit) -> exp) = on(${name}).filter(e)
             """
         s+="\r\n"
         mapping.fields.values.forEach { it->
             s+= "                        ${buildField(it)}\r\n"
         }
         s += """
-                    }
                 }
             """
         return s
