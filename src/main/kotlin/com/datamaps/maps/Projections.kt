@@ -18,9 +18,9 @@ import kotlin.reflect.KClass
  *
  * JiraWorker
  * {
- *    {{"scalars"}},
- *        "gender" {
- *              fields = "gender"
+ *        name,
+ *        gender {
+ *             gender
  *        }
  * }
  *
@@ -162,6 +162,11 @@ open class DataProjection {
 
     fun with(slice: () -> DataProjection): DataProjection {
         val sl = slice()
+        fields[sl.parentField] = sl
+        return this
+    }
+
+    fun with(sl: DataProjection): DataProjection {
         fields[sl.parentField] = sl
         return this
     }

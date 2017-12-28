@@ -33,7 +33,7 @@ class DataServiceAsyncTests : BaseSpringTests() {
         dataService
                 .async()
                 .findAll(on(StaffUnit)
-                        .with(+StaffUnit.gender().gender, +StaffUnit.worker().name)
+                        .with(!StaffUnit.gender().gender, !StaffUnit.worker().name)
                 )
                 .doWithResult { list ->
                     list.forEach {

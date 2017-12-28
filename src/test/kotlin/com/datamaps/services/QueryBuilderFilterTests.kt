@@ -140,6 +140,53 @@ class QueryBuilderFilterTests : BaseSpringTests() {
     }
 
     @Test(invocationCount = 1)
+    fun testQueryFilter01_FSApi() {
+
+        var dp = StaffUnit
+                .dice {
+                    scalars().withRefs()
+                    +name
+                    SU.worker {
+                        scalars().withRefs()
+                    }
+                }
+                .filter {
+                    -SU.worker().gender().id eq -SU.gender().id
+                }
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        println(q.qr.where)
+        assertBodyEquals(q.qr.where, "jira_gender1.id=jira_gender2.id")
+
+        //часть вторая
+        dp = StaffUnit.dice {
+            alias("jsu")
+            scalars().withRefs()
+            +name
+            worker {
+                scalars().withRefs()
+            }
+            +gender
+        }.filter {
+            f(SU.worker().gender().id) eq f(SU.gender().id) and
+                    (f(SU.name) eq value("qqq"))
+        }
+
+        q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        println(q.qr.where)
+        assertBodyEquals(q.qr.where, "(jira_gender1.id=jira_gender2.id and jsu.name=:param0)")
+
+        //ради интереса убедимся, что sql-запрос пройдет на настоящей базе
+        namedParameterJdbcTemplate.query(q.sql, q.qr.params, { resultSet, i ->
+            run {
+                println("${resultSet.getInt("ID")}")
+            }
+        })
+    }
+
+    @Test(invocationCount = 1)
             //тоже самое но на QOL
     fun testQueryFilter01_oql() {
         var dp = on(Gender)
@@ -193,6 +240,28 @@ class QueryBuilderFilterTests : BaseSpringTests() {
                 println("${resultSet.getInt("ID")}")
             }
         })
+    }
+
+    @Test(invocationCount = 1)
+            //тоже самое но на QOL
+    fun testQueryFilter01_oql_FSAPi() {
+
+        var dp = StaffUnit
+                .dice {
+                    scalars().withRefs()
+                    +name
+                    worker {
+                        scalars().withRefs()
+                    }
+                }
+                .where("{{worker.gender.id}} = {{gender.id}}")
+
+        var q = queryBuilder.createQueryByDataProjection(dp)
+        println(q.sql)
+        println(q.qr.where)
+        assertBodyEquals(q.qr.where, "jira_gender1.id=jira_gender2.id")
+
+
     }
 
 

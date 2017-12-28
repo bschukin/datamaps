@@ -1,7 +1,6 @@
 package com.datamaps.marp
 
 import com.datamaps.BaseSpringTests
-import com.datamaps.DTP
 import com.datamaps.Department
 import com.datamaps.Product
 import com.datamaps.maps.f
@@ -21,31 +20,28 @@ class DataMarp3 : BaseSpringTests() {
 
         //пример запроса
         val datamap =
-
-                with(Department)
-                {
-                    dataService.find(on(entity)
+                    dataService.find(on(Department.entity)
                             .with {
-                                slice(parent)
-                                        .field(name)
-                                        .field(fullName)
+                                slice(Department.parent)
+                                        .field(Department.name)
+                                        .field(Department.fullName)
                             }
                             .with {
-                                slice(childs)
-                                        .field(name)
+                                slice(Department.childs)
+                                        .field(Department.name)
                                         .with {
-                                            slice(parent)
-                                                    .field(name)
+                                            slice(Department.parent)
+                                                    .field(Department.name)
                                         }
                             }
                             .filter {
-                                f(childs().fullName) eq f(parent().name)
+                                f(Department.childs().fullName) eq f(Department.parent().name)
                             })!!
-                }
+
 
         //пробивает по проперте "parent.fullname" новое свойство
-        datamap[DTP.name] = "яволь"
-        datamap[DTP.parent().fullName] = "zer gut"
+        datamap[Department.name] = "яволь"
+        datamap[Department.parent().fullName] = "zer gut"
 
     }
 
@@ -53,7 +49,7 @@ class DataMarp3 : BaseSpringTests() {
     @Test(invocationCount = 1)
     fun basicDataMapsUses2() {
 
-        val dtp = Department.new()
+        val dtp = Department.create()
 
         with(Department)
         {
@@ -79,7 +75,7 @@ class DataMarp3 : BaseSpringTests() {
     //показывается использование функций фиелдсета - new и filter
     fun basicFieldSetsFunctions() {
 
-        if (notExists(Product.filter { f(Product.name) eq "QDP" })) { //создание фильтра и проекции  или Product.filter { f(name) eq "QDP" }
+        if (notExists(Product.filter { f(name) eq "QDP" })) { //создание фильтра и проекции  или Product.filter { f(name) eq "QDP" }
             val p1 = Product.create {
                 //создание новой мапы. или Product.new()
                 it[name] = "QDP"

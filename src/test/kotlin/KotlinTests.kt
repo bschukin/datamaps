@@ -1,9 +1,7 @@
 
-import com.datamaps.maps.DataProjection
-import com.datamaps.maps.f
+import com.datamaps.SLA
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
-import org.apache.commons.lang.text.StrSubstitutor
 import org.testng.annotations.Test
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
@@ -13,116 +11,105 @@ import kotlin.reflect.KClass
  */
 class KotlinTests {
 
-    @Test
-    fun workWithMaps() {
 
-        val map = mutableMapOf<String, String>()
-        map["xxx"] = "zzz";
+    @Test(invocationCount = 0)
+    fun testApi() {
 
-        println(map["xxx"])
 
-        val myJson = """
-                  user(id: 1) {
-                    n
-                    age
-                    friends {
-                      n
-                    }
-                  }
+
+        //вариант с перегрузкой оператора invoke
+        SLA.dice {
+            service()
+            priority()
+            contractProduct()
+            slice(contractOrg) {
+                slice(organisation) {
+                    name()
+                    fullName()
+                    FIAS()
                 }
-        """.trimIndent()
-
-        println(myJson)
-
-    }
-
-    @Test
-    fun testInfixFunctions() {
-
-        //val e1 =
-
-        val dp = DataProjection("dasd")
-                .filter({
-                    val e = f("hw") gt 10 or ((
-                            f("xxx")
-                            ))
-                    e and f("bnn")
-                })
-    }
-
-    @Test
-    fun testStrSubstitor() {
-
-
-
-        var myStr = "hello {{world}}"
-        val map = mutableMapOf<String, String>()
-        map.put("world", "hell")
-        var s = StrSubstitutor(map, "{{", "}}")
-
-
-
-        println(s.replace(myStr))
-
-    }
-
-    @Test
-    fun testCorutines() {
-
-        val deferred = async {
-            workload(1000)
-        }
-        deferred.invokeOnCompletion {
-            println( deferred.getCompleted())
+                slice(contract) {
+                    conclusionDate()
+                    finishDate()
+                }
+            }
         }
 
+        //вариант с перегрузкой оператора unaryMinus
+        SLA.dice {
+            +service
+            +priority
+            contractOrg {
+                full()
+                organisation {
+                    +name
+                    +fullName
+                    +FIAS
+                }
+                contract {
+                    +conclusionDate
+                    +finishDate
+                    organisation {
+                        +this.contracts
+                    }
+                }
+            }
+        }
 
-        Thread.sleep(2000) // wait for 2 seconds
-
-
-    }
-
-    suspend fun workload(n: Int): Int {
-        delay(1000)
-        println(n)
-        return 6666
-    }
-
-    var someVar= 0
-    @Test
-    fun testKolinReflection() {
-
-        voidd(A::b)
-        voidd(A::z)
-        void(A::class)
-    }
-
-    private fun void(kClass: KClass<*>) {
-
-    }
-
-
-    public class DProjection(kClass: KClass<*>)
-    {
-
-    }
-
-    fun voidd(objectt: KCallable<*>)
-    {
-        println(objectt.name)
-    }
-
-
-    class A
-    {
-        var b:B? = null
-        var z:B? = null
-    }
-
-    class B {
-        var name2 = ""
     }
 }
+
+
+@Test
+fun testCorutines() {
+
+    val deferred = async {
+        workload(1000)
+    }
+    deferred.invokeOnCompletion {
+        println(deferred.getCompleted())
+    }
+
+
+    Thread.sleep(2000) // wait for 2 seconds
+
+
+}
+
+suspend fun workload(n: Int): Int {
+    delay(1000)
+    println(n)
+    return 6666
+}
+
+var someVar = 0
+@Test
+fun testKolinReflection() {
+
+    voidd(A::b)
+    voidd(A::z)
+    void(A::class)
+}
+
+private fun void(kClass: KClass<*>) {
+
+}
+
+
+fun voidd(objectt: KCallable<*>) {
+    println(objectt.name)
+}
+
+
+class A {
+    var b: B? = null
+    var z: B? = null
+}
+
+class B {
+    var name2 = ""
+}
+
 
 
 

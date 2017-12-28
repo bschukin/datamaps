@@ -50,8 +50,10 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         return dataService.find_(dp)
     }
 
+
+    //тест на создание SLA и его поиск и выдачу
+    //пример построен на использовании перечисления вложенных полей для построения проекции
     @Test
-            //тест на создание SLA и его поиск и выдачу
     fun testSLA1() {
 
         insertSLA()
@@ -60,11 +62,11 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         //списком:  организация, контракт, продукт, услуга, SLA
         //способ 1: от организации
         val res = dataService.findAll(on(ORG)
-                .with(+ORG.contracts().contract().number,
-                        +ORG.contracts().contract().products().product().name,
-                        +ORG.contracts().contract().products().slas().service().name,
-                        +ORG.contracts().contract().products().slas().sla,
-                        +ORG.name)
+                .with(!ORG.contracts().contract().number,
+                        !ORG.contracts().contract().products().product().name,
+                        !ORG.contracts().contract().products().slas().service().name,
+                        !ORG.contracts().contract().products().slas().sla,
+                        !ORG.name)
                 .filter { -ORG.name eq "ЗАО БИС" }
         )
 
@@ -88,19 +90,21 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         //1) по организации - показать все имеющиеся SLA
         //списком:  организация, контракт, продукт, услуга, SLA
         //способ 1: от организации
-        val res = dataService.findAll(on(ORG).full()
-                .with {
-                    slice(ORG.contracts)
-                            .with {
-                                slice(ContractOrg.contract)
-                                        .fields(Contract.number)
-                                        .with {
-                                            slice(Contract.products).full()
-                                                    .with { slice(ContractProduct.slas).withRefs() }
-                                        }
+        val res = dataService.findAll(
+                ORG.dice {
+                    full()
+                    contracts {
+                        contract {
+                            +number
+                            products {
+                                full()
+                                slas {
+                                    withRefs()
+                                }
                             }
-                }
-                .where("{{name}} = 'ЗАО БИС'")
+                        }
+                    }
+                }.where("{{name}} = 'ЗАО БИС'")
         )
 
 
@@ -115,24 +119,25 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         Assert.assertEquals("ЗАО БИС | 666| QDP| Consulting| 600", s.trim())
 
         //второй вариант: от SLA
-        val res2 = dataService
-                .findAll(on(SLA).full()
-                        .with {
-                            slice(SLA.contractProduct)
-                                    .with {
-                                        slice(ContractProduct.product)
-                                                .field("name")
-                                    }
+        val res2 = dataService.findAll(
+                SLA.dice {
+                    scalars()
+                    contractProduct {
+                        product {
+                            +name
                         }
-                        .with {
-                            slice(SLA.contractOrg).with {
-                                slice(ContractOrg.organisation).field(ORG.name)
-                            }
+                    }
+                    contractOrg {
+                        organisation {
+                            +name
                         }
-                        .where("{{contractOrg.organisation.name}} = 'ЗАО БИС'")
-                )
+                    }
+                    filter {
+                        -contractOrg().organisation().name eq "ЗАО БИС"
+                    }
+                }
+        )
 
-        println(dataService.toJson(res2[0]))
         val s2 = StringBuilder()
         res2.forEach {
             s2.append("${it[SLA.contractOrg().organisation().name]}  " +
@@ -189,14 +194,16 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
 
     fun insertBftSubdivions() {
 
-        if (dataService.find(on(BftSubdivision).where("{{name}} = 'DVP' ")) == null) {
-            val tz = DataMap(BftSubdivision)
-            tz[BftSubdivision.name] = "DVP" //департамент выскотехологичного производства
+        if (dataService.find(BftSubdivision.filter { -name eq "DVP" }) == null) {
+            BftSubdivision.create {
+                it[name] = "DVP" //департамент выскотехологичного производства
+            }
         }
 
-        if (dataService.find(on(BftSubdivision).where("{{name}} = 'DE' ")) == null) {
-            val tz2 = DataMap(BftSubdivision)
-            tz2[BftSubdivision.name] = "DE"//департамент эксплуатации
+        if (dataService.find(BftSubdivision.filter { -name eq "DE" }) == null) {
+            BftSubdivision.create {
+                it[name] = "DE" //департамент выскотехологичного производства
+            }
         }
 
         dataService.flush()
@@ -216,7 +223,7 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
 
     fun insertModules() {
 
-        val p = find_(on(Product).filter { f(Product.name) eq "QDP" })
+        val p = find_(Product.filter { f(name) eq "QDP" })
 
         if (p[Product.modules].find { it[Module.name] == "bpm" } == null) {
             Module.create {
@@ -313,7 +320,7 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         val dm = dataService.getDataMapping("Organisation")
         dm.print()
 
-        val r = ORG.create {
+        ORG.create {
             it[name] = "БИС"
             it[fullName] = "ЗАО БИС"
             it[INN] = "123456789101"
@@ -352,6 +359,7 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
     }
 
     @Test
+            //todo
     fun testContractOrg() {
         insertContracts()
         insertOrg()
@@ -359,17 +367,16 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
 
         //пример сохранения связи через сохранение самой перевязочной сущности
         //кайфон
-        val ctr = find_(on(Contract)
-                .full()
-                .with {
-                    slice(Contract.orgs).withRefs()
-                            .with {
-                                slice(ContractOrg.organisation)
-                                        .fields(ORG.name, ORG.INN)
-                            }
+        val ctr = find_(Contract.dice {
+            orgs {
+                organisation {
+                    +name
+                    +INN
                 }
-                .where("{{number}} = '666'")
-        )
+            }
+            filter { -number eq "666" }
+        })
+
         assertEquals(ctr[CTR.orgs].size, 1)
         println(ctr)
 
@@ -389,8 +396,8 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
     }
 
     fun insertContractOrg(): DataMap {
-        val ctr = find_(on(Contract).where("{{number}} = '666'"))
-        val org = find_(on(ORG).where("{{name}} = 'ЗАО БИС'"))
+        val ctr = find_(Contract.where("{{number}} = '666'"))
+        val org = find_(ORG.where("{{name}} = 'ЗАО БИС'"))
 
         val dm1 = DataMap(ContractOrg)
         dm1[ContractOrg.contract] = ctr
@@ -403,9 +410,10 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
     fun insertContracts() {
         insertBftSubdivions()
 
-        val tz = DataMap(Contract)
-        tz[CTR.number] = "666"
-        tz[CTR.bftSubdivision] = find_(on(BftSubdivision).where("{{name}} = 'DE'"))
+        Contract.create {
+            it[number] = "666"
+            it[bftSubdivision] = find_(BftSubdivision.filter { -name eq "DE" })
+        }
 
         dataService.flush()
     }
@@ -420,16 +428,18 @@ class ServiceDeskDbTests : AbstractTransactionalTestNGSpringContextTests() {
         dataService.flush()
 
         //достаем Contract'ы с купленными продуктами и модулями
-        val ctr = find_(on(Contract)
-                .full()
-                .with {
-                    slice(Contract.products).full()
-                            .with {
-                                slice(ContractProduct.modules)
-                                        .full()
-                            }
+        val ctr = find_(Contract
+                .dice {
+                    products {
+                        full()
+                        modules {
+                            full()
+                        }
+                    }
+                    filter {
+                        -number eq "666"
+                    }
                 }
-                .where("{{number}} = '666'")
         )
 
         println(ctr)

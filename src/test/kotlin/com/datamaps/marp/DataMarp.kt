@@ -147,6 +147,25 @@ class DataMarp : BaseSpringTests() {
                 }
     }
 
+    @Test
+    fun basicProjectionSlices02() {
+        //второй вариант: от SLA
+       /* val res2 = dataService
+                .findAll(
+                        SLA.on {
+
+                            slice(contractProduct)
+                            {
+                                slice()
+                            }
+                            *//*slice(SLA.contractOrg).with {
+                                slice(ContractOrg.organisation).field(ORG.name)
+                            }*//*
+                        }
+                                .where("{{contractOrg.organisation.name}} = 'ЗАО БИС'")
+                )*/
+    }
+
 
     /**
      * Пример "плоского" API проекций. Просто перечисляются поля через точку.
@@ -156,11 +175,11 @@ class DataMarp : BaseSpringTests() {
     fun flatProjectionsExamples() {
 
         var dp = on(StaffUnit).with(
-                +StaffUnit.name,
-                +StaffUnit.worker().name,
-                +StaffUnit.worker().email,
-                +StaffUnit.gender().gender
-        ).filter(-StaffUnit.gender().gender eq "M")
+                !StaffUnit.name,
+                !StaffUnit.worker().name,
+                !StaffUnit.worker().email,
+                !StaffUnit.gender().gender
+        ).filter(f(StaffUnit.gender().gender) eq "M")
     }
 
 
@@ -176,11 +195,11 @@ class DataMarp : BaseSpringTests() {
         //списком:  организация, контракт, продукт, услуга, SLA
         //способ 1: от организации
         val res = dataService.findAll(on(Organisation)
-                .with(+ORG.contracts().contract().number,
-                        +ORG.contracts().contract().products().product().name,
-                        +ORG.contracts().contract().products().slas().service().name,
-                        +ORG.contracts().contract().products().slas().sla,
-                        +ORG.name)
+                .with(!ORG.contracts().contract().number,
+                        !ORG.contracts().contract().products().product().name,
+                        !ORG.contracts().contract().products().slas().service().name,
+                        !ORG.contracts().contract().products().slas().sla,
+                        !ORG.name)
                 .filter { -ORG.name eq "ЗАО БИС" }
         )
 

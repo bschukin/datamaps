@@ -1,5 +1,6 @@
 package com.datamaps.maps
 
+import com.datamaps.general.checkNIS
 import java.util.*
 import kotlin.concurrent.getOrSet
 
@@ -12,13 +13,13 @@ open class FieldSet {
 
 }
 
-open class MappingFieldSet<T: FieldSet>: FieldSet() {
+open class MappingFieldSet<T : FieldSet> : FieldSet() {
 
     /**
      * Создать новый инстанс мапы для даннного фиелдсета и заполнить поля
      */
     fun create(): DataMap {
-        val c =  DataMap(this)
+        val c = DataMap(this)
         return c
     }
 
@@ -26,7 +27,7 @@ open class MappingFieldSet<T: FieldSet>: FieldSet() {
      * Создать новый инстанс мапы для даннного фиелдсета и заполнить поля
      */
     fun create(body: T.(DataMap) -> Unit): DataMap {
-        val c =  DataMap(this)
+        val c = DataMap(this)
         body(this as T, c)
         return c
     }
@@ -44,11 +45,6 @@ open class MappingFieldSet<T: FieldSet>: FieldSet() {
      */
     fun on() = on(this)
 
-    /**
-     * Создать проекцию с фильтром
-     */
-    fun filter(e: (m: Unit) -> exp) = on(this).filter(e)
-
 
     /**создать процекцию с where выражнием
      *
@@ -56,8 +52,105 @@ open class MappingFieldSet<T: FieldSet>: FieldSet() {
     fun where(w: String) = on(this).where(w)
 
 
+    fun onlyId(): DataProjection {
+        return ProjectionBuilder.currProjection().onlyId()
+    }
 
+    fun withId(id: Any?): DataProjection {
+        return ProjectionBuilder.currProjection().id(id)
+    }
+
+    fun full(): DataProjection {
+        return ProjectionBuilder.currProjection().full()
+    }
+
+    fun alias(alias: String): DataProjection {
+        return ProjectionBuilder.currProjection().alias(alias)
+    }
+
+    fun scalars(): DataProjection {
+        return ProjectionBuilder.currProjection().scalars()
+    }
+
+    fun withRefs(): DataProjection {
+        return ProjectionBuilder.currProjection().withRefs()
+    }
+
+    /**
+     * Создать проекцию с фильтром
+     */
+    /*fun filter(e: (m: Unit) -> exp): DataProjection  {
+        return when (ProjectionBuilder.hasProjectionUnderConstruction()) {
+            true -> ProjectionBuilder.currProjection().filter(e)
+            false -> on(this).filter(e)
+        }
+    }*/
+
+    fun filter(builder: T.() -> exp): DataProjection {
+        return when (ProjectionBuilder.hasProjectionUnderConstruction()) {
+            true -> ProjectionBuilder.currProjection().filter(builder(this as T))
+            false -> on(this).filter(builder(this as T))
+        }
+    }
+
+    fun dice(builder: T.() -> Unit = {}): DataProjection {
+        try {
+            val dp = on(this)
+            ProjectionBuilder.createBuilder(dp)
+            builder(this as T)
+            ProjectionBuilder.destroy()
+            return dp
+        } finally {
+            ProjectionBuilder.destroy()
+        }
+    }
+
+    fun <T1> slice(t: Field<T1, *>, builder: T1.() -> Unit = {}) {
+        ProjectionBuilder.pushSlice(Slice(t.n))
+        builder(t.t)
+        val sl = ProjectionBuilder.popSlice()
+        ProjectionBuilder.currProjection().with(sl)
+    }
+
+    class ProjectionBuilder {
+
+        private val stack: Stack<DataProjection> = Stack()
+
+        companion object {
+            private val context = ThreadLocal<ProjectionBuilder>()
+
+            fun createBuilder(projection: DataProjection) {
+                checkNIS(context.get() == null)
+                val builder = ProjectionBuilder()
+                context.set(builder)
+                builder.stack.push(projection)
+            }
+
+            fun destroy() {
+                context.remove()
+            }
+
+            fun pushSlice(projection: DataProjection) {
+                checkNIS(context.get() != null)
+                context.get().stack.push(projection)
+            }
+
+            fun popSlice(): DataProjection {
+                checkNIS(context.get() != null)
+                return context.get().stack.pop()
+            }
+
+            fun hasProjectionUnderConstruction(): Boolean {
+                return context.get()!=null
+            }
+
+            fun currProjection(): DataProjection {
+                return context.get().stack.peek()
+            }
+        }
+    }
 }
+
 typealias MFS<T> = MappingFieldSet<T>
 
 
@@ -122,9 +215,22 @@ data class Field<T, L>(private val _name: String, val t: T, val value: L) {
             return res
         }
 
-    operator fun unaryPlus(): String = n
+    operator fun unaryPlus(): Field<T, L> {
+        MappingFieldSet.ProjectionBuilder.currProjection().field(this)
+        return this
+    }
 
     operator fun unaryMinus(): f = f(this)
+
+    operator fun not(): String = n
+
+    operator fun invoke(builder: T.() -> Unit = {}) {
+        MappingFieldSet.ProjectionBuilder.pushSlice(Slice(this.n))
+        builder(this.t)
+        val sl = MappingFieldSet.ProjectionBuilder.popSlice()
+        MappingFieldSet.ProjectionBuilder.currProjection().with(sl)
+    }
+
 
     val nl: List<String>
         get() {
@@ -142,10 +248,12 @@ data class Field<T, L>(private val _name: String, val t: T, val value: L) {
     }
 
     override fun toString(): String {
-        val tt = if(t is Any) t else Object()
+        val tt = if (t is Any) t else Object()
         return "Field('$_name', type='${tt::class.java.simpleName}')"
     }
 
 
 }
+
+
 

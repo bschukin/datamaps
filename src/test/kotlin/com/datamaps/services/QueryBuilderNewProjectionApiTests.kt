@@ -1,25 +1,20 @@
 package com.datamaps.services
 
-import com.datamaps.BaseSpringTests
-import com.datamaps.StaffUnit
-import com.datamaps.assertBodyEquals
-import com.datamaps.maps.DataProjection
+import com.datamaps.*
 import com.datamaps.maps.on
-import com.datamaps.maps.projection
-import com.datamaps.maps.slice
 import org.testng.Assert.assertEquals
 import org.testng.annotations.Test
 
 /**
  * Created by Щукин on 03.11.2017.
  */
-class QueryBuilderTests : BaseSpringTests() {
+class QueryBuilderNewProjectionApiTests : BaseSpringTests() {
 
 
     @Test
             //простейшие тесты на квери: на лысую таблицу (без вложенных сущностей)
     fun testBuildQuery01() {
-        val dp = on("JiraGender")
+        val dp = Gender.dice { }
         val q = queryBuilder.createQueryByDataProjection(dp)
 
         println(q.sql)
@@ -38,12 +33,14 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test(invocationCount = 1)//простейшие тесты на квери: на таблицу c вложенными сущностями M-1
     fun testBuildQuery02() {
-        var dp = on("JiraWorker")
-                .scalars().withRefs()
-                .field("name")
-                .with {
-                    slice("gender")
-                            .field("gender")
+
+        var dp = Worker
+                .dice {
+                    scalars().withRefs()
+                    +name
+                    gender {
+                        +gender
+                    }
                 }
 
         //1 тест на  структуру по которой построится запрос
@@ -70,11 +67,12 @@ class QueryBuilderTests : BaseSpringTests() {
         })
 
         //тоже самое но со слайсами
-        dp = projection("JiraWorker")
-                .scalars().withRefs()
-                .with {
-                    slice("gender")
-                            .field("gender")
+        dp = Worker
+                .dice {
+                    scalars().withRefs()
+                    gender {
+                        +gender
+                    }
                 }
 
         //1 тест на  структуру по которой построится запрос
@@ -91,11 +89,12 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test(invocationCount = 1)//обрежем jiraWorker поосновательней
     fun testBuildQuery03() {
-        var dp = DataProjection("JiraWorker")
-                .field("name")
-                .with {
-                    slice("gender")
-                            .field("gender")
+        var dp = Worker
+                .dice {
+                    +name
+                    gender {
+                        +gender
+                    }
                 }
 
         //1 тест на  структуру по которой построится запрос
@@ -105,12 +104,13 @@ class QueryBuilderTests : BaseSpringTests() {
         assertEquals(qr.selectColumns.size, 4)
 
         //тоже самое но со слайсами
-        dp = projection("JiraWorker")
-                .field("name")
-                .with {
-                    slice("gender")
-                            .field("gender")
-                }
+        dp = Worker.dice {
+            +name
+            gender {
+                +gender
+            }
+        }
+
 
         //1 тест на  структуру по которой построится запрос
         qr = QueryBuildContext()
@@ -123,14 +123,15 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test(invocationCount = 1)//собираем инфо-п
     fun testBuildQuery05() {
-        var dp = DataProjection("JiraStaffUnit")
-                .scalars().withRefs()
-                .field("name")
-                .with {
-                    slice("worker")
-                            .scalars().withRefs()
+        var dp = StaffUnit
+                .dice {
+                    scalars().withRefs()
+                    +name
+                    worker {
+                        scalars().withRefs()
+                    }
+                    +gender
                 }
-                .field("gender")
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
@@ -162,11 +163,12 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test(invocationCount = 1)//JiraDepartment: структура-дерево
     fun testBuildQuery04() {
-        var dp = DataProjection("JiraDepartment")
-                .field("name")
-                .with {
-                    slice("parent")
-                            .field("name")
+        var dp = Department
+                .dice {
+                    +name
+                    parent {
+                        name
+                    }
                 }
 
         //1 тест на  структуру по которой построится запрос
@@ -193,12 +195,14 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test(invocationCount = 1)//Коллеция 1-N
     fun testBuildQuery06() {
-        var dp = DataProjection("JiraProject")
-                .scalars().withRefs()
-                .with {
-                    slice("JiraTasks")
-                            .scalars().withRefs()
+        var dp = Project
+                .dice {
+                    scalars().withRefs()
+                    tasks {
+                        scalars().withRefs()
+                    }
                 }
+
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
         queryBuilder.buildMainQueryStructure(qr, dp)
@@ -216,11 +220,13 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test
     fun testBuildQuery07WithId() {
-        var dp = projection("JiraProject", 1)
-                .scalars().withRefs()
-                .with {
-                    slice("jiraTasks")
-                            .scalars().withRefs()
+        var dp = Project
+                .dice {
+                    withId(1L)
+                    scalars().withRefs()
+                    tasks {
+                        scalars().withRefs()
+                    }
                 }
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
@@ -240,13 +246,16 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test//Тест на использования алиасов
     fun testBuildQuery08WithAlias01() {
-        var dp = DataProjection("JiraProject", 1)
-                .scalars().withRefs()
-                .alias("JP")
-                .with {
-                    slice("jiraTasks")
-                            .scalars().withRefs()
+        var dp = Project
+                .dice {
+                    withId(1)
+                    alias("JP")
+                    scalars().withRefs()
+                    tasks {
+                        scalars().withRefs()
+                    }
                 }
+
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
         queryBuilder.buildMainQueryStructure(qr, dp)
@@ -265,14 +274,17 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test//Тест на использования алиасов
     fun testBuildQuery08WithAlias02() {
-        var dp = DataProjection("JiraProject", 1)
-                .scalars().withRefs()
-                .alias("JP")
-                .with {
-                    slice("jiraTasks")
-                            .alias("JT")
-                            .scalars().withRefs()
+        val dp = Project
+                .dice {
+                    withId(1)
+                    alias("JP")
+                    scalars().withRefs()
+                    tasks {
+                        alias("JT")
+                        scalars().withRefs()
+                    }
                 }
+
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
         queryBuilder.buildMainQueryStructure(qr, dp)
@@ -292,8 +304,11 @@ class QueryBuilderTests : BaseSpringTests() {
 
     @Test
     fun testOnlyId() {
-        var dp = projection("JiraProject", 1)
-                .onlyId()
+        val dp = Project
+                .dice {
+                    withId(1L)
+                    onlyId()
+                }
 
         //1 тест на  структуру по которой построится запрос
         val qr = QueryBuildContext()
@@ -310,16 +325,14 @@ class QueryBuilderTests : BaseSpringTests() {
     }
 
 
-
-
     @Test
     fun testProjectionWithFieldsFlatEnumerarion() {
-        var dp = on(StaffUnit).with (
+        val dp = on(StaffUnit).with(
                 !StaffUnit.name,
                 !StaffUnit.worker().name,
                 !StaffUnit.worker().email,
                 !StaffUnit.gender().gender
-                )
+        )
 
 
         //1 тест на  структуру по которой построится запрос

@@ -1,6 +1,5 @@
 package com.datamaps
 
-import com.datamaps.maps.DataMap
 import com.datamaps.maps.Field
 import com.datamaps.maps.MFS
 
@@ -24,39 +23,36 @@ object Worker : MFS<Worker>() {
 typealias WRKR = Worker
 
 
-class StaffUnit : MFS<StaffUnit>() {
-    companion object {
+object StaffUnit : MFS<StaffUnit>() {
         val entity = "JiraStaffUnit"
         val id = Field.long("ID")
         val name = Field.string("name")
         val gender = Field.reference("gender", Gender)
         val worker = Field.reference("worker", Worker)
-    }
+
+
 }
 
 typealias SU = StaffUnit
 
-class Department : MFS<Department>() {
-    companion object {
+object Department : MFS<Department>() {
         val entity = "JiraDepartment"
         val id = Field.id()
         val name = Field.string("name")
         val fullName = Field.string("fullName")
         val parent = Field.reference("parent", Department)
         val childs = Field.list("childs", Department)
-        fun new() = DataMap(Department)
-    }
+
 }
 typealias DTP = Department
 
-/*class Task : DM() {
-    companion object {
-        val entity = "JiraTask"
-        val id = Field.id()
-        val name = Field.string("name")
-        val checks = Field.list("jiraChecklists", Check)
-    }
-}*/
+
+object Project : MFS<Project>() {
+
+    val entity = "JiraProject"
+    val name = Field.string("name")
+    val tasks = Field.list("jiraTasks", Task)
+}
 
 object Task : MFS<Task>() {
 
@@ -67,11 +63,10 @@ object Task : MFS<Task>() {
 
 typealias TSK = Task
 
-class Check : MFS<Check>() {
-    companion object {
+object Check : MFS<Check>() {
         val entity = "JiraChecklist"
         val id = Field.id()
         val name = Field.string("name")
         val task = Field.reference("jiraTask", Task)
-    }
+
 }
