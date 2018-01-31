@@ -1,4 +1,4 @@
-# datamaps
+# DataMaps
 
 This is a prototype for  a lightweight ORM-framework for Kotlin.
 
