@@ -1,37 +1,14 @@
-package com.bftcom.ice.datamaps.common.maps
+package com.bftcom.ice.datamaps.misc
 
 import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.FieldSet
 import com.bftcom.ice.datamaps.MFS
 import com.bftcom.ice.datamaps.MappingFieldSet
-import com.bftcom.ice.datamaps.misc.CiMap
-import com.bftcom.ice.datamaps.misc.ciMapOf
 import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.declaredMembers
 import kotlin.reflect.jvm.isAccessible
 
-fun FieldSet.getField(property: String): Field<*, *>? {
-    val obj = this::class.objectInstance
-    val res = this::class.declaredMembers.find { it.name.equals(property, true) }
-    if (res != null)
-        return res.call(obj) as? Field<*, *>
-    return null
-}
-
-fun MappingFieldSet<*>.getReferencedFieldSet(property: String): MFS<*>? {
-    return getField(property)?.refFieldSet()
-}
-
-fun FieldSet.getAllFields(): List<Field<*, *>> {
-    val obj = this::class.objectInstance
-    return this::class.members.filterIsInstance(KProperty::class.java)
-            .map {
-                it.isAccessible = true
-                it.call(obj)
-            }
-            .filter { it is Field<*, *> }.map { it as Field<*, *> }.toList()
-}
 
 
 object FieldSetRepo {
@@ -59,10 +36,6 @@ object FieldSetRepo {
 
     fun fieldSet(entity: String): FieldSet {
         return fieldSetOrNull(entity)!!
-    }
-
-    fun findFieldSetByTableName(table: String): FieldSet? {
-        return  cache.values.filterNotNull().find { table.equals(it.table, true)  }
     }
 
     fun registerFieldSet(t: FieldSet) {

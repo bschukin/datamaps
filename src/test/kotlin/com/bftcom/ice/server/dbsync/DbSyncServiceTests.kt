@@ -1,13 +1,12 @@
-package com.bftcom.ice.datamaps.tools.dbsync
+package com.bftcom.ice.datamaps.core.dbsync
 
 import com.bftcom.ice.datamaps.dataMapToString
 import com.bftcom.ice.datamaps.misc.Date
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.server.assertEqIgnoreCase
-import com.bftcom.ice.datamaps.impl.dialects.DbDialect
-import com.bftcom.ice.datamaps.impl.util.shadow
+import com.bftcom.ice.datamaps.core.dialects.DbDialect
+import com.bftcom.ice.datamaps.core.util.shadow
 import com.bftcom.ice.IfSpringProfileActive
-import com.bftcom.ice.datamaps.tools.Sources
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ByteArrayResource

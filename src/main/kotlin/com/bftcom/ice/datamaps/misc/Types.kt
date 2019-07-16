@@ -1,7 +1,7 @@
 package com.bftcom.ice.datamaps.misc
 
 import com.bftcom.ice.datamaps.ValuedEnum
-import com.bftcom.ice.datamaps.DeltaStore
+import com.bftcom.ice.datamaps.core.delta.DeltaStore
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.text.SimpleDateFormat
@@ -73,6 +73,10 @@ open class Date : Comparable<Date> {
 
     override fun compareTo(other: Date): Int {
         return this.getDate().compareTo(other.getDate())
+    }
+
+    override fun hashCode(): Int {
+        return calendar.hashCode()
     }
 }
 

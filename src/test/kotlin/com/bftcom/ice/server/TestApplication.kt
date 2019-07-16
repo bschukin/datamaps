@@ -1,12 +1,12 @@
 package com.bftcom.ice.server
 
-import com.bftcom.ice.datamaps.impl.mappings.AsIsNameMappingsStrategy
-import com.bftcom.ice.datamaps.impl.mappings.NameMappingsStrategy
-import com.bftcom.ice.datamaps.impl.dialects.DbDialect
-import com.bftcom.ice.datamaps.impl.util.SqlStatistics
-import com.bftcom.ice.datamaps.impl.dialects.getDbDialectByConnection
-import com.bftcom.ice.datamaps.impl.util.JdbcTemplateWrapper
-import com.bftcom.ice.datamaps.impl.util.NamedJdbcTemplateWrapper
+import com.bftcom.ice.datamaps.core.mappings.AsIsNameMappingsStrategy
+import com.bftcom.ice.datamaps.core.mappings.NameMappingsStrategy
+import com.bftcom.ice.datamaps.core.dialects.DbDialect
+import com.bftcom.ice.datamaps.core.util.SqlStatistics
+import com.bftcom.ice.datamaps.core.dialects.getDbDialectByConnection
+import com.bftcom.ice.datamaps.core.util.JdbcTemplateWrapper
+import com.bftcom.ice.datamaps.core.util.NamedJdbcTemplateWrapper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean

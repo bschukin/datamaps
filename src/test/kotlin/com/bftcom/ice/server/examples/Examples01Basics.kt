@@ -2,7 +2,7 @@ package com.bftcom.ice.server.examples
 
 import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.server.*
-import com.bftcom.ice.datamaps.impl.util.printAsJson
+import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Test
 
 

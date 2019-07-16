@@ -1,9 +1,8 @@
 package com.bftcom.ice.datamaps
 
-import com.bftcom.ice.datamaps.common.maps.FieldSetRepo
-import com.bftcom.ice.datamaps.common.maps.getAllFields
-import com.bftcom.ice.datamaps.common.maps.getField
-import com.bftcom.ice.datamaps.impl.delta.JsonPath
+import com.bftcom.ice.datamaps.core.delta.DeltaStore
+import com.bftcom.ice.datamaps.core.delta.JsonPath
+import com.bftcom.ice.datamaps.misc.FieldSetRepo
 import com.bftcom.ice.datamaps.misc.CaseInsensitiveKeyMap
 import com.bftcom.ice.datamaps.misc.FieldType
 import com.bftcom.ice.datamaps.misc.caseInsMapOf

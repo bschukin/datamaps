@@ -7,10 +7,8 @@ import com.bftcom.ice.statemachine.StateMachine.findState
 import com.bftcom.ice.datamaps.misc.throwImpossible
 import com.bftcom.ice.datamaps.misc.throwNotFound
 import com.bftcom.ice.datamaps.misc.Timestamp
-import com.bftcom.ice.datamaps.impl.mappings.DataMappingsService
-import com.bftcom.ice.datamaps.impl.util.CacheClearable
-import com.bftcom.ice.datamaps.tools.ServerScriptService
-import com.bftcom.ice.datamaps.tools.Var
+import com.bftcom.ice.datamaps.core.mappings.DataMappingsService
+import com.bftcom.ice.datamaps.core.util.CacheClearable
 import com.bftcom.ice.statemachine.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -18,8 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 open class StateMachineServiceImpl(val dataService: DataService,
-                                   val dataMappingService: DataMappingsService,
-                                   val serverScriptService: ServerScriptService
+                                   val dataMappingService: DataMappingsService
 ) : StateMachineService, DataMapTriggers, CacheClearable {
 
     /** класс описывающий связь Entity и StateMachine:
@@ -228,11 +225,7 @@ open class StateMachineServiceImpl(val dataService: DataService,
         val script = action[{ script }]
         val data = theDataMap["data"]
         if (script != null) {
-            serverScriptService.execute(script,
-                    Var("_entity", theDataMap),
-                    Var("_data", data),
-                    Var("_transition", theTransition),
-                    Var("_dataService", dataService, DataService::class.simpleName!!))
+            TODO()
         } else
             dataService.springBeanMethodCall(action[{ className }]!!, action[{ method }]!!,
                     args = *arrayOf(theDataMap, theTransition))
@@ -241,8 +234,9 @@ open class StateMachineServiceImpl(val dataService: DataService,
     private fun execConditionScript(theDataMap: DataMap, theTransition: DataMapF<Transition>): Boolean {
         val script = theTransition[{ conditionScript }]
         if (script != null && script.isNotEmpty()) {
-            val scriptResult = serverScriptService.execute(script, Var("_entity", theDataMap))
-            return if (scriptResult is Boolean) scriptResult else false
+            /*val scriptResult = serverScriptService.execute(script, Var("_entity", theDataMap))
+            return if (scriptResult is Boolean) scriptResult else false*/
+            TODO()
         }
         return false
     }

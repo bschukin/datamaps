@@ -11,26 +11,26 @@
 
     <context:component-scan base-package="com.bftcom.ice"/>
 
-    <bean id="conversionService" class="com.bftcom.ice.datamaps.impl.util.NullPassByConversionServiceFactoryBean">
+    <bean id="conversionService" class="com.bftcom.ice.datamaps.core.util.NullPassByConversionServiceFactoryBean">
         <property name="converters">
             <list>
-                <bean class="com.bftcom.ice.datamaps.impl.util.IceDateToDateConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.IceTimestampToTimestampConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.SqlDateToIceDateConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.OracleSqlTimestampToIceTimestampConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.SqlTimestampToIceTimestampConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.NumberToDateConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.BigDecimalToBooleanConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.IntToBooleanConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.ClobToStringConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.BlobToByteArrayConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.PGobjectToStringConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.GuidToUuidConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.GuidToStringConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.UuidToGuidConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.UuidArrayToPgObjectConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.StringArrayToPgObjectConverter"/>
-                <bean class="com.bftcom.ice.datamaps.impl.util.ArrayToPgObjectConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.IceDateToDateConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.IceTimestampToTimestampConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.SqlDateToIceDateConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.OracleSqlTimestampToIceTimestampConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.SqlTimestampToIceTimestampConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.NumberToDateConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.BigDecimalToBooleanConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.IntToBooleanConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.ClobToStringConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.BlobToByteArrayConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.PGobjectToStringConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.GuidToUuidConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.GuidToStringConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.UuidToGuidConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.UuidArrayToPgObjectConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.StringArrayToPgObjectConverter"/>
+                <bean class="com.bftcom.ice.datamaps.core.util.ArrayToPgObjectConverter"/>
             </list>
         </property>
     </bean>

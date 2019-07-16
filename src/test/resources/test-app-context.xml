@@ -8,5 +8,5 @@
   <import resource="test-app-db-context.xml"/>
   <import resource="classpath:com/bftcom/ice/server-context.xml"/>
 
-  <bean id="nameMappingsStrategy" class="com.bftcom.ice.datamaps.impl.mappings.CamelUnderscoreNameMappingsStrategy"/>
+  <bean id="nameMappingsStrategy" class="com.bftcom.ice.datamaps.core.mappings.CamelUnderscoreNameMappingsStrategy"/>
 </beans>

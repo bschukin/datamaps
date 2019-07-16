@@ -23,11 +23,4 @@ class StateMachineInstanceTriggers(val dataService: DataService,
 
         stateMachineService.initStateMachineInstance(event.delta, s)
     }
-
-    /*override fun beforeDelete(event: TriggerContext) {
-        if (event.new()[stateMachineInstanceField.n] == null)
-            return
-
-        dataService.deleteAll(StateMachineInstance.withId(event.new()[stateMachineInstanceField].id))
-    }*/
 }

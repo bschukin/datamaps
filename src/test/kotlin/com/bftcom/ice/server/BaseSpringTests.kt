@@ -1,10 +1,10 @@
 package com.bftcom.ice.server
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.impl.query.QueryBuilder
-import com.bftcom.ice.datamaps.impl.query.QueryExecutor
-import com.bftcom.ice.datamaps.impl.util.ShadowService
-import com.bftcom.ice.datamaps.impl.util.SqlStatistics
+import com.bftcom.ice.datamaps.core.query.QueryBuilder
+import com.bftcom.ice.datamaps.core.query.QueryExecutor
+import com.bftcom.ice.datamaps.core.util.ShadowService
+import com.bftcom.ice.datamaps.core.util.SqlStatistics
 import com.bftcom.ice.SpringProfileRule
 import org.junit.Assert
 import org.junit.Rule

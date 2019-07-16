@@ -2,10 +2,14 @@
 
 package com.bftcom.ice.datamaps
 
-import com.bftcom.ice.datamaps.common.maps.FieldSetRepo
+import com.bftcom.ice.datamaps.misc.FieldSetRepo
 import com.bftcom.ice.datamaps.common.utils.*
+import com.bftcom.ice.datamaps.core.delta.DeltaStore
 import com.bftcom.ice.datamaps.misc.*
+import kotlin.reflect.KProperty
 import kotlin.reflect.KProperty0
+import kotlin.reflect.full.declaredMembers
+import kotlin.reflect.jvm.isAccessible
 
 
 ////ЭТО ФАЙЛ для всего что имеет отношение к фиелдсетам (маппингам)
@@ -64,8 +68,28 @@ abstract class FieldSet(private var _entity: String = "", var caption: String? =
     fun isTransient() = containsOption(Transience::class)
 }
 
+fun FieldSet.getField(property: String): Field<*, *>? {
+    val obj = this::class.objectInstance
+    val res = this::class.declaredMembers.find { it.name.equals(property, true) }
+    if (res != null)
+        return res.call(obj) as? Field<*, *>
+    return null
+}
+
+fun MappingFieldSet<*>.getReferencedFieldSet(property: String): MFS<*>? {
+    return getField(property)?.refFieldSet()
+}
 
 
+fun FieldSet.getAllFields(): List<Field<*, *>> {
+    val obj = this::class.objectInstance
+    return this::class.members.filterIsInstance(KProperty::class.java)
+            .map {
+                it.isAccessible = true
+                it.call(obj)
+            }
+            .filter { it is Field<*, *> }.map { it as Field<*, *> }.toList()
+}
 
 open class MappingFieldSet<T : FieldSet>(entity: String = "",
                                                                  caption: String? = null,
