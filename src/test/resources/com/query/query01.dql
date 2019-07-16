@@ -1,4 +1,0 @@
-AAA {
-    view: "PersonView",
-    alias-for:"specific",
-}

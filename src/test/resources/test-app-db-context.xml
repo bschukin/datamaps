@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+        http://www.springframework.org/schema/jdbc
+        http://www.springframework.org/schema/jdbc/spring-jdbc-4.1.xsd">
+
+
+  <beans profile="postgresql">
+    <jdbc:initialize-database>
+      <jdbc:script location="classpath:db/create-test-db-postgresql.sql"/>
+      <jdbc:script location="classpath:db/insert-test-data.sql"/>
+    </jdbc:initialize-database>
+  </beans>
+
+  <beans profile="oracle">
+    <jdbc:initialize-database>
+      <jdbc:script location="classpath:db/oracle-basic-procedures.sql" separator="/"/>
+      <jdbc:script location="classpath:db/create-test-db-oracle.sql"/>
+      <jdbc:script location="classpath:db/insert-test-data.sql"/>
+      <jdbc:script location="classpath:init/oracle-state-machine.sql"/>
+      <jdbc:script location="classpath:init/oracle-scheduler-journal.sql"/>
+      <jdbc:script location="classpath:init/oracle-timemachine.sql"/>
+    </jdbc:initialize-database>
+  </beans>
+
+
+  <beans profile="hsqldb">
+    <jdbc:embedded-database id="dataSource" type="HSQL">
+      <jdbc:script location="classpath:db/hsqldb-state-machine.sql"/>
+      <jdbc:script location="classpath:db/create-test-db-hsql.sql"/>
+      <jdbc:script location="classpath:db/insert-test-data.sql"/>
+    </jdbc:embedded-database>
+  </beans>
+
+
+</beans>
