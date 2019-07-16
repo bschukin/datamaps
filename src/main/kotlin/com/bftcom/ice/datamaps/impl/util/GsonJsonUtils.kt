@@ -5,10 +5,10 @@ import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.common.maps.*
 import com.bftcom.ice.datamaps.DataMapF.Companion.DYNAMIC_HOLDER
 import com.bftcom.ice.datamaps.DataMapF.Companion.JSON_PATH
-import com.bftcom.ice.datamaps.SynthethicIdUtils.newSyntheticId
-import com.bftcom.ice.datamaps.utils.COMMON_DATE_FORMAT
-import com.bftcom.ice.datamaps.utils.Date
-import com.bftcom.ice.datamaps.utils.Timestamp
+import com.bftcom.ice.datamaps.impl.util.SynthethicIdUtils.newSyntheticId
+import com.bftcom.ice.datamaps.misc.COMMON_DATE_FORMAT
+import com.bftcom.ice.datamaps.misc.Date
+import com.bftcom.ice.datamaps.misc.Timestamp
 import com.google.gson.*
 import com.google.gson.stream.JsonReader
 import org.springframework.context.annotation.Primary
@@ -528,4 +528,24 @@ fun formatDate(date: java.util.Date): String {
     return dateTimeFormatter.format(date.toInstant()
             .atZone(defaultZoneId)
             .toLocalDateTime())
+}
+
+/*  *синтетический ключ применяется в динамик-объектах.
+     * Отличие от гуида в том мы быстро можем отличить среди остальных строк и чисел*/
+object SynthethicIdUtils {
+
+    /**сгенерировать новый синтетический ключ.
+     * синтетический ключ применяется в динамик-объектах.
+     * Отличие от гуида в том мы быстро можем отличить среди остальных строк и чисел*/
+    fun newSyntheticId(): String = "@ice-" + DeltaStore.newGuid()
+
+    /**Это синтетический ключ? */
+    fun isSyntheticId(id: String?): Boolean = id != null && id.startsWith("@ice-")
+
+    /**Если синтетический ключ - вернуть null. Иначе - ключ*/
+    fun getNoSyntheticIdOrNull(id: Any?): Any? {
+        if (isSyntheticId(id as? String))
+            return null
+        return id
+    }
 }

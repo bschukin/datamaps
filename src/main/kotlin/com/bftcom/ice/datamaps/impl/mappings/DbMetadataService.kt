@@ -3,7 +3,7 @@ package com.bftcom.ice.datamaps.impl.mappings
 import com.bftcom.ice.datamaps.impl.dialects.DbDialect
 import com.bftcom.ice.datamaps.impl.util.CacheClearable
 import com.bftcom.ice.datamaps.impl.util.getJDBCTypeByJdbcMetadata
-import com.bftcom.ice.datamaps.utils.*
+import com.bftcom.ice.datamaps.misc.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.env.Environment
 import org.springframework.jdbc.core.JdbcTemplate

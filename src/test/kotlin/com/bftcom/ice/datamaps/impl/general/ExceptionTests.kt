@@ -5,8 +5,8 @@ import com.bftcom.ice.server.Gender
 import org.junit.Assert
 import org.junit.Test
 import com.bftcom.ice.assertBodyEquals
-import com.bftcom.ice.datamaps.utils.DbRecordNotFound
-import com.bftcom.ice.datamaps.utils.toExceptionInfo
+import com.bftcom.ice.datamaps.misc.DbRecordNotFound
+import com.bftcom.ice.datamaps.misc.toExceptionInfo
 import kotlin.test.assertEquals
 
 

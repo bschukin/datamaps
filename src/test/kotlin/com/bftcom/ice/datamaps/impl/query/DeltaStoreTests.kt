@@ -2,7 +2,7 @@ package com.bftcom.ice.datamaps.impl.query
 
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.datamaps.DataMap
-import com.bftcom.ice.datamaps.common.maps.DeltaStore
+import com.bftcom.ice.datamaps.DeltaStore
 import org.junit.Assert
 import org.junit.Test
 import org.springframework.transaction.annotation.Transactional

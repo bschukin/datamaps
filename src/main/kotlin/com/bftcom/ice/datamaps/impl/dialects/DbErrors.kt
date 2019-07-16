@@ -6,8 +6,8 @@ import com.bftcom.ice.datamaps.common.maps.FieldSetRepo
 import com.bftcom.ice.datamaps.impl.mappings.DbMetadataService
 import com.bftcom.ice.datamaps.impl.mappings.DataMapping
 import com.bftcom.ice.datamaps.impl.mappings.DataMappingsService
-import com.bftcom.ice.datamaps.utils.DbForeignConstraintException
-import com.bftcom.ice.datamaps.utils.DbUniqueConstraintException
+import com.bftcom.ice.datamaps.misc.DbForeignConstraintException
+import com.bftcom.ice.datamaps.misc.DbUniqueConstraintException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException

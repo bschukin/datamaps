@@ -1,7 +1,7 @@
 package com.bftcom.ice.datamaps.impl.query
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.utils.throwNotImplementedYet
+import com.bftcom.ice.datamaps.misc.throwNotImplementedYet
 import org.springframework.stereotype.Service
 
 /**

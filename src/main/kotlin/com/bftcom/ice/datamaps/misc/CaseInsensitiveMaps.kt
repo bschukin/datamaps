@@ -1,4 +1,4 @@
-package com.bftcom.ice.datamaps.utils
+package com.bftcom.ice.datamaps.misc
 
 fun <V> linkedCaseInsMapOf(): OrderedCaseInsensitiveMap<V> = OrderedCaseInsensitiveMap()
 fun <V> linkedCaseInsMapOf(vararg pairs: Pair<String, V>): OrderedCaseInsensitiveMap<V> =

@@ -1,13 +1,14 @@
 package com.bftcom.ice.datamaps.impl.query
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.utils.BLOB
-import com.bftcom.ice.datamaps.utils.NIY
-import com.bftcom.ice.datamaps.utils.throwImpossible
+import com.bftcom.ice.datamaps.misc.BLOB
+import com.bftcom.ice.datamaps.misc.NIY
+import com.bftcom.ice.datamaps.misc.throwImpossible
 import com.bftcom.ice.datamaps.common.maps.*
 import com.bftcom.ice.datamaps.DataMapF.Companion.BACKREFID
+import com.bftcom.ice.datamaps.DeltaStore
 import com.bftcom.ice.datamaps.impl.dialects.DbDialect
-import com.bftcom.ice.datamaps.utils.Date
+import com.bftcom.ice.datamaps.misc.Date
 import com.bftcom.ice.datamaps.impl.mappings.DataField
 import com.bftcom.ice.datamaps.impl.mappings.DataMapping
 import com.bftcom.ice.datamaps.impl.mappings.DataMappingsService
@@ -416,7 +417,9 @@ open class QueryBuilder {
                     parentProperty = tree?.parentField, childProperty = tree?.childsField,
                     depth = currProjection.option().recursiveDepth, mergeIntoSourceList = true, buildHierarchy = true)
             currProjection.entity = fieldSet?.entity
-            dataService.loadChilds(parents2, currProjection, opts)
+
+            (dataService as DataServiceExtd)
+                    .loadChilds(parents2, currProjection, opts)
 
             list
         }
@@ -450,7 +453,8 @@ open class QueryBuilder {
                     depth = currProjection.option().recursiveDepth, mergeIntoSourceList = true,
                     buildHierarchy = true, includeLevel0 = true)
             currProjection.entity = fieldSet?.entity
-            dataService.loadParents(parents2, currProjection, opts)
+            (dataService as DataServiceExtd)
+                    .loadParents(parents2, currProjection, opts)
 
             list
         }

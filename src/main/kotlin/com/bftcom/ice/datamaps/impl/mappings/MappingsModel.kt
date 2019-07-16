@@ -1,6 +1,6 @@
 package com.bftcom.ice.datamaps.impl.mappings
 
-import com.bftcom.ice.datamaps.utils.*
+import com.bftcom.ice.datamaps.misc.*
 import java.sql.JDBCType
 import kotlin.reflect.KClass
 

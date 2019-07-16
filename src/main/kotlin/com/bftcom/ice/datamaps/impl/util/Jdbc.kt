@@ -1,11 +1,11 @@
 package com.bftcom.ice.datamaps.impl.util
 
-import com.bftcom.ice.datamaps.utils.FieldType
-import com.bftcom.ice.datamaps.utils.NIY
+import com.bftcom.ice.datamaps.misc.FieldType
+import com.bftcom.ice.datamaps.misc.NIY
 import com.bftcom.ice.datamaps.DataMapF
-import com.bftcom.ice.datamaps.utils.Date
-import com.bftcom.ice.datamaps.utils.GUID
-import com.bftcom.ice.datamaps.utils.Timestamp
+import com.bftcom.ice.datamaps.misc.Date
+import com.bftcom.ice.datamaps.misc.GUID
+import com.bftcom.ice.datamaps.misc.Timestamp
 import org.springframework.dao.DataAccessException
 import org.springframework.jdbc.core.JdbcOperations
 import org.springframework.jdbc.core.JdbcTemplate

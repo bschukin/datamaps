@@ -3,10 +3,10 @@ package com.bftcom.ice.datamaps.impl.query
 import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.MFS
 import com.bftcom.ice.datamaps.and
-import com.bftcom.ice.datamaps.utils.Date
-import com.bftcom.ice.datamaps.utils.Timestamp
-import com.bftcom.ice.datamaps.utils.__infinity
-import com.bftcom.ice.datamaps.utils.infinity__
+import com.bftcom.ice.datamaps.misc.Date
+import com.bftcom.ice.datamaps.misc.Timestamp
+import com.bftcom.ice.datamaps.misc.__infinity
+import com.bftcom.ice.datamaps.misc.infinity__
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.server.DateTest
 import com.bftcom.ice.IfSpringProfileActive

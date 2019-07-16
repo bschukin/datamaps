@@ -1,6 +1,6 @@
 package com.bftcom.ice.datamaps
 
-import com.bftcom.ice.datamaps.utils.*
+import com.bftcom.ice.datamaps.misc.*
 import kotlin.reflect.KCallable
 import kotlin.reflect.KClass
 
@@ -46,7 +46,6 @@ abstract class BaseProjection {
     var groupByFields = mutableListOf<String>()
 
     var params = mutableMapOf<String, Any?>()
-    var transportParams = mutableMapOf<String, TypedValue?>()
 
     fun where(): String? {
         return this.oql

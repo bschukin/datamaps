@@ -1,6 +1,6 @@
 package com.bftcom.ice.datamaps.impl.util
 
-import com.bftcom.ice.datamaps.utils.throwImpossible
+import com.bftcom.ice.datamaps.misc.throwImpossible
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,7 +39,7 @@ class CastItemsTest {
         fun applyFloatPrimitive(arg: Float) {}
         fun applyFloat(arg: Float?) {}
 
-        fun applyDate(arg: com.bftcom.ice.datamaps.utils.Date) {}
+        fun applyDate(arg: com.bftcom.ice.datamaps.misc.Date) {}
 
         fun applyNullableAny(arg: Any?) {}
         fun applyAny(arg: Any) {}
@@ -232,18 +232,18 @@ class CastItemsTest {
                 arrayOf("""'1' to Number""", TestData('1', "applyNumber", Number::class.javaObjectType) { it == 1L }),
                 arrayOf("null to Number", TestData(null, "applyNumber", Number::class.javaObjectType) { it == null }),
 
-                arrayOf("java.util.Date to com.bftcom.ice.common.utils.Date",
-                    TestData(Date(), "applyDate", com.bftcom.ice.datamaps.utils.Date::class.java) { it is com.bftcom.ice.datamaps.utils.Date }),
+                arrayOf("java.util.Date to com.bftcom.ice.common.misc.Date",
+                    TestData(Date(), "applyDate", com.bftcom.ice.datamaps.misc.Date::class.java) { it is com.bftcom.ice.datamaps.misc.Date }),
                 arrayOf(
-                    "java.time.LocalDate to com.bftcom.ice.common.utils.Date",
-                    TestData(LocalDate.now(), "applyDate", com.bftcom.ice.datamaps.utils.Date::class.java) { it is com.bftcom.ice.datamaps.utils.Date }),
-                arrayOf(""""1" to  com.bftcom.ice.common.utils.Date""",
-                    TestData("1", "applyDate", com.bftcom.ice.datamaps.utils.Date::class.java) { it is com.bftcom.ice.datamaps.utils.Date }),
-                arrayOf("""'1' to  com.bftcom.ice.common.utils.Date""",
-                    TestData('1', "applyDate", com.bftcom.ice.datamaps.utils.Date::class.java) { it is com.bftcom.ice.datamaps.utils.Date }),
-                arrayOf("""1000 to  com.bftcom.ice.common.utils.Date""",
-                    TestData(1000, "applyDate", com.bftcom.ice.datamaps.utils.Date::class.java) { it is com.bftcom.ice.datamaps.utils.Date }),
-                arrayOf("null to  com.bftcom.ice.common.utils.Date", TestData(null, "applyDate", com.bftcom.ice.datamaps.utils.Date::class.java) { it == null }),
+                    "java.time.LocalDate to com.bftcom.ice.common.misc.Date",
+                    TestData(LocalDate.now(), "applyDate", com.bftcom.ice.datamaps.misc.Date::class.java) { it is com.bftcom.ice.datamaps.misc.Date }),
+                arrayOf(""""1" to  com.bftcom.ice.common.misc.Date""",
+                    TestData("1", "applyDate", com.bftcom.ice.datamaps.misc.Date::class.java) { it is com.bftcom.ice.datamaps.misc.Date }),
+                arrayOf("""'1' to  com.bftcom.ice.common.misc.Date""",
+                    TestData('1', "applyDate", com.bftcom.ice.datamaps.misc.Date::class.java) { it is com.bftcom.ice.datamaps.misc.Date }),
+                arrayOf("""1000 to  com.bftcom.ice.common.misc.Date""",
+                    TestData(1000, "applyDate", com.bftcom.ice.datamaps.misc.Date::class.java) { it is com.bftcom.ice.datamaps.misc.Date }),
+                arrayOf("null to  com.bftcom.ice.common.misc.Date", TestData(null, "applyDate", com.bftcom.ice.datamaps.misc.Date::class.java) { it == null }),
 
 
                 arrayOf("null to Any?", TestData(null, "applyNullableAny", Any::class.java) { it == null }),

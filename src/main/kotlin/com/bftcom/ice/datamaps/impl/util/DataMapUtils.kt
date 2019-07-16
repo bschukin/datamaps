@@ -1,8 +1,11 @@
 package com.bftcom.ice.datamaps.impl.util
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.utils.FieldType
+import com.bftcom.ice.datamaps.misc.FieldType
 import com.bftcom.ice.datamaps.common.maps.*
+import com.bftcom.ice.datamaps.impl.delta.AnyValue
+import com.bftcom.ice.datamaps.impl.delta.Delta
+import com.bftcom.ice.datamaps.impl.delta.DeltaType
 import com.bftcom.ice.datamaps.impl.mappings.DataMappingsService
 import org.springframework.stereotype.Service
 

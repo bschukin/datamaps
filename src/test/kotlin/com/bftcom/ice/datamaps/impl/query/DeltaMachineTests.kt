@@ -1,9 +1,8 @@
 package com.bftcom.ice.datamaps.impl.query
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.common.maps.*
 import com.bftcom.ice.datamaps.impl.delta.DeltaMachine
-import com.bftcom.ice.datamaps.impl.dialects.DataServiceExtd
+import com.bftcom.ice.datamaps.DeltaStore
 import com.bftcom.ice.server.*
 import org.junit.Assert
 import org.junit.Test

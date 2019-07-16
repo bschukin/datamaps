@@ -1,9 +1,9 @@
 package com.bftcom.ice.datamaps.impl.query
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.utils.caseInsMapOf
-import com.bftcom.ice.datamaps.utils.linkedCaseInsMapOf
-import com.bftcom.ice.datamaps.utils.throwImpossible
+import com.bftcom.ice.datamaps.misc.caseInsMapOf
+import com.bftcom.ice.datamaps.misc.linkedCaseInsMapOf
+import com.bftcom.ice.datamaps.misc.throwImpossible
 import com.bftcom.ice.datamaps.common.maps.*
 import com.bftcom.ice.datamaps.DataMapF.Companion.entityDiscriminator
 import com.bftcom.ice.datamaps.impl.dialects.DbDialect

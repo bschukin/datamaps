@@ -1,7 +1,7 @@
 package com.bftcom.ice.datamaps.tools.dbsync
 
 import com.bftcom.ice.datamaps.dataMapToString
-import com.bftcom.ice.datamaps.utils.Date
+import com.bftcom.ice.datamaps.misc.Date
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.server.assertEqIgnoreCase
 import com.bftcom.ice.datamaps.impl.dialects.DbDialect

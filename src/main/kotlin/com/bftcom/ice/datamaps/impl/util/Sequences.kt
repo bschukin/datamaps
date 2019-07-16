@@ -1,7 +1,7 @@
 package com.bftcom.ice.datamaps.impl.util
 
 import com.bftcom.ice.datamaps.impl.mappings.GenericDbMetadataService
-import com.bftcom.ice.datamaps.utils.NIY
+import com.bftcom.ice.datamaps.misc.NIY
 import com.bftcom.ice.datamaps.impl.mappings.DataMappingsService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.support.incrementer.*

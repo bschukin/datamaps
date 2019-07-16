@@ -1,40 +1,20 @@
 package com.bftcom.ice.datamaps.impl.dialects
 
-import com.bftcom.ice.datamaps.utils.throwNotImplementedYet
-import com.bftcom.ice.datamaps.DataMap
-import com.bftcom.ice.datamaps.DataService
 import com.bftcom.ice.datamaps.impl.mappings.ForeignKeyCascade
-import com.bftcom.ice.datamaps.utils.GUID
-import com.bftcom.ice.datamaps.impl.mappings.DataMapping
+import com.bftcom.ice.datamaps.misc.GUID
+import com.bftcom.ice.datamaps.misc.throwNotImplementedYet
 import org.springframework.jdbc.core.JdbcTemplate
 import java.sql.Connection
 import java.sql.DatabaseMetaData
 import java.sql.JDBCType
 import java.util.*
-import java.util.stream.Stream
 import kotlin.reflect.KClass
 
 /**
  * Created by Щукин on 27.10.2017.
  */
 
-interface DataServiceExtd : DataService {
-    fun getDataMapping(name: String): DataMapping
 
-    fun deleteAll(entity: String)
-
-    /**
-     * Быстрая массовая вставка записей в базу.
-     * Айдишник должен быть либо уже в датамапе, либо присваиваться при инсерте как identity (serial)
-     */
-    fun bulkInsert(list: List<DataMap>, runBeingOperations: Boolean = true, presInsertAction: ((DataMap) -> Unit)? = null)
-
-    /**
-     * Быстрая массовая вставка записей в базу.
-     * Айдишник должен быть либо уже в датамапе, либо присваиваться при инсерте как identity (serial)
-     */
-    fun bulkInsert(stream: Stream<DataMap>, entity: String, runBeingOperations: Boolean = true, presInsertAction: ((DataMap) -> Unit)? = null)
-}
 
 /**
  * Created by b.schukin on 23.11.2017.

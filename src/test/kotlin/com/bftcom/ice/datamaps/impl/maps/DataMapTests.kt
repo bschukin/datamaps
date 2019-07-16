@@ -1,8 +1,8 @@
 package com.bftcom.ice.datamaps.common.maps
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.utils.CiMap
-import com.bftcom.ice.datamaps.utils.GUID
+import com.bftcom.ice.datamaps.misc.CiMap
+import com.bftcom.ice.datamaps.misc.GUID
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.server.Game
 import com.bftcom.ice.server.Gender

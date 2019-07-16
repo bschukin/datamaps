@@ -1,10 +1,10 @@
 package com.bftcom.ice.datamaps.impl.query
 
-import com.bftcom.ice.datamaps.common.maps.DeltaStore
+import com.bftcom.ice.datamaps.DeltaStore
 import com.bftcom.ice.datamaps.DynamicEntity
 import com.bftcom.ice.datamaps.DynamicFieldSet
 import com.bftcom.ice.datamaps.projection
-import com.bftcom.ice.datamaps.utils.Date
+import com.bftcom.ice.datamaps.misc.Date
 import com.bftcom.ice.server.Attach
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.server.Person

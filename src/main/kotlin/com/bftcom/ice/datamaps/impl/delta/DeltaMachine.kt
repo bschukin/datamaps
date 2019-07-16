@@ -1,9 +1,8 @@
 package com.bftcom.ice.datamaps.impl.delta
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.utils.makeSure
-import com.bftcom.ice.datamaps.utils.throwImpossible
-import com.bftcom.ice.datamaps.common.maps.*
+import com.bftcom.ice.datamaps.misc.makeSure
+import com.bftcom.ice.datamaps.misc.throwImpossible
 import com.bftcom.ice.datamaps.impl.dialects.DbDialect
 import com.bftcom.ice.datamaps.impl.util.SequenceIncrementor
 import com.bftcom.ice.datamaps.impl.query.SqlQueryContext

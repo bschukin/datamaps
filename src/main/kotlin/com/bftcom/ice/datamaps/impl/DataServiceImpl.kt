@@ -1,16 +1,15 @@
 package com.bftcom.ice.datamaps.impl
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.utils.SomethingNotFound
-import com.bftcom.ice.datamaps.utils.throwNotFound
-import com.bftcom.ice.datamaps.common.maps.*
+import com.bftcom.ice.datamaps.misc.SomethingNotFound
+import com.bftcom.ice.datamaps.misc.throwNotFound
 import com.bftcom.ice.datamaps.impl.query.*
 import com.bftcom.ice.datamaps.impl.mappings.DataMapping
 import com.bftcom.ice.datamaps.impl.mappings.DataMappingsService
 import com.bftcom.ice.datamaps.impl.delta.DeltaMachine
-import com.bftcom.ice.datamaps.impl.dialects.DataServiceExtd
+import com.bftcom.ice.datamaps.DeltaStore
 import com.bftcom.ice.datamaps.impl.util.*
-import com.bftcom.ice.datamaps.utils.DbRecordNotFound
+import com.bftcom.ice.datamaps.misc.DbRecordNotFound
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -224,15 +223,6 @@ open class DataServiceImpl : DataServiceExtd {
         deltaMachine.flush()
     }
 
-    override fun saveDeltas(buckets: List<DeltaBucket>): Map<String, DataMap> {
-
-        val news = buckets.map { it.dm }
-                .filter { it.isNew() }.map { it.newMapGuid!! to it }.toMap()
-        deltaMachine.createAndExeUpdateStatements(buckets, true)
-
-        return news
-    }
-
     override fun insert(dataMap: DataMap, preInsertAction: ((DataMap) -> Unit)?, runTriggers: Boolean): DataMap {
         deltaMachine.insert(dataMap, preInsertAction, runTriggers)
         return dataMap
@@ -295,23 +285,26 @@ open class DataServiceImpl : DataServiceExtd {
             throw e.targetException
         }
     }
-}
 
-private fun <T : FieldSet> getParentAndChildFields(options: TreeQueryOptions,
-                                                   list: List<DataMapF<T>>,
-                                                   projection: DataProjection?): Pair<String, String?> {
-    val parentField = when {
-        options.parentProperty != null -> options.parentProperty
-        list[0].fieldSet != null && list[0].fieldSet!!.containsOption(Tree::class) -> list[0].fieldSet!!.getOption(Tree::class)!!.parentField
-        projection?.fieldSet != null && projection.fieldSet!!.containsOption(Tree::class) -> projection.fieldSet!!.getOption(Tree::class)!!.parentField
-        else -> throwNotFound("a parent field of the hierarchical query is not defined")
-    }!!
+    companion object {
+        private fun <T : FieldSet> getParentAndChildFields(options: TreeQueryOptions,
+                                                           list: List<DataMapF<T>>,
+                                                           projection: DataProjection?): Pair<String, String?> {
+            val parentField = when {
+                options.parentProperty != null -> options.parentProperty
+                list[0].fieldSet != null && list[0].fieldSet!!.containsOption(Tree::class) -> list[0].fieldSet!!.getOption(Tree::class)!!.parentField
+                projection?.fieldSet != null && projection.fieldSet!!.containsOption(Tree::class) -> projection.fieldSet!!.getOption(Tree::class)!!.parentField
+                else -> throwNotFound("a parent field of the hierarchical query is not defined")
+            }!!
 
-    val childField = when {
-        options.childProperty != null -> options.childProperty
-        list[0].fieldSet != null && list[0].fieldSet!!.containsOption(Tree::class) -> list[0].fieldSet!!.getOption(Tree::class)!!.childsField
-        projection?.fieldSet != null && projection.fieldSet!!.containsOption(Tree::class) -> projection.fieldSet!!.getOption(Tree::class)!!.childsField
-        else -> throwNotFound("a child field of the hierarchical query is not defined")
+            val childField = when {
+                options.childProperty != null -> options.childProperty
+                list[0].fieldSet != null && list[0].fieldSet!!.containsOption(Tree::class) -> list[0].fieldSet!!.getOption(Tree::class)!!.childsField
+                projection?.fieldSet != null && projection.fieldSet!!.containsOption(Tree::class) -> projection.fieldSet!!.getOption(Tree::class)!!.childsField
+                else -> throwNotFound("a child field of the hierarchical query is not defined")
+            }
+            return Pair(parentField, childField)
+        }
     }
-    return Pair(parentField, childField)
 }
+

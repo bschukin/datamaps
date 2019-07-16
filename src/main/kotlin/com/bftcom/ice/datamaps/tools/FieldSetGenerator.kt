@@ -1,7 +1,7 @@
 package com.bftcom.ice.datamaps.tools
 
 import com.bftcom.ice.datamaps.DataMapF
-import com.bftcom.ice.datamaps.utils.Date
+import com.bftcom.ice.datamaps.misc.Date
 import com.bftcom.ice.datamaps.impl.mappings.DataField
 import com.bftcom.ice.datamaps.impl.mappings.DataMappingsService
 import org.springframework.stereotype.Service

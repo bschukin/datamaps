@@ -4,8 +4,8 @@ import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.FieldSet
 import com.bftcom.ice.datamaps.MFS
 import com.bftcom.ice.datamaps.MappingFieldSet
-import com.bftcom.ice.datamaps.utils.CiMap
-import com.bftcom.ice.datamaps.utils.ciMapOf
+import com.bftcom.ice.datamaps.misc.CiMap
+import com.bftcom.ice.datamaps.misc.ciMapOf
 import org.jetbrains.kotlin.utils.addToStdlib.firstNotNullResult
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.declaredMembers

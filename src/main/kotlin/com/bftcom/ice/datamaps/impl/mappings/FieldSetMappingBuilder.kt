@@ -4,7 +4,7 @@ import com.bftcom.ice.datamaps.DataMapF
 import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.FieldSet
 import com.bftcom.ice.datamaps.MFS
-import com.bftcom.ice.datamaps.utils.FieldType
+import com.bftcom.ice.datamaps.misc.FieldType
 import com.bftcom.ice.datamaps.common.maps.*
 import com.bftcom.ice.datamaps.tools.dbsync.DbDiffService
 import com.bftcom.ice.datamaps.tools.dbsync.EntityDbDiff

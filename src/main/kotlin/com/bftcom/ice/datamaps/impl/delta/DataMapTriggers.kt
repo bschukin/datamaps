@@ -1,8 +1,8 @@
 package com.bftcom.ice.datamaps.impl.delta
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.utils.CaseInsensitiveKeyMap
-import com.bftcom.ice.datamaps.utils.makeSure
+import com.bftcom.ice.datamaps.misc.CaseInsensitiveKeyMap
+import com.bftcom.ice.datamaps.misc.makeSure
 import com.bftcom.ice.datamaps.common.maps.*
 import com.bftcom.ice.datamaps.impl.util.JsonFieldDataMapsBuilder
 import com.bftcom.ice.datamaps.impl.util.differsFrom

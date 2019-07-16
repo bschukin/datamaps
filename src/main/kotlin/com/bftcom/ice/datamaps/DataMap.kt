@@ -1,13 +1,13 @@
 package com.bftcom.ice.datamaps
 
-import com.bftcom.ice.datamaps.common.maps.DeltaStore
 import com.bftcom.ice.datamaps.common.maps.FieldSetRepo
 import com.bftcom.ice.datamaps.common.maps.getAllFields
 import com.bftcom.ice.datamaps.common.maps.getField
-import com.bftcom.ice.datamaps.utils.CaseInsensitiveKeyMap
-import com.bftcom.ice.datamaps.utils.FieldType
-import com.bftcom.ice.datamaps.utils.caseInsMapOf
-import com.bftcom.ice.datamaps.utils.makeSure
+import com.bftcom.ice.datamaps.impl.delta.JsonPath
+import com.bftcom.ice.datamaps.misc.CaseInsensitiveKeyMap
+import com.bftcom.ice.datamaps.misc.FieldType
+import com.bftcom.ice.datamaps.misc.caseInsMapOf
+import com.bftcom.ice.datamaps.misc.makeSure
 
 /**
  * Created by Щукин on 27.10.2017.

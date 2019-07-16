@@ -3,7 +3,7 @@ package com.bftcom.ice.datamaps.tools.dbsync
 import com.bftcom.ice.datamaps.DataService
 import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.MappingFieldSet
-import com.bftcom.ice.datamaps.utils.Date
+import com.bftcom.ice.datamaps.misc.Date
 import com.bftcom.ice.datamaps.impl.mappings.DataMappingsService
 import com.bftcom.ice.datamaps.impl.mappings.TableNameResolver
 import com.bftcom.ice.datamaps.impl.dialects.DbDialect

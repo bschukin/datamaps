@@ -1,7 +1,7 @@
 package com.bftcom.ice.datamaps.impl.mappings
 
-import com.bftcom.ice.datamaps.utils.SomethingNotFound
-import com.bftcom.ice.datamaps.utils.makeSure
+import com.bftcom.ice.datamaps.misc.SomethingNotFound
+import com.bftcom.ice.datamaps.misc.makeSure
 import com.bftcom.ice.datamaps.DataMapF
 import com.bftcom.ice.datamaps.impl.util.SequenceIncrementor
 import com.bftcom.ice.datamaps.impl.util.getJavaTypeByJDBCType

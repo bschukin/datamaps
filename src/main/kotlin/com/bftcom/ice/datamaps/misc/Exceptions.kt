@@ -1,4 +1,4 @@
-package com.bftcom.ice.datamaps.utils
+package com.bftcom.ice.datamaps.misc
 
 import org.apache.commons.lang3.exception.ExceptionUtils
 

@@ -41,14 +41,14 @@ open class TreeTests : BaseSpringTests() {
         //тест 1
         val deps = dataService.findAll(Department.filter { id IN (listOf(3, 4)) })
 
-        val parents = dataService.loadParents(deps, null,
+        val parents = dataServiceExtd.loadParents(deps, null,
                 TreeQueryOptions(buildHierarchy = false, mergeIntoSourceList = false, includeLevel0 = false))
 
         assertTrue(parents.size == 2)
 
 
         //тест 2
-        val parents2 = dataService.loadParents(deps, null,
+        val parents2 = dataServiceExtd.loadParents(deps, null,
                 TreeQueryOptions(buildHierarchy = true, mergeIntoSourceList = false, includeLevel0 = true))
 
         assertTrue(parents2.size == 2)

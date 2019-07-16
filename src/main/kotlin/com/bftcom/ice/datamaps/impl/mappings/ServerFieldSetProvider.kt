@@ -3,8 +3,8 @@ package com.bftcom.ice.datamaps.impl.mappings
 import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.FieldSet
 import com.bftcom.ice.datamaps.MappingFieldSet
-import com.bftcom.ice.datamaps.utils.CaseInsensitiveKeyMap
-import com.bftcom.ice.datamaps.utils.OrderedCaseInsensitiveMap
+import com.bftcom.ice.datamaps.misc.CaseInsensitiveKeyMap
+import com.bftcom.ice.datamaps.misc.OrderedCaseInsensitiveMap
 import com.bftcom.ice.datamaps.common.maps.*
 import com.bftcom.ice.datamaps.impl.util.CacheClearable
 import org.apache.commons.lang3.reflect.FieldUtils

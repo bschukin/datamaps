@@ -6,7 +6,7 @@ import com.bftcom.ice.datamaps.MFS
 import com.bftcom.ice.assertBodyEquals
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.IfSpringProfileActive
-import com.bftcom.ice.datamaps.utils.DbUniqueConstraintException
+import com.bftcom.ice.datamaps.misc.DbUniqueConstraintException
 import org.junit.Test
 
 /**

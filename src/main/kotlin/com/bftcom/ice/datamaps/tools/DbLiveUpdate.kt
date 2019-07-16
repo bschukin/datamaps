@@ -1,6 +1,6 @@
 package com.bftcom.ice.datamaps.tools
 
-import com.bftcom.ice.datamaps.utils.throwNotFound
+import com.bftcom.ice.datamaps.misc.throwNotFound
 import com.bftcom.ice.datamaps.FieldSet
 import com.bftcom.ice.datamaps.common.maps.FieldSetRepo
 import com.bftcom.ice.datamaps.tools.dbsync.DbDiffService

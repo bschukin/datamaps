@@ -4,9 +4,9 @@ import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.statemachine.State.getDefaultTransition
 import com.bftcom.ice.statemachine.StateMachine.findStartState
 import com.bftcom.ice.statemachine.StateMachine.findState
-import com.bftcom.ice.datamaps.utils.throwImpossible
-import com.bftcom.ice.datamaps.utils.throwNotFound
-import com.bftcom.ice.datamaps.utils.Timestamp
+import com.bftcom.ice.datamaps.misc.throwImpossible
+import com.bftcom.ice.datamaps.misc.throwNotFound
+import com.bftcom.ice.datamaps.misc.Timestamp
 import com.bftcom.ice.datamaps.impl.mappings.DataMappingsService
 import com.bftcom.ice.datamaps.impl.util.CacheClearable
 import com.bftcom.ice.datamaps.tools.ServerScriptService

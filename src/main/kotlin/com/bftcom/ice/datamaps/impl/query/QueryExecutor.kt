@@ -1,11 +1,11 @@
 package com.bftcom.ice.datamaps.impl.query
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.utils.makeSure
-import com.bftcom.ice.datamaps.common.maps.*
+import com.bftcom.ice.datamaps.misc.makeSure
 import com.bftcom.ice.datamaps.DataMapF.Companion.entityDiscriminator
+import com.bftcom.ice.datamaps.DeltaStore
 import com.bftcom.ice.datamaps.impl.util.ConvertHelper
-import com.bftcom.ice.datamaps.utils.DbException
+import com.bftcom.ice.datamaps.misc.DbException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.convert.ConversionService
 import org.springframework.dao.DataAccessException

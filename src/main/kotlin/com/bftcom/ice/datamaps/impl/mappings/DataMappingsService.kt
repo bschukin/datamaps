@@ -1,6 +1,6 @@
 package com.bftcom.ice.datamaps.impl.mappings
 
-import com.bftcom.ice.datamaps.utils.throwImpossible
+import com.bftcom.ice.datamaps.misc.throwImpossible
 import com.bftcom.ice.datamaps.DataMap
 import com.bftcom.ice.datamaps.common.maps.FieldSetRepo
 import com.bftcom.ice.datamaps.impl.util.CacheClearable

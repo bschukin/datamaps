@@ -1,10 +1,10 @@
 package com.bftcom.ice.datamaps.impl.util
 
-import com.bftcom.ice.datamaps.utils.SomethingNotFound
+import com.bftcom.ice.datamaps.misc.SomethingNotFound
 import com.bftcom.ice.datamaps.ValuedEnum
-import com.bftcom.ice.datamaps.utils.Date
-import com.bftcom.ice.datamaps.utils.GUID
-import com.bftcom.ice.datamaps.utils.Timestamp
+import com.bftcom.ice.datamaps.misc.Date
+import com.bftcom.ice.datamaps.misc.GUID
+import com.bftcom.ice.datamaps.misc.Timestamp
 import com.bftcom.ice.datamaps.impl.mappings.GenericDbMetadataService
 import org.postgresql.util.PGobject
 import org.springframework.beans.factory.annotation.Autowired

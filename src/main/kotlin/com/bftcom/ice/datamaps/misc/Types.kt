@@ -1,8 +1,7 @@
-package com.bftcom.ice.datamaps.utils
+package com.bftcom.ice.datamaps.misc
 
-import com.bftcom.ice.datamaps.TypedValue
 import com.bftcom.ice.datamaps.ValuedEnum
-import com.bftcom.ice.datamaps.common.maps.DeltaStore
+import com.bftcom.ice.datamaps.DeltaStore
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.text.SimpleDateFormat
@@ -259,11 +258,11 @@ enum class FieldType {
                 when (value) {
                     __infinity -> "__infinity"
                     infinity__ -> "infinity__"
-                    else -> (value as com.bftcom.ice.datamaps.utils.Date).getTime()
+                    else -> (value as com.bftcom.ice.datamaps.misc.Date).getTime()
                 }
             }
             Timestamp -> {
-                (value as com.bftcom.ice.datamaps.utils.Date).getTime()
+                (value as com.bftcom.ice.datamaps.misc.Date).getTime()
             }
             Enum -> (value as ValuedEnum<*>).value
             Guid -> (value as GUID)._uuid
@@ -299,7 +298,7 @@ enum class FieldType {
                     }
                     else -> TODO()
                 }
-            Timestamp -> value as? com.bftcom.ice.datamaps.utils.Timestamp
+            Timestamp -> value as? com.bftcom.ice.datamaps.misc.Timestamp
                     ?: (value as? Number)?.let { Timestamp(it) } ?: TODO()
             Enum -> value
             else -> getFieldValueByPlatformSpecialType(this, value)
@@ -314,7 +313,7 @@ enum class FieldType {
             String, Bool, ByteArray -> false
             Int, Long, Double -> true
             Date, Timestamp -> when (value) {
-                is com.bftcom.ice.datamaps.utils.Date -> false
+                is com.bftcom.ice.datamaps.misc.Date -> false
                 is Number -> true
                 is kotlin.String -> true
                 else -> TODO("Usupported date/timestamp type: $value")
@@ -330,7 +329,7 @@ enum class FieldType {
     fun castOrNull(value: Any?): Any? {
         return try {
             value?.let { castFromType(this.toString(), it) }
-                ?.takeIf { it !is com.bftcom.ice.datamaps.utils.Date || (it.getTime() != kotlin.Double.NaN) }
+                ?.takeIf { it !is com.bftcom.ice.datamaps.misc.Date || (it.getTime() != kotlin.Double.NaN) }
         } catch (_: Exception) {
             null
         }
@@ -345,8 +344,8 @@ enum class FieldType {
                 Int -> kotlin.Int::class
                 Long -> kotlin.Long::class
                 Double -> kotlin.Double::class
-                Date -> com.bftcom.ice.datamaps.utils.Date::class
-                Timestamp -> com.bftcom.ice.datamaps.utils.Timestamp::class
+                Date -> com.bftcom.ice.datamaps.misc.Date::class
+                Timestamp -> com.bftcom.ice.datamaps.misc.Timestamp::class
                 Clob -> CharSequence::class
                 Json -> Map::class
                 ByteArray -> kotlin.ByteArray::class
@@ -372,11 +371,11 @@ enum class FieldType {
                     kotlin.Double::class -> Double
                     else -> TODO("Type ${value::class} is not supported")
                 }
-                is com.bftcom.ice.datamaps.utils.Timestamp -> Timestamp
-                is com.bftcom.ice.datamaps.utils.Date -> Date
+                is com.bftcom.ice.datamaps.misc.Timestamp -> Timestamp
+                is com.bftcom.ice.datamaps.misc.Date -> Date
                 is kotlin.ByteArray -> ByteArray
             //при сериализации, TypedValue может десериализнуться как Map (например в случае ID имеющих тип Any)
-                is Map<*, *> -> FieldType.valueOf(value[TypedValue::_type.name] as kotlin.String)
+                is Map<*, *> -> TODO()
                 else -> getFieldTypeByPlatformSpecialType(value)
             }
         }

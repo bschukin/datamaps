@@ -3,7 +3,6 @@ package com.bftcom.ice.server
 import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.impl.query.QueryBuilder
 import com.bftcom.ice.datamaps.impl.query.QueryExecutor
-import com.bftcom.ice.datamaps.impl.dialects.DataServiceExtd
 import com.bftcom.ice.datamaps.impl.util.ShadowService
 import com.bftcom.ice.datamaps.impl.util.SqlStatistics
 import com.bftcom.ice.SpringProfileRule
@@ -41,7 +40,7 @@ abstract class BaseSpringTests : AbstractTransactionalJUnit4SpringContextTests()
     lateinit var queryBuilder: QueryBuilder
 
     @Autowired
-    open lateinit var dataService: DataService
+    open lateinit var dataService: DataServiceExtd
 
 
     val dataServiceExtd: DataServiceExtd
