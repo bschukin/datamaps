@@ -1,8 +1,8 @@
 package com.bftcom.ice.server.examples
 
-import com.bftcom.ice.common.maps.*
+import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.server.*
-import com.bftcom.ice.server.util.printAsJson
+import com.bftcom.ice.datamaps.impl.util.printAsJson
 import org.junit.Test
 
 

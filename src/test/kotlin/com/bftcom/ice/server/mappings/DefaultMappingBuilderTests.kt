@@ -3,7 +3,7 @@ package com.bftcom.ice.server.mappings
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.server.Game
 import com.bftcom.ice.server.assertEqIgnoreCase
-import com.bftcom.ice.server.datamaps.mappings.DefaultMappingBuilder
+import com.bftcom.ice.datamaps.impl.mappings.DefaultMappingBuilder
 import org.junit.Assert
 import org.junit.Test
 import java.sql.JDBCType

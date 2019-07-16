@@ -1,12 +1,12 @@
-package com.bftcom.ice.server.tools.dbsync
+package com.bftcom.ice.datamaps.tools.dbsync
 
-import com.bftcom.ice.common.maps.Field
-import com.bftcom.ice.common.maps.MFS
-import com.bftcom.ice.common.maps.getAllFields
+import com.bftcom.ice.datamaps.Field
+import com.bftcom.ice.datamaps.MFS
+import com.bftcom.ice.datamaps.common.maps.getAllFields
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.server.assertBodyEquals
 import com.bftcom.ice.server.assertEqIgnoreCase
-import com.bftcom.ice.server.test.IfSpringProfileActive
+import com.bftcom.ice.IfSpringProfileActive
 import org.junit.Assert
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired

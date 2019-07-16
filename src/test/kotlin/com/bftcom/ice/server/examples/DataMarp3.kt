@@ -1,8 +1,8 @@
 package com.bftcom.ice.server.examples
 
-import com.bftcom.ice.common.maps.f
-import com.bftcom.ice.common.maps.on
-import com.bftcom.ice.common.maps.slice
+import com.bftcom.ice.datamaps.f
+import com.bftcom.ice.datamaps.on
+import com.bftcom.ice.datamaps.slice
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.server.Department
 import org.junit.Ignore

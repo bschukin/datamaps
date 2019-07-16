@@ -1,6 +1,6 @@
 package com.bftcom.ice.server
 
-import com.bftcom.ice.common.maps.*
+import com.bftcom.ice.datamaps.*
 
 object Gender : MFS<Gender>() {
     val id = Field.id()
@@ -96,7 +96,7 @@ object Attach: MFS<Attach>() {
 
 
 
-object Game:MFS<Game>() {
+object Game: MFS<Game>() {
     val id = Field.stringId()
     val name = Field.string("name")
     val metacriticId = Field.int("metacriticId")
@@ -104,12 +104,12 @@ object Game:MFS<Game>() {
 
 }
 
-object GameEpisode:MFS<GameEpisode>() {
+object GameEpisode: MFS<GameEpisode>() {
     val id = Field.stringId()
     val name = Field.string("name")
 }
 
-object DateTest:MFS<DateTest>() {
+object DateTest: MFS<DateTest>() {
     val id = Field.stringId()
     val timestamp = Field.timestamp("timestamp")
     val tdate = Field.date("tdate")

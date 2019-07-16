@@ -1,12 +1,12 @@
 package com.bftcom.ice.server
 
-import com.bftcom.ice.common.maps.*
-import com.bftcom.ice.server.datamaps.QueryBuilder
-import com.bftcom.ice.server.datamaps.QueryExecutor
-import com.bftcom.ice.server.services.DataServiceExtd
-import com.bftcom.ice.server.services.ShadowService
-import com.bftcom.ice.server.services.SqlStatistics
-import com.bftcom.ice.server.test.SpringProfileRule
+import com.bftcom.ice.datamaps.*
+import com.bftcom.ice.datamaps.impl.query.QueryBuilder
+import com.bftcom.ice.datamaps.impl.query.QueryExecutor
+import com.bftcom.ice.datamaps.impl.dialects.DataServiceExtd
+import com.bftcom.ice.datamaps.impl.util.ShadowService
+import com.bftcom.ice.datamaps.impl.util.SqlStatistics
+import com.bftcom.ice.SpringProfileRule
 import org.junit.Assert
 import org.junit.Rule
 import org.springframework.beans.factory.annotation.Autowired

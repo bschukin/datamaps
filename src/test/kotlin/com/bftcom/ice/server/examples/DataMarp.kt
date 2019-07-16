@@ -1,6 +1,6 @@
 package com.bftcom.ice.server.examples
 
-import com.bftcom.ice.common.maps.*
+import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.server.BaseSpringTests
 import com.bftcom.ice.server.Child
 import com.bftcom.ice.server.Gender
