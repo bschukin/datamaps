@@ -1,10 +1,10 @@
-package com.bftcom.ice.server.examples
+package com.bftcom.ice.datamaps.examples
 
 import com.bftcom.ice.datamaps.f
 import com.bftcom.ice.datamaps.on
 import com.bftcom.ice.datamaps.slice
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Department
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Department
 import org.junit.Ignore
 import org.junit.Test
 

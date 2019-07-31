@@ -2,11 +2,11 @@ package com.bftcom.ice.datamaps.core.services
 
 import com.bftcom.ice.datamaps.dataMapToString
 import com.bftcom.ice.datamaps.core.util.shadow
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Gender
-import com.bftcom.ice.server.Person
-import com.bftcom.ice.server.Person.email
-import com.bftcom.ice.server.assertBodyEquals
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Gender
+import com.bftcom.ice.datamaps.Person
+import com.bftcom.ice.datamaps.Person.email
+import com.bftcom.ice.datamaps.assertBodyEquals
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component

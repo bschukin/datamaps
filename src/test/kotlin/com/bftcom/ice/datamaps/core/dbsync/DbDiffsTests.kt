@@ -2,10 +2,10 @@ package com.bftcom.ice.datamaps.core.dbsync
 
 import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.MFS
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.assertBodyEquals
-import com.bftcom.ice.server.assertEqIgnoreCase
-import com.bftcom.ice.IfSpringProfileActive
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.assertBodyEquals
+import com.bftcom.ice.datamaps.assertEqIgnoreCase
+import com.bftcom.ice.datamaps.IfSpringProfileActive
 import com.bftcom.ice.datamaps.getAllFields
 import org.junit.Assert
 import org.junit.Test
@@ -79,7 +79,7 @@ open class DbDiffsTests : BaseSpringTests() {
 
         println(script)
 
-        assertBodyEquals(script,"""
+        assertBodyEquals(script, """
             ALTER TABLE tbd01 ADD COLUMN IF NOT EXISTS "NEW_FIELD" text;
 
             ALTER TABLE tbd01 ADD COLUMN IF NOT EXISTS "MY_REF_ID" integer;

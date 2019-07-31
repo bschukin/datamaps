@@ -1,10 +1,10 @@
 package com.bftcom.ice.datamaps.core.query
 
-import com.bftcom.ice.assertBodyEquals
+import com.bftcom.ice.datamaps.assertBodyEquals
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Gender
-import com.bftcom.ice.server.Person
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Gender
+import com.bftcom.ice.datamaps.Person
 import com.bftcom.ice.datamaps.core.mappings.DataMappingsService
 import com.bftcom.ice.datamaps.misc.FieldSetProviders
 import com.bftcom.ice.datamaps.misc.IServerFieldSetProvider

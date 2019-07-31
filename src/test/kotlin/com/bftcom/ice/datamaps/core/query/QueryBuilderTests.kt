@@ -1,11 +1,11 @@
 package com.bftcom.ice.datamaps.core.query
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Department
-import com.bftcom.ice.server.Person
-import com.bftcom.ice.server.Person.city
-import com.bftcom.ice.server.assertBodyEquals
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Department
+import com.bftcom.ice.datamaps.Person
+import com.bftcom.ice.datamaps.Person.city
+import com.bftcom.ice.datamaps.assertBodyEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -146,7 +146,7 @@ open class QueryBuilderTests : BaseSpringTests() {
         val q = queryBuilder.createQueryByDataProjection(dp)
 
         println(q.sql)
-        assertBodyEquals( """SELECT
+        assertBodyEquals("""SELECT
                 DEPARTMENT1.ID  AS  ID1,  DEPARTMENT1.NAME  AS  NAME1,  DEPARTMENT2.ID  AS  ID2,
                 DEPARTMENT2.NAME  AS  NAME2,  CITY1.ID  AS  ID3,  CITY1.TITLE  AS  TITLE1,  PERSON1.ID  AS  ID4,
                 PERSON1.NAME  AS  NAME3,  PERSON1.EMAIL  AS  EMAIL1,  PERSON1.LAST_NAME  AS  LAST_NAME1,

@@ -3,9 +3,9 @@ package com.bftcom.ice.datamaps.core.query
 import com.bftcom.ice.datamaps.f
 import com.bftcom.ice.datamaps.not
 import com.bftcom.ice.datamaps.value
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Person
-import com.bftcom.ice.server.assertBodyEquals
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Person
+import com.bftcom.ice.datamaps.assertBodyEquals
 import org.junit.Test
 
 /**
@@ -54,7 +54,7 @@ open class QueryBuilderTextFilterTests : BaseSpringTests() {
 
 
         //NOT
-        dp =Person.on().field("name")
+        dp = Person.on().field("name")
                 .textFilter { not(value("Варшавский")) }
         q = queryBuilder.createQueryByDataProjection(dp)
 

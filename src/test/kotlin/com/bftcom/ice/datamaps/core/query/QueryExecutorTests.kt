@@ -1,10 +1,6 @@
 package com.bftcom.ice.datamaps.core.query
 
-import com.bftcom.ice.datamaps.DataMap
-import com.bftcom.ice.datamaps.Projection
-import com.bftcom.ice.datamaps.UndefinedFieldSet
-import com.bftcom.ice.datamaps.slice
-import com.bftcom.ice.server.*
+import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.core.util.toJson
 import org.junit.Assert
 import org.junit.Test
@@ -245,14 +241,14 @@ open class QueryExecutorTests : BaseSpringTests() {
     @Test
     fun testExecQueryDeleteAll() {
         //создаем проект  а при нем два таска
-        val p = Project{
+        val p = Project {
             it.id = 1000
-            it[name]  = "Project XXX"
-            it[tasks].add(Task{
-                it[name]  = "task01"
+            it[name] = "Project XXX"
+            it[tasks].add(Task {
+                it[name] = "task01"
             })
-            it[tasks].add(Task{
-                it[name]  = "task02"
+            it[tasks].add(Task {
+                it[name] = "task02"
             })
         }
         dataService.flush()

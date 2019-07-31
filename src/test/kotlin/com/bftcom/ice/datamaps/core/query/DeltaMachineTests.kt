@@ -3,7 +3,6 @@ package com.bftcom.ice.datamaps.core.query
 import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.core.delta.DeltaMachine
 import com.bftcom.ice.datamaps.core.delta.DeltaStore
-import com.bftcom.ice.server.*
 import org.junit.Assert
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired

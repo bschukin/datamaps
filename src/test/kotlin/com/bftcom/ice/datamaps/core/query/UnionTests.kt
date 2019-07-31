@@ -1,9 +1,7 @@
 package com.bftcom.ice.datamaps.core.query
 
+import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.DataMapF.Companion.entityDiscriminator
-import com.bftcom.ice.datamaps.f
-import com.bftcom.ice.datamaps.firstOf
-import com.bftcom.ice.server.*
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import javax.annotation.Resource

@@ -5,9 +5,9 @@ import com.bftcom.ice.datamaps.DynamicFieldSet
 import com.bftcom.ice.datamaps.core.delta.DeltaStore
 import com.bftcom.ice.datamaps.projection
 import com.bftcom.ice.datamaps.misc.Date
-import com.bftcom.ice.server.Attach
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Person
+import com.bftcom.ice.datamaps.Attach
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Person
 import com.bftcom.ice.datamaps.core.util.dataMapFromJson
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import com.bftcom.ice.datamaps.core.util.toJson

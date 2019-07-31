@@ -1,7 +1,7 @@
 package com.bftcom.ice.datamaps.common.maps
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.server.Person
+import com.bftcom.ice.datamaps.Person
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Assert

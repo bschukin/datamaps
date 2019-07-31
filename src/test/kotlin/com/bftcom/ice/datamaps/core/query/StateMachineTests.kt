@@ -1,8 +1,8 @@
 package com.bftcom.ice.datamaps.core.query
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.assertEqIgnoreCase
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.assertEqIgnoreCase
 import com.bftcom.ice.datamaps.core.query.StateMachineTests.GuessNumber.tryCount
 import com.bftcom.ice.datamaps.core.util.CacheClearable
 import com.bftcom.ice.datamaps.core.util.printAsJson
@@ -283,12 +283,12 @@ open class StateMachineTests : BaseSpringTests() {
 
 
         //сейча договор в статусе first
-        assertEqIgnoreCase("first", dogovor3[{state().code }])
+        assertEqIgnoreCase("first", dogovor3[{ state().code }])
         assertNull(dogovor3[stateMachineInstanceField])
 
         //переводим во второй статус (без явного указания перехода - само должно определиться)
         stateMachineService.doTransitionByCode(dogovor3, "first")
-        assertEqIgnoreCase("second", dogovor3[{state().code }])
+        assertEqIgnoreCase("second", dogovor3[{ state().code }])
         assertNull(dogovor3[stateMachineInstanceField])
 
         //переводим в третий статус с явным указанием перехода

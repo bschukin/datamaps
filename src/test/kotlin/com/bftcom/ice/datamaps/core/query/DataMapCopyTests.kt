@@ -2,7 +2,6 @@ package com.bftcom.ice.datamaps.core.query
 
 import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.core.util.*
-import com.bftcom.ice.server.*
 import com.bftcom.ice.statemachine.*
 import org.junit.Test
 import javax.annotation.Resource
@@ -22,12 +21,12 @@ open class CopyTests : BaseSpringTests() {
     fun testCopyPerson() {
         //пример создания DataMap с фиелсетами
         val person = Person {
-/* TODO:  Person.id - все равно заменяется порядковым номером из seq - разобраться, почему при явном указании
-            для оракакла IdGenerationType.IDENTITY он не заменяется и из-за этого валится на констрейнте в Child.person_id,
-               а в постгрес IdGenerationType.SEQUENCE и все заменяется на сгенерированный
-               (может надо диалект поправить?)
-               */
-           // it.id = 100L
+            /* TODO:  Person.id - все равно заменяется порядковым номером из seq - разобраться, почему при явном указании
+                        для оракакла IdGenerationType.IDENTITY он не заменяется и из-за этого валится на констрейнте в Child.person_id,
+                           а в постгрес IdGenerationType.SEQUENCE и все заменяется на сгенерированный
+                           (может надо диалект поправить?)
+                           */
+            // it.id = 100L
             it[name] = "Boris"
             it[lastName] = "Schukin"
             it[age] = 38

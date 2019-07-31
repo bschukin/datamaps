@@ -2,7 +2,6 @@ package com.bftcom.ice.datamaps.core.query
 
 import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.core.delta.DataMapTriggersRegistry
-import com.bftcom.ice.server.*
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Assert
 import org.junit.Test

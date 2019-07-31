@@ -2,9 +2,9 @@ package com.bftcom.ice.datamaps.core.util
 
 import com.bftcom.ice.datamaps.Projection
 import com.bftcom.ice.datamaps.slice
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Project
-import com.bftcom.ice.server.assertBodyEquals
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Project
+import com.bftcom.ice.datamaps.assertBodyEquals
 import org.junit.Test
 import kotlin.test.assertEquals
 

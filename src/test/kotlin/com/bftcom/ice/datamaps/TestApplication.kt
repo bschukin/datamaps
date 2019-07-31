@@ -1,4 +1,4 @@
-package com.bftcom.ice.server
+package com.bftcom.ice.datamaps
 
 import com.bftcom.ice.datamaps.core.mappings.AsIsNameMappingsStrategy
 import com.bftcom.ice.datamaps.core.mappings.NameMappingsStrategy

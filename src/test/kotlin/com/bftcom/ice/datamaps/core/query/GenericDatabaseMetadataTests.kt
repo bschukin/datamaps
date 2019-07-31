@@ -1,9 +1,9 @@
 package com.bftcom.ice.datamaps.core.query
 
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.assertBodyEquals
-import com.bftcom.ice.server.assertEqIgnoreCase
-import com.bftcom.ice.IfSpringProfileActive
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.assertBodyEquals
+import com.bftcom.ice.datamaps.assertEqIgnoreCase
+import com.bftcom.ice.datamaps.IfSpringProfileActive
 import com.bftcom.ice.datamaps.core.mappings.DbMetadataService
 import org.junit.Assert
 import org.junit.Test

@@ -4,9 +4,9 @@ import com.bftcom.ice.datamaps.DataMap
 import com.bftcom.ice.datamaps.DynamicEntity
 import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.MFS
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.assertBodyEquals
-import com.bftcom.ice.IfSpringProfileActive
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.assertBodyEquals
+import com.bftcom.ice.datamaps.IfSpringProfileActive
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Ignore
 import org.junit.Test

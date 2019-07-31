@@ -3,9 +3,9 @@ package com.bftcom.ice.datamaps.core.query
 import com.bftcom.ice.datamaps.on
 import com.bftcom.ice.datamaps.projection
 import com.bftcom.ice.datamaps.slice
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Gender
-import com.bftcom.ice.server.Person
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Gender
+import com.bftcom.ice.datamaps.Person
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Test
 

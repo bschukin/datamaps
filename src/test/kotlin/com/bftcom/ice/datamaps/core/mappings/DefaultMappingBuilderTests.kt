@@ -1,9 +1,8 @@
-package com.bftcom.ice.server.mappings
+package com.bftcom.ice.datamaps.core.mappings
 
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Game
-import com.bftcom.ice.server.assertEqIgnoreCase
-import com.bftcom.ice.datamaps.core.mappings.DefaultMappingBuilder
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Game
+import com.bftcom.ice.datamaps.assertEqIgnoreCase
 import org.junit.Assert
 import org.junit.Test
 import java.sql.JDBCType
@@ -41,12 +40,12 @@ open class DefaultMappingBuilderTests : BaseSpringTests() {
 
         Assert.assertEquals(dt.fields.size, 12)
         assertEqIgnoreCase(dt.fields.values.stream().map { f -> f.name }.toList(),
-                listOf("ID", "NAME", "EMAIL", "LASTNAME", "AGE","BIO", "PHOTO", "GENDER","CITY",
-                        "FAVORITEGAME", "CHILDS","WORKERDEPARTMENTS"))
+                listOf("ID", "NAME", "EMAIL", "LASTNAME", "AGE", "BIO", "PHOTO", "GENDER", "CITY",
+                        "FAVORITEGAME", "CHILDS", "WORKERDEPARTMENTS"))
 
         assertEqIgnoreCase(dt.fullGroup.fields.stream().toList(), listOf("ID", "NAME", "EMAIL", "LASTNAME", "AGE",
-                "GENDER","CITY", "FAVORITEGAME", "CHILDS","WORKERDEPARTMENTS"))
-        assertEqIgnoreCase(dt.defaultGroup.fields.stream().toList(), listOf("ID", "NAME", "EMAIL","LASTNAME","AGE"))
+                "GENDER", "CITY", "FAVORITEGAME", "CHILDS", "WORKERDEPARTMENTS"))
+        assertEqIgnoreCase(dt.defaultGroup.fields.stream().toList(), listOf("ID", "NAME", "EMAIL", "LASTNAME", "AGE"))
         assertEqIgnoreCase(dt.refsGroup.fields.stream().toList(), listOf("GENDER", "CITY", "FAVORITEGAME"))
         assertEqIgnoreCase(dt.listsGroup.fields.stream().toList(), listOf("CHILDS", "WORKERDEPARTMENTS"))
         assertEqIgnoreCase(dt.blobsGroup.fields.stream().toList(), listOf("BIO", "PHOTO"))
@@ -74,7 +73,7 @@ open class DefaultMappingBuilderTests : BaseSpringTests() {
         dt.fields.forEach{f-> println(f.value)}
         println(dt.groups)
         Assert.assertEquals(dt.fields.size, 6)
-        assertEqIgnoreCase(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("id", "name", "parent","city","boss", "departments"))
+        assertEqIgnoreCase(dt.fields.values.stream().map { f -> f.name }.toList(), listOf("id", "name", "parent", "city", "boss", "departments"))
 
         assertEqIgnoreCase(dt.defaultGroup.fields.stream().toList(), listOf("id", "name"))
     }

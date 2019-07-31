@@ -1,10 +1,10 @@
 package com.bftcom.ice.datamaps.common.general
 
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Gender
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Gender
 import org.junit.Assert
 import org.junit.Test
-import com.bftcom.ice.assertBodyEquals
+import com.bftcom.ice.datamaps.assertBodyEquals
 import com.bftcom.ice.datamaps.misc.DbRecordNotFound
 import com.bftcom.ice.datamaps.misc.toExceptionInfo
 import kotlin.test.assertEquals

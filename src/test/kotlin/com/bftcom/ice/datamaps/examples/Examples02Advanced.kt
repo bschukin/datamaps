@@ -1,12 +1,12 @@
-package com.bftcom.ice.server.examples
+package com.bftcom.ice.datamaps.examples
 
 import com.bftcom.ice.datamaps.f
 import com.bftcom.ice.datamaps.on
 import com.bftcom.ice.datamaps.projection
 import com.bftcom.ice.datamaps.slice
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Gender
-import com.bftcom.ice.server.Project
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Gender
+import com.bftcom.ice.datamaps.Project
 import org.junit.Assert
 import org.junit.Test
 

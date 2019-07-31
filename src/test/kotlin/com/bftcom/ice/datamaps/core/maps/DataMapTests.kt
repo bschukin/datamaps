@@ -3,10 +3,10 @@ package com.bftcom.ice.datamaps.common.maps
 import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.misc.CiMap
 import com.bftcom.ice.datamaps.misc.GUID
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Game
-import com.bftcom.ice.server.Gender
-import com.bftcom.ice.server.Person
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Game
+import com.bftcom.ice.datamaps.Gender
+import com.bftcom.ice.datamaps.Person
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Assert
 import org.junit.Assert.*
@@ -80,7 +80,7 @@ open class DataMapTests : BaseSpringTests() {
 
         //create
 
-        val m1 = Gender{
+        val m1 = Gender {
             it[id] = 100L
             it[name] = "ccc"
         }
@@ -464,7 +464,7 @@ open class DataMapTests : BaseSpringTests() {
     @Test
     fun testReadonlyDataMaps() {
 
-        val p = Person{
+        val p = Person {
             it[age] = 500
             it[name] = "Helloman"
         }

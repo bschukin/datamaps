@@ -1,7 +1,7 @@
 package com.bftcom.ice.datamaps.core.query
 
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.FooBar
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.FooBar
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Test
 import org.springframework.transaction.annotation.Transactional

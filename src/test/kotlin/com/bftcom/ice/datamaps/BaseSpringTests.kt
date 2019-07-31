@@ -1,11 +1,9 @@
-package com.bftcom.ice.server
+package com.bftcom.ice.datamaps
 
-import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.core.query.QueryBuilder
 import com.bftcom.ice.datamaps.core.query.QueryExecutor
 import com.bftcom.ice.datamaps.core.util.ShadowService
 import com.bftcom.ice.datamaps.core.util.SqlStatistics
-import com.bftcom.ice.SpringProfileRule
 import org.junit.Assert
 import org.junit.Rule
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,7 +42,7 @@ abstract class BaseSpringTests : AbstractTransactionalJUnit4SpringContextTests()
 
 
     val dataServiceExtd: DataServiceExtd
-        get() = dataService as DataServiceExtd
+        get() = dataService
 
     @Resource
     lateinit var queryExecutor: QueryExecutor
@@ -89,10 +87,12 @@ abstract class BaseSpringTests : AbstractTransactionalJUnit4SpringContextTests()
 fun eraseAllWs(string: String): String = string.replace("\\s".toRegex(), "").replace("\"", "")
 
 
-fun assertBodyEquals(string1: String, string2: String?) {
-    if (string2 == null)
-        return
-    Assert.assertEquals(eraseAllWs(string1).toLowerCase(), eraseAllWs(string2).toLowerCase())
+
+fun assertBodyEquals(string1: String, string2: String) {
+    val s1 = eraseAllWs(string1).toLowerCase()
+    val s2 = eraseAllWs(string2).toLowerCase()
+    if(s1!=s2)
+        throw RuntimeException("strings are not equal")
 }
 
 fun assertEqIgnoreCase(string1: String, string2: String) {

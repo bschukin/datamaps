@@ -5,7 +5,7 @@ import com.bftcom.ice.datamaps.MFS
 import com.bftcom.ice.datamaps.Temporal
 import com.bftcom.ice.datamaps.f
 import com.bftcom.ice.datamaps.misc.Date
-import com.bftcom.ice.server.BaseSpringTests
+import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Test
 

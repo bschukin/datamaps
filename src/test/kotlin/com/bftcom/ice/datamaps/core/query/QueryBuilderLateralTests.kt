@@ -1,9 +1,9 @@
     package com.bftcom.ice.datamaps.core.query
 
-import com.bftcom.ice.server.BaseSpringTests
+import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.projection
-import com.bftcom.ice.server.Project
-import com.bftcom.ice.IfSpringProfileActive
+import com.bftcom.ice.datamaps.Project
+import com.bftcom.ice.datamaps.IfSpringProfileActive
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Test
 

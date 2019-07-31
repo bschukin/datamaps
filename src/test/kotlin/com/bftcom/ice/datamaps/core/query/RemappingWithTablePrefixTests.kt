@@ -3,7 +3,7 @@ package com.bftcom.ice.datamaps.core.query
 import com.bftcom.ice.datamaps.DataService
 import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.MFS
-import com.bftcom.ice.assertBodyEquals
+import com.bftcom.ice.datamaps.assertBodyEquals
 import com.bftcom.ice.datamaps.core.mappings.CamelUnderscoreNameMappingsStrategy
 import com.bftcom.ice.datamaps.core.mappings.NameMappingsStrategy
 import com.bftcom.ice.datamaps.core.util.printAsJson

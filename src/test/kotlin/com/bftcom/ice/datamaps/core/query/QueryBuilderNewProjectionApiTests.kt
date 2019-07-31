@@ -1,7 +1,6 @@
 package com.bftcom.ice.datamaps.core.query
 
-import com.bftcom.ice.server.*
-import com.bftcom.ice.datamaps.on
+import com.bftcom.ice.datamaps.*
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

@@ -3,7 +3,7 @@ package com.bftcom.ice.datamaps.core.query
 import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.MFS
 import com.bftcom.ice.datamaps.StringEnum
-import com.bftcom.ice.server.BaseSpringTests
+import com.bftcom.ice.datamaps.BaseSpringTests
 import org.junit.Assert
 import org.junit.Test
 import org.springframework.transaction.annotation.Transactional

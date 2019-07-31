@@ -1,9 +1,9 @@
 package com.bftcom.ice.datamaps.core.query
 
 import com.bftcom.ice.datamaps.dataMapToString
-import com.bftcom.ice.server.Attach
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.IfSpringProfileActive
+import com.bftcom.ice.datamaps.Attach
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.IfSpringProfileActive
 import com.bftcom.ice.datamaps.inSilence
 import org.junit.Test
 import kotlin.test.assertEquals

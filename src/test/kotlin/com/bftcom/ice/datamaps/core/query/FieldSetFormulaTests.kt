@@ -1,11 +1,7 @@
 package com.bftcom.ice.datamaps.core.query
 
-import com.bftcom.ice.datamaps.Field
-import com.bftcom.ice.datamaps.MFS
-import com.bftcom.ice.datamaps.f
-import com.bftcom.ice.datamaps.value
-import com.bftcom.ice.server.*
-import com.bftcom.ice.IfSpringProfileActive
+import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.*
 import org.junit.Assert
 import org.junit.Test
 

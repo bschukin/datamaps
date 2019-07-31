@@ -1,8 +1,8 @@
 package com.bftcom.ice.datamaps.core.query
 
 import com.bftcom.ice.datamaps.DataMap
-import com.bftcom.ice.server.BaseSpringTests
-import com.bftcom.ice.server.Person
+import com.bftcom.ice.datamaps.BaseSpringTests
+import com.bftcom.ice.datamaps.Person
 import org.junit.Test
 import org.springframework.stereotype.Service
 import kotlin.test.assertEquals

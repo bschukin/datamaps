@@ -1,6 +1,4 @@
-package com.bftcom.ice.server
-
-import com.bftcom.ice.datamaps.*
+package com.bftcom.ice.datamaps
 
 object Gender : MFS<Gender>() {
     val id = Field.id()
