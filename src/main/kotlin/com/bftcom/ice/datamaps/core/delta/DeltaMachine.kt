@@ -6,7 +6,7 @@ import com.bftcom.ice.datamaps.misc.throwImpossible
 import com.bftcom.ice.datamaps.core.dialects.DbDialect
 import com.bftcom.ice.datamaps.core.util.SequenceIncrementor
 import com.bftcom.ice.datamaps.core.query.SqlQueryContext
-import com.bftcom.ice.datamaps.core.util.DbExceptionsMessageTranslator
+import com.bftcom.ice.datamaps.core.dialects.DbExceptionsMessageTranslator
 import com.bftcom.ice.datamaps.core.mappings.DataMapping
 import com.bftcom.ice.datamaps.core.mappings.DataMappingsService
 import com.bftcom.ice.datamaps.core.mappings.IdGenerationType

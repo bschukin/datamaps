@@ -4,7 +4,7 @@ import com.bftcom.ice.datamaps.f
 import com.bftcom.ice.datamaps.slice
 import com.bftcom.ice.datamaps.Attach
 import com.bftcom.ice.datamaps.BaseSpringTests
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Test
 

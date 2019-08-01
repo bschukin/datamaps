@@ -1,6 +1,7 @@
 package com.bftcom.ice.datamaps.core.query
 
 import com.bftcom.ice.datamaps.*
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import com.bftcom.ice.datamaps.misc.DbRecordNotFound
 import com.bftcom.ice.datamaps.misc.DbUniqueConstraintException
 import com.bftcom.ice.datamaps.misc.toExceptionInfo

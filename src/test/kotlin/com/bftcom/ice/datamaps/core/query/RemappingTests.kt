@@ -6,7 +6,7 @@ import com.bftcom.ice.datamaps.Field
 import com.bftcom.ice.datamaps.MFS
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.assertBodyEquals
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Ignore
 import org.junit.Test

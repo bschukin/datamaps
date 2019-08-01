@@ -3,7 +3,7 @@ package com.bftcom.ice.datamaps.core.query
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.Person
 import com.bftcom.ice.datamaps.assertBodyEquals
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import org.junit.Test
 
 /**

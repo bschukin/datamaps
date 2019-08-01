@@ -9,7 +9,7 @@ import com.bftcom.ice.datamaps.misc.__infinity
 import com.bftcom.ice.datamaps.misc.infinity__
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.DateTest
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import com.bftcom.ice.datamaps.core.util.dataMapFromJson
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import com.bftcom.ice.datamaps.core.util.toJson

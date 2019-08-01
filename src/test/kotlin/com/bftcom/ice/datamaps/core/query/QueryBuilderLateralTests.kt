@@ -3,7 +3,7 @@
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.projection
 import com.bftcom.ice.datamaps.Project
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Test
 

@@ -1,6 +1,6 @@
 package com.bftcom.ice.datamaps.core.query
 
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import com.bftcom.ice.datamaps.*
 import org.junit.Assert
 import org.junit.Test

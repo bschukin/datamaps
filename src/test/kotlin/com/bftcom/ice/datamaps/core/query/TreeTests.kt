@@ -4,7 +4,7 @@ import com.bftcom.ice.datamaps.TreeQueryOptions
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.Department
 import com.bftcom.ice.datamaps.assertBodyEquals
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Test
 import javax.annotation.Resource

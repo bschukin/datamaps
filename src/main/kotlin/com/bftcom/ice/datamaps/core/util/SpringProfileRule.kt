@@ -1,4 +1,4 @@
-package com.bftcom.ice.datamaps
+package com.bftcom.ice.datamaps.core.util
 
 import org.junit.AssumptionViolatedException
 import org.junit.rules.TestRule

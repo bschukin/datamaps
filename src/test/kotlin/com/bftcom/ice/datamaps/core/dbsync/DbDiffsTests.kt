@@ -5,7 +5,7 @@ import com.bftcom.ice.datamaps.MFS
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.assertBodyEquals
 import com.bftcom.ice.datamaps.assertEqIgnoreCase
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import com.bftcom.ice.datamaps.getAllFields
 import org.junit.Assert
 import org.junit.Test

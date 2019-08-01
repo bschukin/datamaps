@@ -1,9 +1,7 @@
-package com.bftcom.ice.datamaps.core.util
+package com.bftcom.ice.datamaps.core.dialects
 
 
 import com.bftcom.ice.datamaps.FieldSet
-import com.bftcom.ice.datamaps.core.dialects.DbDialect
-import com.bftcom.ice.datamaps.core.dialects.PostgresqlDialect
 import com.bftcom.ice.datamaps.misc.FieldSetRepo
 import com.bftcom.ice.datamaps.core.mappings.DbMetadataService
 import com.bftcom.ice.datamaps.core.mappings.DataMapping

@@ -6,7 +6,7 @@ import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.assertEqIgnoreCase
 import com.bftcom.ice.datamaps.core.dialects.DbDialect
 import com.bftcom.ice.datamaps.core.util.shadow
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.core.util.IfSpringProfileActive
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.ByteArrayResource
