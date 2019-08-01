@@ -5,11 +5,8 @@ object Gender : MFS<Gender>() {
     val name = Field.string("name")
     val isClassic = Field.boolean("isClassic")
 
-    override val nativeKey: List<Field<*, *>> by lazy{
-        listOf(name)
-    }
+    override val nativeKey = listOf(name)
 }
-typealias GDR = Gender
 
 object City : MFS<City>() {
     val id = Field.id()
@@ -29,9 +26,7 @@ object Person : MFS<Person>() {
     val photo = Field.blob("photo")
     val favoriteGame = Field.reference("favoriteGame", Game)
 
-    override val nativeKey: List<Field<*, *>> by lazy{
-        listOf(Gender.name)
-    }
+    override val nativeKey = listOf(Gender.name)
 }
 
 object Child : MFS<Child>() {
@@ -39,8 +34,6 @@ object Child : MFS<Child>() {
     val id = Field.int("id")
     val name = Field.string("name")
 }
-
-typealias WRKR = Person
 
 object Department : MFS<Department>() {
     val id = Field.id()
@@ -65,8 +58,6 @@ object Task : MFS<Task>() {
     val name = Field.string("name")
     val checks = Field.list("checklists", Check)
 }
-
-typealias TSK = Task
 
 object Check : MFS<Check>("Checklist") {
     val id = Field.id()
@@ -111,25 +102,6 @@ object DateTest: MFS<DateTest>() {
     val id = Field.stringId()
     val timestamp = Field.timestamp("timestamp")
     val tdate = Field.date("tdate")
-}
-
-object IgorsMap : MFS<IgorsMap>("Igorsmap", "IgorsMap") {
-    val id = Field.id()
-    val upperName = Field.string("upperName")
-    val data = Field.jsonObj("data", IgorsMap2)
-    override val nativeKey: List<Field<*, *>>
-        get() = listOf(upperName)
-
-    object IgorsMap2 : MFS<IgorsMap2>(DataMap.DYNAMIC_ENTITY) {
-
-        val innerName = Field.string("innerName")
-        val part = Field.jsonObj("part", IgorsMap3)
-
-        object IgorsMap3 : MFS<IgorsMap3>(DataMap.DYNAMIC_ENTITY) {
-            val foo = Field.string("foo")
-            val bar = Field.string("bar")
-        }
-    }
 }
 
 object FooBar : MFS<FooBar>() {
