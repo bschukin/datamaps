@@ -27,7 +27,7 @@ import kotlin.streams.toList
  */
 
 @Service
-open class QueryBuilder {
+internal open class QueryBuilder {
 
     @Autowired
     private lateinit var dataMappingsService: DataMappingsService

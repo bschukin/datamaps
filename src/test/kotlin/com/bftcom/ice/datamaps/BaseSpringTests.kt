@@ -35,7 +35,7 @@ abstract class BaseSpringTests : AbstractTransactionalJUnit4SpringContextTests()
     lateinit var env: Environment
 
     @Autowired
-    lateinit var queryBuilder: QueryBuilder
+    internal lateinit var queryBuilder: QueryBuilder
 
     @Autowired
     open lateinit var dataService: DataServiceExtd
@@ -45,7 +45,7 @@ abstract class BaseSpringTests : AbstractTransactionalJUnit4SpringContextTests()
         get() = dataService
 
     @Resource
-    lateinit var queryExecutor: QueryExecutor
+    internal lateinit var queryExecutor: QueryExecutor
 
     @Autowired
     lateinit var sqlStatistics: SqlStatistics

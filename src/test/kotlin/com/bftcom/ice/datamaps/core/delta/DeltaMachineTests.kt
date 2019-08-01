@@ -1,8 +1,6 @@
-package com.bftcom.ice.datamaps.core.query
+package com.bftcom.ice.datamaps.core.delta
 
 import com.bftcom.ice.datamaps.*
-import com.bftcom.ice.datamaps.core.delta.DeltaMachine
-import com.bftcom.ice.datamaps.core.delta.DeltaStore
 import org.junit.Assert
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired

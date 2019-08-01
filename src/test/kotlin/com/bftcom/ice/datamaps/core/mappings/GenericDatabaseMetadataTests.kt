@@ -1,10 +1,9 @@
-package com.bftcom.ice.datamaps.core.query
+package com.bftcom.ice.datamaps.core.mappings
 
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.assertBodyEquals
 import com.bftcom.ice.datamaps.assertEqIgnoreCase
 import com.bftcom.ice.datamaps.IfSpringProfileActive
-import com.bftcom.ice.datamaps.core.mappings.DbMetadataService
 import org.junit.Assert
 import org.junit.Test
 import org.springframework.jdbc.core.PreparedStatementCreator

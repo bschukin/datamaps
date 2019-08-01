@@ -1,4 +1,4 @@
-package com.bftcom.ice.datamaps.core.query
+package com.bftcom.ice.datamaps.core.delta
 
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.DataMap

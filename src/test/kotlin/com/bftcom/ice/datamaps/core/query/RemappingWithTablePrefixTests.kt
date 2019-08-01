@@ -29,7 +29,7 @@ import kotlin.test.assertEquals
 open class RemappingWithTablePrefixTests : AbstractTransactionalJUnit4SpringContextTests() {
 
     @Autowired
-    lateinit var queryBuilder: QueryBuilder
+    internal lateinit var queryBuilder: QueryBuilder
 
     @Autowired
     lateinit var dataService: DataService

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 import javax.annotation.Resource
 
 @Service
-class QueryUnionBuilder {
+internal class QueryUnionBuilder {
 
     @Autowired
     private lateinit var genericDbMetadataService: GenericDbMetadataService
@@ -122,7 +122,7 @@ class QueryUnionBuilder {
 }
 
 @Service
-class UnionQueryFilterBuilder : QueryFilterBuilder() {
+internal class UnionQueryFilterBuilder : QueryFilterBuilder() {
 
     override fun getFieldNameInQuery(qr: QueryBuildContext, field: String): String {
         if (field == entityDiscriminator)
@@ -148,7 +148,7 @@ class UnionQueryFilterBuilder : QueryFilterBuilder() {
 
 }
 
-class QueryVariablesResolverU(private val builder: UnionQueryFilterBuilder, private val qr: QueryBuildContext) : StrLookup<String>() {
+internal class QueryVariablesResolverU(private val builder: UnionQueryFilterBuilder, private val qr: QueryBuildContext) : StrLookup<String>() {
     override fun lookup(key: String?): String {
         return builder.getFieldNameInQuery2(qr, key!!)
     }

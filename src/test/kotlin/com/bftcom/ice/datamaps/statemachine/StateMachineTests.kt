@@ -1,9 +1,9 @@
-package com.bftcom.ice.datamaps.core.query
+package com.bftcom.ice.datamaps.statemachine
 
 import com.bftcom.ice.datamaps.*
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.assertEqIgnoreCase
-import com.bftcom.ice.datamaps.core.query.StateMachineTests.GuessNumber.tryCount
+import com.bftcom.ice.datamaps.statemachine.StateMachineTests.GuessNumber.tryCount
 import com.bftcom.ice.datamaps.core.util.CacheClearable
 import com.bftcom.ice.datamaps.core.util.printAsJson
 import com.bftcom.ice.statemachine.*
@@ -166,10 +166,10 @@ open class StateMachineTests : BaseSpringTests() {
                             scalars()
                         }
                         state {
-                           +code
+                            +code
                         }
                     }
-                    state{
+                    state {
                         +code
                         +group
                     }
@@ -224,7 +224,7 @@ open class StateMachineTests : BaseSpringTests() {
         val dogovor2 = dataService.find_(
                 Dogovor2.slice {
                     withId(d.id)
-                    state{
+                    state {
                         +code
                     }
                 })
@@ -274,7 +274,7 @@ open class StateMachineTests : BaseSpringTests() {
                 Dogovor3.slice {
                     withId(d.id)
                     full()
-                    state{
+                    state {
                         +code
                     }
                 })

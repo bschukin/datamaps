@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
  * Created by b.schukin on 21.11.2017.
  */
 @Service
-open class QueryFilterBuilder {
+internal open class QueryFilterBuilder {
 
     @Autowired
     private lateinit var dbDialect: DbDialect

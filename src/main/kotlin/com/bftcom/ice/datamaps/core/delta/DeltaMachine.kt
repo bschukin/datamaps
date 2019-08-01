@@ -94,7 +94,7 @@ class DeltaMachine {
         doUpdate(entity, sql, emptyMap())
     }
 
-    fun deleteByProjection(q: SqlQueryContext) {
+    internal fun deleteByProjection(q: SqlQueryContext) {
         doUpdate(q.qr.root.dm.name, q.sql, convertMapValuesForDb(q.params.toMutableMap()))
     }
 

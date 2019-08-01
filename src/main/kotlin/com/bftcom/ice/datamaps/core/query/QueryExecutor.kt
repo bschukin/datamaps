@@ -17,7 +17,7 @@ import java.sql.ResultSet
  * Created by Щукин on 03.11.2017.
  */
 @Service
-class QueryExecutor {
+internal class QueryExecutor {
 
     @Autowired
     private lateinit var namedParameterJdbcTemplate: NamedParameterJdbcOperations

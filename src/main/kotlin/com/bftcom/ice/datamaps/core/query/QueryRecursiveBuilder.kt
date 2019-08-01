@@ -9,7 +9,7 @@ import javax.annotation.Resource
 const val __level = "__level"
 
 @Service
-class QueryRecursiveBuilder {
+internal class QueryRecursiveBuilder {
 
 
     @Resource

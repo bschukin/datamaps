@@ -1,13 +1,12 @@
 package com.bftcom.ice.datamaps.core.query
 
-import com.bftcom.ice.datamaps.DataMap
-import com.bftcom.ice.datamaps.Field
-import com.bftcom.ice.datamaps.MFS
-import com.bftcom.ice.datamaps.assertBodyEquals
-import com.bftcom.ice.datamaps.BaseSpringTests
-import com.bftcom.ice.datamaps.IfSpringProfileActive
+import com.bftcom.ice.datamaps.*
+import com.bftcom.ice.datamaps.misc.DbRecordNotFound
 import com.bftcom.ice.datamaps.misc.DbUniqueConstraintException
+import com.bftcom.ice.datamaps.misc.toExceptionInfo
+import org.junit.Assert
 import org.junit.Test
+import kotlin.test.assertEquals
 
 /**
  * Created by Щукин on 03.11.2017.
@@ -31,6 +30,36 @@ open class DbExceptionTests : BaseSpringTests() {
         val id = Field.id()
         val name = Field.string("name")
 
+    }
+
+    @Test
+    fun testExceptionInfo() {
+        try {
+            jdbcTemplate.query("select * from huemae", {})
+        } catch (e: Exception) {
+            val ei = e.toExceptionInfo()
+            println(ei)
+            println("===================")
+            println(ei.stackTrace)
+            assertTrue(ei.clazz.isNotEmpty())
+            assertTrue(ei.stackTrace.isNotEmpty())
+            assertTrue(ei.cause!!.stackTrace.isEmpty())
+
+        }
+    }
+
+    @Test
+    fun testObjectNotFoundException() {
+        try {
+            dataService.find_(Gender.withId(66))
+        } catch (e: DbRecordNotFound) {
+
+            assertBodyEquals(e.entity, Gender.entity)
+            assertEquals(e.id, 66)
+            return
+        }
+
+        Assert.fail()
     }
 
     @Test

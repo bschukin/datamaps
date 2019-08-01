@@ -1,7 +1,6 @@
-package com.bftcom.ice.datamaps.core.services
+package com.bftcom.ice.datamaps.core.util
 
 import com.bftcom.ice.datamaps.dataMapToString
-import com.bftcom.ice.datamaps.core.util.shadow
 import com.bftcom.ice.datamaps.BaseSpringTests
 import com.bftcom.ice.datamaps.Gender
 import com.bftcom.ice.datamaps.Person

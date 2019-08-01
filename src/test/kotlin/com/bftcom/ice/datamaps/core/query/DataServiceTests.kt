@@ -12,7 +12,7 @@ import org.junit.Test
 /**
  * Created by Щукин on 03.11.2017.
  */
-open class DataServiceTests01Basics : BaseSpringTests()
+open class DataServiceTests : BaseSpringTests()
 {
 
     @Test

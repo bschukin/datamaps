@@ -42,7 +42,7 @@ open class CaseInsensitiveKeyMap<V>(private val map: MutableMap<Key, V> = mutabl
     }
 
     override fun get(key: String): V? {
-        return this.map.get(convertKey(key))
+        return this.map[convertKey(key)]
     }
 
     override fun remove(key: String): V? {
@@ -52,13 +52,13 @@ open class CaseInsensitiveKeyMap<V>(private val map: MutableMap<Key, V> = mutabl
     override fun put(key: String, value: V): V? {
         val k = convertKey(key)
         val old = this.map.remove(k)
-        this.map.put(k, value)
+        this.map[k] = value
         return old
     }
 
     override fun putAll(from: Map<out String, V>) {
         for ((key, value) in from) {
-            this.put(key, value)
+            this[key] = value
         }
     }
 
@@ -76,7 +76,7 @@ open class CaseInsensitiveKeyMap<V>(private val map: MutableMap<Key, V> = mutabl
     }
 
     private fun convertKey(key: String): Key {
-        return Key(key!!)
+        return Key(key)
     }
 
     override val keys: MutableSet<String>
@@ -100,24 +100,20 @@ open class CaseInsensitiveKeyMap<V>(private val map: MutableMap<Key, V> = mutabl
     }
 
     class Key(val key: String) {
-        private val lcKey: String
-
-        init {
-            this.lcKey = key.toLowerCase()
-        }
+        private val lcKey: String = key.toLowerCase()
 
         override fun hashCode(): Int {
             return this.lcKey.hashCode()
         }
 
-        override fun equals(obj: Any?): Boolean {
-            if (this === obj) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
                 return true
-            } else if (obj == null) {
+            } else if (other== null) {
                 return false
             }
-            val other = obj as Key?
-            return this.lcKey == other!!.lcKey
+            val otherKey = other as Key?
+            return this.lcKey == otherKey?.lcKey
         }
 
     }
@@ -125,11 +121,15 @@ open class CaseInsensitiveKeyMap<V>(private val map: MutableMap<Key, V> = mutabl
     override fun toString(): String = "orci-map{" + this.map { e -> entryToString(e) }
             .joinToString(";") + "}"
 
-    internal fun entryToString(e: Map.Entry<*, *>): String = with(e) { "$key=$value" }
+    private fun entryToString(e: Map.Entry<*, *>): String = with(e) { "$key=$value" }
 
     override fun equals(other: Any?): Boolean {
         val other2 = if (other is CaseInsensitiveKeyMap<*>) other.toMap() else other
-        return this.toMap().equals(other2)
+        return this.toMap() == other2
+    }
+
+    override fun hashCode(): Int {
+        return map.hashCode()
     }
 
     class ReadonlyCaseInsensitiveKeyMap<V>(target: CaseInsensitiveKeyMap<V>) : CaseInsensitiveKeyMap<V>() {
@@ -247,7 +247,6 @@ class OrderedCaseInsensitiveMap<V> : CaseInsensitiveKeyMap<V>() {
 
 
 }
-typealias OciMap<V> = OrderedCaseInsensitiveMap<V>
 
 typealias CiMap<V> = CaseInsensitiveKeyMap<V>
 

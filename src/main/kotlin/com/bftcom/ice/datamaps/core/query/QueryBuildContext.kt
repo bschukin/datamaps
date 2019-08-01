@@ -17,7 +17,7 @@ import java.util.stream.Collectors
 /**
  * Created by b.schukin on 14.11.2017.
  */
-class QueryBuildContext(val queryBuilder: QueryBuilder? = null, paramCounterStart: Int = 0) {
+internal class QueryBuildContext(val queryBuilder: QueryBuilder? = null, paramCounterStart: Int = 0) {
 
     //карта ключ: {алиасТаблицы.имяколонки}-->{уникальный алиас колонки в запросе}
     var columnAliases = linkedCaseInsMapOf<String>()
@@ -274,7 +274,7 @@ class QueryLevel(var dm: DataMapping, var dp: DataProjection, var alias: String,
 }
 
 
-open class MappingContext(val q: SqlQueryContext) {
+internal open class MappingContext(val q: SqlQueryContext) {
 
     //карта карт: "Ентити" -> {карта {id of entity}->{DataMap}  }
     protected var mapOfMaps = caseInsMapOf<MutableMap<Any, DataMap>>()
@@ -311,7 +311,7 @@ open class MappingContext(val q: SqlQueryContext) {
 
 }
 
-class UnionMappingContext(q: SqlQueryContext) : MappingContext(q) {
+internal class UnionMappingContext(q: SqlQueryContext) : MappingContext(q) {
 
     private var resultMap = linkedMapOf<DataMap, DataMap>()
 
@@ -335,19 +335,19 @@ class UnionMappingContext(q: SqlQueryContext) : MappingContext(q) {
     }
 }
 
-typealias RowMapper = (MappingContext, ResultSet) -> Unit
+internal typealias RowMapper = (MappingContext, ResultSet) -> Unit
 
-class SqlQueryContext(val sql: String, val params: Map<String, Any?>,
+internal class SqlQueryContext(val sql: String, val params: Map<String, Any?>,
                       var qr: QueryBuildContext)
 
-data class SqlUnionQueryContext(val sql: String, val params: Map<String, Any?>,
+internal data class SqlUnionQueryContext(val sql: String, val params: Map<String, Any?>,
                                 val firstCtx: SqlQueryContext,
                                 val qr: Map<String, SqlQueryContext>)
 
 
 typealias PostMapper = (List<DataMapF<*>>, DataService) -> List<DataMapF<*>>
 
-class SPair(s1: String, s2: String) {
+private class SPair(s1: String, s2: String) {
 
     private val s1: String = s1.toLowerCase()
     private val s2: String = s2.toLowerCase()
@@ -392,7 +392,7 @@ internal class Join(private val joinString: String) {
 }
 
 
-open class QueryVariablesResolver(protected val qr: QueryBuildContext, private val ql: QueryLevel) : StrLookup<String>() {
+internal open class QueryVariablesResolver(protected val qr: QueryBuildContext, private val ql: QueryLevel) : StrLookup<String>() {
     override fun lookup(key: String?): String {
         return qr.getFieldNameInQuery(key!!, ql.alias, ql)
     }
