@@ -53,8 +53,8 @@ open class DeltaMachineTests : BaseSpringTests() {
         val gender = dataService.get(Gender.entity, 2L)!!
         println(gender)
 
-        gender[GDR.name] = "men"
-        gender[GDR.name] = "men2"
+        gender[Gender.name] = "men"
+        gender[Gender.name] = "men2"
 
         val list = deltaMachine.createAndExeUpdateStatements(DeltaStore.collectBuckets())
 
@@ -109,7 +109,7 @@ open class DeltaMachineTests : BaseSpringTests() {
                         .where("{{name}} = 'Fillip Bedrosovich'"))!!
 
 
-        Assert.assertEquals(worker2[WRKR.gender][GDR.name], "woman")
+        Assert.assertEquals(worker2[Person.gender().name], "woman")
 
     }
 

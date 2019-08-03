@@ -10,6 +10,7 @@ import org.junit.Test
 
 
 /***
+ * ПРИМЕРЫ РАБОТЫ С КАРТАМИ БЕЗ СОЗДАНИЯ ФИЕЛДСЕТОВ ("DYNAMIC API")
  * Базовые примеры на слайсы и проекции
  */
 open class DataMarp : BaseSpringTests() {
@@ -49,92 +50,6 @@ open class DataMarp : BaseSpringTests() {
     }
 
     @Test
-    fun dataMapsBasicOperations2() {
-
-        //пример создания DataMap с фиелсетами
-        val person = Person.create {
-            it.id = 100L
-            it[name] = "Boris"
-            it[lastName] = "Schukin"
-            it[age] = 38
-            //референс
-            it[gender] = find_(Gender.filter { name eq "man" })
-            //список
-            it[childs].add(
-                    Child.create {
-                        it[name] = "Sasha"
-                        it[age] = 13
-                    }
-            )
-        }
-
-
-        //примеры чтения по индексатору мапа
-        val age1 = person[Person.age]
-
-        //использование оператора "()"
-        // доступ к свойству гендер справочника "gender"
-        val genderName = person[Person.gender][Gender.name]
-
-        //использование функции "list"
-        // доступ к свойству гендер справочника "gender"
-        val childName = person[Person.childs][0][Person.name]
-
-        print(age1.toString() + genderName + childName)
-
-        //2я версия
-        with(Person)
-        {
-            val age2 = person[age]
-
-            //использование оператора "()"
-            // доступ к свойству гендер справочника "gender"
-            val genderName2 = person[gender][Gender.name]
-
-            // использование nested свойства
-            val childName2 = person[childs[0].name]
-        }
-
-        //находим всех персон
-        var persons = dataService.findAll(Projection("Person"))
-
-    }
-
-
-    @Test
-    fun dataMapsAndFieldSets() {
-        //create API
-        val m1 = Gender {
-            it[id] = 100L
-            it[name] = "ccc"
-        }
-
-        val myGender = Gender.create {
-            it[id] = 100L
-            it[name] = "был такой"
-        }
-
-        val person = Person.create {
-            it[id] = 100L
-            it[name] = "some hero"
-            it[gender] = myGender
-            it[gender().name] = "стал другой"
-        }
-
-        //update API
-        //часть вторая - апдейты
-        update(Gender, m1).with {
-            it[name] = "zzz"
-        }
-
-        Person.update(person) {
-            it[name] = "some zero"
-            it[gender] = m1
-            it[gender().name] = "совсем иной"
-        }
-    }
-
-    @Test
     fun testInsertAndUpdate0() {
 
         val w0 = DataMap("Person", isNew = true)
@@ -153,27 +68,6 @@ open class DataMarp : BaseSpringTests() {
 
         dataService.flush()
     }
-
-    @Test
-    fun testInsertAndUpdate() {
-
-        Person.create {
-            it[name] = "Fiedor"
-            it[email] = "dostoevsky@yandex.ru"
-        }
-
-        dataService.flush()
-
-        val w = dataService.find_(Person.filter { name eq "Fiedor" })
-
-        Person.update(w) {
-            it[name] = "Fiedor Dostoevsky"
-            it[gender] = dataService.find(on(Gender).where("{{name}}='man'"))
-        }
-
-        dataService.flush()
-    }
-
 
     @Test
     fun basicProjectionUses() {
@@ -252,49 +146,6 @@ open class DataMarp : BaseSpringTests() {
     }
 
 
-    /**
-     * Пример "плоского" API проекций. Просто перечисляются поля через точку.
-     * Только эти поля и будут вытащены
-     */
-    @Test
-    fun flatProjectionsExamples() {
-
-        //через строковые имена (оператор !)
-        var dp = on(Person).with(
-                !Person.name,
-                !Person.city().title,
-                !Person.gender().name
-        ).filter(f(Person.gender().name) eq "M")
-
-        //через поля фиелдсетов
-        var dp2 = on(Person).with(
-                Person.name,
-                Person.city().title,
-                Person.gender().name
-        ).filter(f(Person.gender().name) eq "M")
-
-    }
-
-
-    @Test
-    fun testDataMapFieldLamdaAccessors() {
-
-        val res = dataService.findAll(
-                Person.slice {
-                    full()
-                })
-
-        res.forEach {
-            //печатаем персону
-            println(it[{ city }])
-
-            //можно и так
-            println(it[{ city().title }])
-
-            //или так
-            println(it[{ gender }][{ name }])
-        }
-    }
 
 
     @Test

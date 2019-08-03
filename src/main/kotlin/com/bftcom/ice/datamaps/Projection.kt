@@ -444,7 +444,6 @@ open class DataProjectionF<T : FieldSet> : BaseProjection {
         return super.groupBy(*fields) as DataProjectionF<T>
     }
 
-    @Deprecated("используйте option().withSubSelect")
     fun asSelect(): DataProjectionF<T> {
         option().withSubSelect()
         return this

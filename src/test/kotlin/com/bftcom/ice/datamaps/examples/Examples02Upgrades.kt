@@ -17,57 +17,65 @@ import org.junit.Test
  */
 open class Examples01Advanced : BaseSpringTests() {
 
-
     @Test
-    //Использование формул в запросах, и отображение полученных результатов в поля датамапа
-    fun exampleQueryFormulas() {
-
-        //формула + фильтр по полю формулы
-        val gender = dataService.find(Gender.on()
-                .formula("caption", """
-                    case when {{id}}=1 then 'Ж'
-                         when {{id}}=2 then 'М'
-                         else 'О' end
-                """)
-                .filter(f("caption") eq "Ж"))!!
-
-        println(gender["caption"])
-
-        //lateral: получение элементов дочерней коллекции
-        // на родительский уровень для отображения в списке
-        val dp = Project.on()
-                .lateral("tasks", """
-                    (select string_agg(t.n, ';') as tasks1, count(*) as qty1
-                            from task t
-                            where t.project_id= {{id}}
-                            ) tasks on true
-                    """,
-                        "tasks1" to "tasks", "qty1" to "qty")
-                .where("{{tasks.tasks1}} like '%001%'")
-    }
-
-    @Test
-    //апгрейды:  догрузка
+    //апгрейды:  догрузка данных карты
     fun exampleUpgrades() {
 
         //1 грузим  проекты без коллекций
         val projects = dataService.findAll(
-                on("Project")
-                        .scalars()
-                        .where("{{name}} = 'QDP'")
+                Project.slice {
+                    scalars()
+                    where("{{name}} = 'QDP'")
+                }
         )
 
-        //2 догружаем коллекции
-        dataService.upgrade(projects, projection()
-                .with {
-                    slice("Tasks") //загружаем коллекуию тасков
-                            .full() //все поля - следвателоьно и вложенная коллекция чеклистов полетит
+        //2 догружаем коллекцию тасков (с вложенной коллекцией чеклистов)
+        dataService.upgrade(projects,
+                Project.slice {
+                    tasks {
+                        full()
+                    }
                 })
 
 
         //use complex indexator
         Assert.assertTrue(projects[0].nested("Tasks[0].checklists[0].name") == "foo check")
     }
+
+    @Test
+    //Апгрейдится можно на любом уровне.
+    //Загрузим сначала Проекты и Таски, но без чеклистов.
+    // А поотм догрузим и чеклисты
+    //Project(1)-->Tasks(2)-->Checklist(3) - загрузим чеклисты
+    fun testUpgradesOnSecondLevel() {
+
+        //1 грузим  проекты без коллекций
+        val projects = dataService.findAll(
+                Project.on().scalars()
+                        .withCollections()
+                        .where("{{name}} = 'QDP'")
+                        .order(f("Tasks.id"))
+        )
+
+        Assert.assertTrue(projects.size == 1)
+        Assert.assertTrue(projects[0].list("Tasks").size == 2)
+        Assert.assertTrue(projects[0].nested("Tasks[0].checklists") == null)
+
+        dataService.upgrade(projects,
+                Project.slice {
+                    tasks {
+                        checks {
+                            scalars()
+                        }
+                    }
+                })
+
+        println(projects)
+
+        Assert.assertTrue(projects[0].nestedl("Tasks[0].checklists").size == 2)
+    }
+
+
     /***
      * Стратегия выгрузки  данных по проекции.
      * Обычно - все выгружается одним запросом , через жойны.

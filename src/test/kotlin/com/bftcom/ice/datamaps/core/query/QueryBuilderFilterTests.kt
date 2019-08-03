@@ -29,7 +29,7 @@ open class QueryBuilderFilterTests : BaseSpringTests() {
 
     @Test()
     fun testQueryAliases02() {
-        val dp = Projection(WRKR.entity)
+        val dp = Projection(Person.entity)
                 .scalars().withRefs()
 
         val q = queryBuilder.createQueryByDataProjection(dp)
@@ -88,7 +88,7 @@ open class QueryBuilderFilterTests : BaseSpringTests() {
 
         var dp: DataProjection = on(Gender)
                 .filter({
-                    f(GDR.name)
+                    f(Gender.name)
                 })
 
 

@@ -5,11 +5,8 @@ import com.bftcom.ice.datamaps.core.util.printAsJson
 import org.junit.Test
 
 
-
-
 /***
- * Примеры на работу с датамапсами и проекциями
- * (Fieldset-API)
+ * Basic Examples
  */
 open class Examples01 : BaseSpringTests() {
 
@@ -25,11 +22,11 @@ open class Examples01 : BaseSpringTests() {
             it[name] = "Boris"
             it[lastName] = "Schukin"
             it[age] = 38
-            //референс
-            it[gender] = find_(Gender.filter { name eq "man" })
+            //референс ищем по ссылке
+            it[gender] = dataService.find_(Gender.filter { name eq "man" })
             //список
             it[childs].add(
-                    Child.create {
+                    Child {
                         it[name] = "Sasha"
                         it[age] = 13
                     }
@@ -54,7 +51,7 @@ open class Examples01 : BaseSpringTests() {
         assertTrue(genderName == genderName2)
         assertTrue(genderName2 == genderName3)
 
-        //работа с внутренними списками
+        //работа с вложенными списками
         val childName = person[Person.childs][0][Person.name]   //простые индексаторы
         val childName1 = person["childs[0].name"]   //строковый индексатор
 
@@ -68,7 +65,7 @@ open class Examples01 : BaseSpringTests() {
 
         //запись с использованием функции with
         person.with {
-            it[name] = "some zero"
+            it[name] = "mister x"
             it[age] = 67
             it[childs][0][name] = "Саша"
         }
@@ -81,29 +78,9 @@ open class Examples01 : BaseSpringTests() {
     }
 
     @Test
-    fun testDataMapFieldLamdaAccessors() {
-
-        val res = dataService.findAll(
-                Person.slice {
-                    full()
-                })
-
-        res.forEach {
-            //печатаем персону
-            println(it[{ city }])
-
-            //можно и так
-            println(it[{ city().title }])
-
-            //или так
-            println(it[{ gender }][{ name }])
-        }
-    }
-
-    @Test
     //примеры использования API-филедсетов для создания
     //и изменения датамапов
-    fun exampleFieldSetsCreateAndUpdateFunctions() {
+    fun `using fieldset builders`() {
 
         //create API
         //1) функция Create
@@ -142,7 +119,27 @@ open class Examples01 : BaseSpringTests() {
     }
 
     @Test
-    fun exampleBasicInsertAndUpdate() {
+    fun `field lambda accessors usage`() {
+
+        val res = dataService.findAll(
+                Person.slice {
+                    full()
+                })
+
+        res.forEach {
+            //печатаем персону
+            println(it[{ city }])
+
+            //можно и так
+            println(it[{ city().title }])
+
+            //или так
+            println(it[{ gender }][{ name }])
+        }
+    }
+
+    @Test
+    fun `update datamap in db`() {
 
         val p = Person {
             it[name] = "Fiedor"
@@ -165,7 +162,7 @@ open class Examples01 : BaseSpringTests() {
 
 
     @Test
-    fun exampleBasicProjectionUses() {
+    fun `example of simple projections`() {
 
         //простой пример
         val gender = find_(
@@ -184,66 +181,61 @@ open class Examples01 : BaseSpringTests() {
         )
 
         //еще пример
-        val dp = Department.slice {
-            parent{
+        val dp = dataService.findAll(Department.slice {
+            parent {
 
             }
             childs {
                 +name
                 +fullName
             }
-        }
-        println(dp)
+        })
+
     }
 
     @Test
-    fun exampleProjectionUsesWithGroups() {
+    fun `using field groups in projections`() {
 
         //I. принципы
-        //выгрузка карты City , включая скаляры, ссылки, коллекции
-        val dp = City.withId(1L)
-                .scalars().withRefs().withCollections()
+        //выгрузка карты Person , включая скаляры, ссылки, коллекции
+        val projection1 =
+                Person.withId(1L).scalars()
+                        .withRefs().withCollections()
 
-        //scalars необязательно (эта проекция равна предыдущей)
-        val dp1 = City.withId(1L)
-                .withRefs().withCollections()
-
-        //скаляры, ссылки, коллекции - это все что есть у объекта.
-        //поэтому эта проекция эквивалентна двум предыдущим
-        val dp2 = City.withId(1L)
-                .full()
-
-
-        //II. примеры использования групп на разных уровнях проекции
-        val dp3 = Project.slice {
-            withRefs()              //заказываем все ссылки
-            tasks {
-                // и коллекцию тасков
-                withRefs()          //у таска забираем все ссылки
-                checks {
-                    //и коллекцию чеков
-                    withRefs().withBlobs()  //у чеков мы просим все ссылки и все блобы
+        //пример выше - короткий способ. ниже более формальный способ:
+        val projection1_1 =
+                Person.slice {
+                    withId(1L)
+                    scalars().withRefs()
+                    withCollections()
                 }
-            }
-        }
 
-        //алиасы (алиасы понадобятся для использования в фильтрах например)
-        val dp4 = Project.slice {
-            full()
-            alias("JP")
-            tasks {
-                alias("JT")
-                scalars().withRefs()
-            }
-        }
+
+        //скаляры, ссылки, коллекции, блобы - это все что есть у объекта.
+        val projection2 = Person.withId(1L).full()
+
+        //примеры использования групп на разных уровнях проекции
+        val projection3 =
+                Project.slice {
+                    withRefs()              //заказываем все ссылки
+                    tasks {
+                        // и коллекцию тасков
+                        withRefs()          //у таска забираем все ссылки
+                        checks {
+                            //и коллекцию чеков
+                            withRefs().withBlobs()  //у чеков мы просим все ссылки и все блобы
+                        }
+                    }
+                }
     }
 
     /**
-     * Пример "плоского" API проекций. Просто перечисляются поля через точку.
+     * Пример "плоского" API проекций.
+     * Просто перечисляются поля через точку (в том числе и вложенные).
      * Только эти поля и будут вытащены
      */
     @Test
-    fun exampleFlatProjectionsExamples() {
+    fun `flat projection example`() {
 
         val dp = Person.on().with(
                 Person.name,
@@ -257,7 +249,7 @@ open class Examples01 : BaseSpringTests() {
     }
 
     @Test
-    fun exampleFiltersApiMethod() {
+    fun `projection filter examples`() {
 
         //самое простое
         val dp =
@@ -296,25 +288,12 @@ open class Examples01 : BaseSpringTests() {
                                 { boss ISNOT NULL }
                     }
                 }
-
-        // + использование алиасов
-        val dp4 =
-                Department.slice {
-                    +name
-                    boss {
-                        alias("B")
-                    }
-                    filter {
-                        f("B.city.id") eq f(city().id)
-                    }
-                }
-
     }
 
     @Test
     //where позволяет писать более сложные поисковые выражения.
     //в комплекте идет система квери-байндинга полей внутри where к алиасам стороящегося sql-выражения
-    fun exampleWhereApiMethods() {
+    fun `injected where examples`() {
 
         val dp =
                 Department.slice {
@@ -378,11 +357,6 @@ open class Examples01 : BaseSpringTests() {
                 .order(f(Project.name), f(Project.tasks().name), f(Project.tasks().checks().id))
                 .limit(100).offset(500)
     }
-
-
-
-
-
 
 
 }
